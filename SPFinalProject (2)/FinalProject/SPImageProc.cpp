@@ -8,6 +8,8 @@
 #include <opencv2/highgui.hpp>
 #include <cstdio>
 #include "SPImageProc.h"
+
+
 extern "C" {
 #include "SPLogger.h"
 }
@@ -220,6 +222,5 @@ void sp::ImageProc::showImage(const char* imgPath) {
 		spLoggerPrintWarning(MINIMAL_GUI_NOT_SET_WARNING, __FILE__, __func__,
 		__LINE__);
 	}
-
 }
 
