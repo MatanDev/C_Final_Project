@@ -23,6 +23,32 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
 
+/*
+ * TODO - doc
+ */
+typedef enum sp_kdtree_split_method_t {
+	RANDOM,
+	MAX_SPREAD,
+	INCREMENTAL
+} SP_KDTREE_SPLIT_METHOD;
+
+struct sp_config_t {
+	char* spImagesDirectory;
+	char* spImagesPrefix;
+	char* spImagesSuffix;
+	int spNumOfImages;
+	int spPCADimension;
+	char* spPCAFilename;
+	int spNumOfFeatures;
+	bool spExtractionMode;
+	int spNumOfSimilarImages;
+	SP_KDTREE_SPLIT_METHOD spKDTreeSplitMethod;
+	int spKNN;
+	bool spMinimalGUI;
+	int spLoggerLevel;
+	char* spLoggerFilename;
+};
+
 typedef struct sp_config_t* SPConfig;
 
 /**
@@ -169,5 +195,10 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config);
  * If config == NULL nothig is done.
  */
 void spConfigDestroy(SPConfig config);
+
+
+
+SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config, int index, bool isFeats);
+char* configMsgToStr(SP_CONFIG_MSG msg);
 
 #endif /* SPCONFIG_H_ */
