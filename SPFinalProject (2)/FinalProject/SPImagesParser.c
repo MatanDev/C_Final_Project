@@ -8,9 +8,9 @@
 #define DOUBLE_PRECISION 6
 
 #define BREAKLINE "\r\n"
-#define MAXLINE_LEN 1024 //TODO - verify what this should be
-#define HEADER_STRING_FOMAT "%d,%d\r\n"
-#define POINT_STRING_FOMAT "%d%s\r\n"
+#define MAXLINE_LEN 2048 //TODO - verify what this should be
+#define HEADER_STRING_FORMAT "%d,%d\r\n\0"
+#define POINT_STRING_FORMAT "%d%s\r\n\0"
 #define INTERNAL_POINT_DATA_STRING_FORMAT ",%f%s"
 
 #define ERROR_GETTING_PATH "Error creating file path"
@@ -57,7 +57,7 @@ void logImageProblem(char* problem, int imageIndex, const char* file,
 }
 
 //global variable for holding the features matrix
-SPPoint** featuresMatrix = NULL;
+SPImageData* featuresMatrix = NULL;
 
 char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message){
 	SP_CONFIG_MSG  configMessage;
@@ -71,7 +71,7 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 
 	path = (char*)calloc(sizeof(char),MAXLINE_LEN);
 	if (path == NULL){
-
+		//TODO - throw error
 	}
 
 	configMessage = spConfigGetImagePathFeats(path,config,index,dataPath);
@@ -96,7 +96,7 @@ double getPositiveNumberFromSubString(char* myString, int* start){
 	char rsltAsString[MAXLINE_LEN];
 	int i = 0;
 
-	while (isdigit(myString[*start]) || myString[*start] == '.'){
+	while (isdigit(myString[*start]) || myString[*start] == '.' || myString[*start] == '-'){
 		rsltAsString[i] = myString[*start];
 		i++;
 		(*start)++;
@@ -107,6 +107,10 @@ double getPositiveNumberFromSubString(char* myString, int* start){
 
 int getNumOfDigits(int x){
 	int digits = 0;
+
+	if (x==0)
+		return 1;
+
 	while (x!=0){
 		digits++;
 		x/=10;
@@ -114,23 +118,24 @@ int getNumOfDigits(int x){
 	return digits;
 }
 
-void setFeaturesMatrix(SPPoint** features){
+void setFeaturesMatrix(SPImageData* features){
 	featuresMatrix = features;
 }
 
 int getPointCSVSize(SPPoint point){
-	int rslt, digits, i;
+	/*int rslt, digits, i;
 	digits =  getNumOfDigits(spPointGetDimension(point));
 	rslt = digits + 3; // +4 stands for "," + "\r\n" + "\0"
-	for (i= 0; i<digits;i++){
+	for (i= 0; i<spPointGetDimension(point);i++){
 		rslt += DOUBLE_PRECISION + 2; // +2 stands for the "." and ","
 		rslt += getNumOfDigits((int)spPointGetAxisCoor(point,i));
 	}
-	return rslt;
+	return rslt;*/
+	return 2048;
 }
 
 char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
-	char *rsltString = NULL , *tempString = NULL;
+	char *rsltString = NULL , *tempString = NULL, *secondTempString;
 	int size,i,rsltFlag;
 
 	if (point == NULL){
@@ -142,8 +147,9 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 	assert(size > 4);
 	rsltString = (char*)calloc(sizeof(char),size);
 	tempString = (char*)calloc(sizeof(char),size);
+	secondTempString = (char*)calloc(sizeof(char),size);
 
-	if (rsltString == NULL || tempString == NULL){
+	if (rsltString == NULL || tempString == NULL || secondTempString == NULL){
 		*message = SP_DP_MEMORY_FAILURE;
 		return NULL;
 	}
@@ -152,8 +158,9 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 
 	//create internal string data
 	for (i = spPointGetDimension(point) -1 ;i>=0;i--){
+		strcpy(secondTempString, tempString);
 		rsltFlag = sprintf(tempString, INTERNAL_POINT_DATA_STRING_FORMAT,
-				spPointGetAxisCoor(point,i),tempString);
+				spPointGetAxisCoor(point,i),secondTempString);
 		if (rsltFlag < 0){
 			free(tempString);
 			free(rsltString);
@@ -162,15 +169,16 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 		}
 	}
 
-	rsltFlag = sprintf(rsltString, POINT_STRING_FOMAT,
+	rsltFlag = sprintf(rsltString, POINT_STRING_FORMAT,
 			spPointGetDimension(point),tempString);
 	if (rsltFlag < 0){
 		free(tempString);
+		free(secondTempString);
 		free(rsltString);
 		*message = SP_DP_FORMAT_ERROR;
 		return NULL;
 	}
-
+	free(secondTempString);
 	free(tempString);
 	return rsltString;
 }
@@ -230,14 +238,15 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 	stringLen += getNumOfDigits(imageData->index);
 	stringLen += getNumOfDigits(imageData->numOfFeatures);
 
-	rslt = (char*)calloc(sizeof(char),stringLen);
+	//rslt = (char*)calloc(sizeof(char),stringLen);
+	rslt = (char*)calloc(sizeof(char),2048);
 
 	if (rslt == NULL){
 		*message = SP_DP_MEMORY_FAILURE;
 		return NULL;
 	}
 
-	successFlag = sprintf(rslt, HEADER_STRING_FOMAT, imageData->index, imageData->numOfFeatures);
+	successFlag = sprintf(rslt, HEADER_STRING_FORMAT, imageData->index, imageData->numOfFeatures);
 
 	if (successFlag < 0){
 		free(rslt);
@@ -303,7 +312,7 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 	for (i = 0 ;i < numOfImages ; i++)
 	{
 		currentImageData = loadImageData(config, i ,createFlag, message);
-		if (message != SP_DP_SUCCESS)
+		if (*message != SP_DP_SUCCESS)
 		{
 			// rollback and exit
 			for (j=0;j<i;j++)
@@ -315,6 +324,11 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 			return NULL;
 		}
 		allImagesData[i] = currentImageData;
+	}
+
+	if (featuresMatrix != NULL){
+		free(featuresMatrix);
+		featuresMatrix = NULL;
 	}
 
 	return allImagesData;
@@ -365,13 +379,15 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 
 }
 
+
 SP_DP_MESSAGES createImageDataByPath(char* imagePath, SPImageData imageData){
 	if (imageData->index < 0 || featuresMatrix[imageData->index] == NULL)
 	{
 		spLoggerPrintError(ERROR_ANALYZING_FEATURES, __FILE__,__FUNCTION__, __LINE__);
 		return SP_DP_FEATURE_EXTRACTION_ERROR;
 	}
-	imageData->featuresArray = featuresMatrix[imageData->index];//getImageFeatures(getImageFeatures, imageData->index, &(imageData->numOfFeatures));
+	imageData->featuresArray = featuresMatrix[imageData->index]->featuresArray;//getImageFeatures(getImageFeatures, imageData->index, &(imageData->numOfFeatures));
+	imageData->numOfFeatures = featuresMatrix[imageData->index]->numOfFeatures;
 
 	return SP_DP_SUCCESS;
 }
@@ -474,8 +490,8 @@ SPImageData loadImageData(const SPConfig config, int imageIndex, bool createFlag
 		return NULL;
 	}
 
-	filePath = getImagePath(config, imageIndex, createFlag, message);
-	if (message == SP_DP_SUCCESS) {
+	filePath = getImagePath(config, imageIndex, !createFlag, message);
+	if (*message == SP_DP_SUCCESS) {
 		image = loadImageDataByPath(filePath,imageIndex, createFlag,  message);
 	}
 
@@ -487,7 +503,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
 	assert(imageFile != NULL && imageData != NULL);
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	int i;
-	char* line;
+	char *line;
 	line = getImageStringHeader(imageData, &message);
 
 	if (line == NULL)
@@ -496,6 +512,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
 		return SP_DP_INVALID_ARGUMENT;
 	}
 	fputs(line,imageFile);
+	fflush(imageFile);
 	free(line);
 
 	for (i=0;i<imageData->numOfFeatures;i++)
@@ -508,6 +525,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
 			return SP_DP_INVALID_ARGUMENT;
 		}
 		fputs(line,imageFile);
+		fflush(imageFile);
 		free(line);
 	}
 
@@ -529,6 +547,8 @@ SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData){
 		spLoggerPrintError(ERROR_GETTING_PATH, __FILE__,__FUNCTION__, __LINE__);
 		return outputMessage;
 	}
+
+	remove(filePath); //remove old files if exists
 
 	imageFile = fopen(filePath, "ab+"); //ab+ should create of not exist
 	if (imageFile == NULL) {
@@ -578,6 +598,48 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData)
 
 	return outputMessage;
 }
+
+SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESSAGES* msg){
+	*msg = SP_DP_SUCCESS;
+	SP_CONFIG_MSG configMsg = SP_CONFIG_SUCCESS;
+	SPImageData* allImagesData = NULL;
+	bool createDatabase;
+	char* tempMsg;
+
+	if (config == NULL){
+		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+		*msg = SP_DP_INVALID_ARGUMENT;
+		return NULL;
+	}
+
+	createDatabase = spConfigIsExtractionMode(config, &configMsg);
+
+	if (configMsg != SP_CONFIG_SUCCESS){
+
+			tempMsg = configMsgToStr(configMsg);
+			if (tempMsg != NULL){
+				spLoggerPrintError(tempMsg, __FILE__,__FUNCTION__, __LINE__);
+				free(tempMsg);
+			}
+			else {
+				spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+				spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+			}
+			*msg = SP_DP_INVALID_ARGUMENT;
+			return NULL;
+	}
+
+	assert (!createDatabase || featuresMatrix != NULL);
+
+	allImagesData = loadAllImagesData(config, createDatabase, msg);
+
+	if (*msg == SP_DP_SUCCESS && createDatabase){
+		*msg = saveAllImagesData(config, allImagesData);
+	}
+
+	return allImagesData;
+}
+
 
 void freeFeatures(SPPoint* features, int numOfFeatures){
 	assert(numOfFeatures >= 0);

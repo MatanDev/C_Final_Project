@@ -34,7 +34,7 @@ typedef enum sp_data_parse_messages {
  *
  * @param features - the input features
  */
-void setFeaturesMatrix(SPPoint** features);
+void setFeaturesMatrix(SPImageData* features);
 
 /*
  * The method returns the number of characters required to store the point's data as a CSV
@@ -329,6 +329,24 @@ SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData);
  */
 SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData);
 
+/*
+ * The main method that starts and loads all the images data according to the configurations
+ *
+ * @param config - the config file
+ * @param msg - a message that represent the outcome of the process
+ *
+ * @returns :
+ * NULL if:
+ * 	    SP_DP_INVALID_ARGUMENT - config is NULL,
+ * 		SP_DP_MEMORY_FAILURE - memory allocation failure
+ * 		SP_DP_FILE_WRITE_ERROR - error writing to file
+ *	    SP_DP_FILE_READ_ERROR - error reading from a file
+ *	    SP_DP_FORMAT_ERROR - some file was in the wrong format
+ *	    SP_DP_FEATURE_EXTRACTION_ERROR - could not extract features
+ * SPImage data array of the images data and msg = SP_DP_SUCCESS if all actions done successfully
+ *
+ */
+SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESSAGES* msg);
 
 /*
  * Deallocates a number of features from a given features array

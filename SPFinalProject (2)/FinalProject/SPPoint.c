@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <assert.h>
 
+
+#define epsilon 0.0000000001
+
+
+bool isEqual(double x,double y)
+{
+	return (0 <=(x-y) && (x-y) < epsilon) || (0<= (y-x) && (y-x) < epsilon);
+}
+
+
 #define WARNING_POINT_NULL "Point is null when free is called"
 
 /*
@@ -72,6 +82,22 @@ SPPoint spPointCopy(SPPoint source) {
 	if (source->data == NULL)
 		return NULL;
 	return spPointCreate(source->data,source->dim,source->index);
+}
+
+bool spPointCompare(SPPoint p1, SPPoint p2){
+	int i;
+	if (p1 == NULL || p2 == NULL)
+		return false;
+	if (p1->dim != p2->dim)
+		return false;
+	if (p1->index != p2->index)
+		return false;
+
+	for (i = 0; i< p1->dim;i++){
+		if (!isEqual(p1->data[i],p2->data[i]))
+			return false;
+	}
+	return true;
 }
 
 void spPointDestroy(SPPoint point) {

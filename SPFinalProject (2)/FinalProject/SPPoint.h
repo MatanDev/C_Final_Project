@@ -1,6 +1,6 @@
 #ifndef SPPOINT_H_
 #define SPPOINT_H_
-
+#include <stdbool.h>
 /**
  * SPPoint Summary
  * Encapsulates a point with variable length dimension. The coordinates
@@ -106,5 +106,15 @@ double spPointGetAxisCoor(SPPoint point, int axis);
  */
 double spPointL2SquaredDistance(SPPoint p, SPPoint q);
 
+/*
+ * The method returns true iff both points has the same values
+ *
+ * @param p1 - first point
+ * @param p2 - second point
+ *
+ * @return true iff both points are not NULL and contains the same values
+ */
+bool spPointCompare(SPPoint p1, SPPoint p2);
+bool isEqual(double x,double y);//TODO - comment this or handle
 
 #endif /* SPPOINT_H_ */

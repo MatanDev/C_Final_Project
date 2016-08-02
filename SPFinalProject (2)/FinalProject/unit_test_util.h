@@ -4,7 +4,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #include <stdio.h>
 
 #define FAIL(msg) do {\
@@ -31,6 +30,10 @@ extern "C" {
 				fflush(NULL);\
 			}else{ fprintf(stderr, "%s  FAIL\n",#f);\
 			} }while (0)
+
+
+
+
 
 #ifdef __cplusplus
 }
