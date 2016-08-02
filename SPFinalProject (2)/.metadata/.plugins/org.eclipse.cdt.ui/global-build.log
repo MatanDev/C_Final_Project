@@ -1,0 +1,56 @@
+08:30:26 **** Incremental Build of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfigUnitTest.o "..\\SPConfigUnitTest.c" 
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+..\SPConfig.c: In function 'handleStringField':
+..\SPConfig.c:150:2: warning: implicit declaration of function 'copyAndMalloc' [-Wimplicit-function-declaration]
+  if ((*strField = copyAndMalloc(value)) == NULL)
+  ^
+..\SPConfig.c:150:17: warning: assignment makes pointer from integer without a cast
+  if ((*strField = copyAndMalloc(value)) == NULL)
+                 ^
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPLogger.o "..\\SPLogger.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o SPImageProc.o "..\\SPImageProc.cpp" 
+In file included from ..\SPImageProc.cpp:10:0:
+..\SPImageProc.h:19:27: warning: non-static data member initializers only available with -std=c++11 or -std=gnu++11
+  const char* windowName = "Software Project CBIR";
+                           ^
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPPoint.o "..\\SPPoint.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o main.o "..\\main.cpp" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 
+SPConfig.o: In function `handleStringField':
+C:\temp\4th_semester\program\C_Final_Project\SPFinalProject (2)\FinalProject\Debug/../SPConfig.c:150: undefined reference to `copyAndMalloc'
+collect2.exe: error: ld returned 1 exit status
+08:30:54 **** Incremental Build of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 
+08:33:06 **** Incremental Build of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 
+08:43:19 **** Incremental Build of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 
+08:43:35 **** Clean-only build of configuration Debug for project FinalProject ****
+rm -rf SPConfigUnitTest.d SPConfig.d SPConfig.o main.d SPLogger.o SPLogger.d SPImageProc.o SPImageProc.d main.o SPPoint.d FinalProject.exe SPConfigUnitTest.o SPPoint.o 
+Cannot run program "rm": Launching failed
+
+Error: Program "rm" not found in PATH
+PATH=[C:\MinGW\bin;\bin;C:/Program Files (x86)/Java/jre1.8.0_73/bin/client;C:/Program Files (x86)/Java/jre1.8.0_73/bin;C:/Program Files (x86)/Java/jre1.8.0_73/lib/i386;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\Lenovo\FusionEngine;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Lenovo\Motion Control\;C:\Python34;C:\Python34\Scripts;C:\Program Files (x86)\Skype\Phone\;C:\MinGW\bin;C:\MinGW\libexec\gcc\mingw32\4.9.3;C:\Program Files (x86)\CMake\bin;C:\opencv\build\x86\mingw\bin;C:\Program Files\C\eclipse]
+
+08:43:36 **** Clean-only build of configuration Debug for project FinalProject ****
+08:43:39 **** Rebuild of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPLogger.o "..\\SPLogger.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o main.o "..\\main.cpp" 
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfigUnitTest.o "..\\SPConfigUnitTest.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o SPImageProc.o "..\\SPImageProc.cpp" 
+In file included from ..\SPImageProc.cpp:10:0:
+..\SPImageProc.h:19:27: warning: non-static data member initializers only available with -std=c++11 or -std=gnu++11
+  const char* windowName = "Software Project CBIR";
+                           ^
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPPoint.o "..\\SPPoint.c" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 

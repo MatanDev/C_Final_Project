@@ -1,0 +1,16 @@
+08:43:39 **** Rebuild of configuration Debug for project FinalProject ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfig.o "..\\SPConfig.c" 
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPLogger.o "..\\SPLogger.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o main.o "..\\main.cpp" 
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPConfigUnitTest.o "..\\SPConfigUnitTest.c" 
+g++ "-IC:\\opencv\\opencv_contrib-master\\modules\\xfeatures2d\\include\\" "-IC:\\opencv\\build\\include" -O0 -g3 -Wall -c -fmessage-length=0 -o SPImageProc.o "..\\SPImageProc.cpp" 
+In file included from ..\SPImageProc.cpp:10:0:
+..\SPImageProc.h:19:27: warning: non-static data member initializers only available with -std=c++11 or -std=gnu++11
+  const char* windowName = "Software Project CBIR";
+                           ^
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o SPPoint.o "..\\SPPoint.c" 
+g++ "-LC:\\opencv\\build\\x86\\mingw\\lib" -o FinalProject.exe main.o SPPoint.o SPLogger.o SPImageProc.o SPConfigUnitTest.o SPConfig.o -llibopencv_core310 -llibopencv_imgcodecs310 -llibopencv_imgproc310 -llibopencv_xfeatures2d310 -llibopencv_features2d310 -llibopencv_highgui310 
+
+08:43:42 Build Finished (took 2s.788ms)
+

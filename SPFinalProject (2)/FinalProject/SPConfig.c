@@ -28,13 +28,24 @@ typedef enum error_message_type_t {
 	PARAMETER_NOT_SET
 } ERROR_MSG_TYPE;
 
-void initConfigToDefault(SPConfig config) {
+char* mallocAndCopy(const char* str) {
+	char* ret = (char*)malloc(strlen(str) + 1);
+	if (ret != NULL)
+		strcpy(ret, str);
+	return ret;
+}
+
+bool initConfigToDefault(SPConfig config, SP_CONFIG_MSG* msg) {
 	config->spImagesDirectory = NULL;
 	config->spImagesPrefix = NULL;
 	config->spImagesSuffix = NULL;
 	config->spNumOfImages = 0;
 	config->spPCADimension = 20;
-	config->spPCAFilename = "pca.yml";
+	config->spPCAFilename = mallocAndCopy("pca.yml");
+	if (config->spPCAFilename == NULL) {
+		*msg = SP_CONFIG_ALLOC_FAIL;
+		return false;
+	}
 	config->spNumOfFeatures = 100;
 	config->spExtractionMode = true;
 	config->spNumOfSimilarImages = 1;
@@ -42,7 +53,12 @@ void initConfigToDefault(SPConfig config) {
 	config->spKNN = 1;
 	config->spMinimalGUI = false;
 	config->spLoggerLevel = 3;
-	config->spLoggerFilename = "stdout";
+	config->spLoggerFilename = mallocAndCopy("stdout");
+	if (config->spLoggerFilename == NULL) {
+		*msg = SP_CONFIG_ALLOC_FAIL;
+		return false;
+	}
+	return true;
 }
 
 void printErrorMessage(const char* filename, int lineNum,
@@ -69,19 +85,23 @@ void printErrorMessage(const char* filename, int lineNum,
  * basically it's like getVarNameAndValueFromLine
  */
 bool parseLine(const char* filename, int lineNum, char* line,
-		char** varName, char** value, bool* isCommentOrEmpty, SP_CONFIG_MSG* msg) {
+		char** varName, char** value, bool* isCommentOrEmpty,
+		SP_CONFIG_MSG* msg) {
 	int startIndex, i;
 	char *tmpPtr;
 
 	// run while space
-	for (startIndex = 0; startIndex < strlen(line) && isspace(line[startIndex]); startIndex++);
+	for (startIndex = 0; startIndex < strlen(line) &&
+	isspace(line[startIndex]); startIndex++);
 
-	// first non-space character is '#' - comment line, or line includes only spaces - empty line
+	// first non-space character is '#' - comment line,
+	// or line includes only spaces - empty line
 	if (line[startIndex] == '#' || startIndex == strlen(line))
 		return *isCommentOrEmpty = true;
 
 	// the second case can happen only in the last line
-	if((tmpPtr = strchr(line + startIndex, '=')) == NULL || tmpPtr == line + strlen(line) - 1) {
+	if((tmpPtr = strchr(line + startIndex, '=')) == NULL ||
+			tmpPtr == line + strlen(line) - 1) {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
 		return false;
@@ -96,7 +116,8 @@ bool parseLine(const char* filename, int lineNum, char* line,
 	(*varName)[i+1] = '\0';
 
 	// clear spaces from beginning of value
-	for (startIndex = 0; startIndex < strlen(*value) && isspace((*value)[startIndex]); startIndex++);
+	for (startIndex = 0; startIndex < strlen(*value) &&
+	isspace((*value)[startIndex]); startIndex++);
 	*value = (*value) + startIndex;
 
 	// clear spaces from end of value (TODO - should clear only \n? - ask in forum)
@@ -109,6 +130,12 @@ bool parseLine(const char* filename, int lineNum, char* line,
 bool handleStringField(char** strField, const char* filename, int lineNum,
 		const char* value, SP_CONFIG_MSG* msg, bool isImagesSuffix) {
 	int i;
+
+	if (*strField != NULL) {
+		free(*strField);
+		*strField = NULL;
+	}
+
 	for (i = 0; i < strlen(value); i++) {
 		if (isspace(value[i])) {
 			*msg = SP_CONFIG_INVALID_STRING;
@@ -118,39 +145,42 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 	}
 
 	if (strlen(value) == 0 ||
-			(isImagesSuffix && strcmp(value, ".jpg") && strcmp(value, ".png") &&
-			strcmp(value, ".bmp") && strcmp(value, ".gif"))) {
+			(isImagesSuffix && strcmp(value, ".jpg") && strcmp(value, ".png")
+					&& strcmp(value, ".bmp") && strcmp(value, ".gif"))) {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
 
-	*strField = (char *)malloc(strlen(value) + 1);
-	strcpy(*strField, value);
-	return true;
+	if ((*strField = mallocAndCopy(value)) == NULL)
+		*msg = SP_CONFIG_ALLOC_FAIL;
+
+	return *strField != NULL;
 }
 
-bool handlePositiveIntField(int* posIntField, const char* filename, int lineNum,
-		char* value, SP_CONFIG_MSG* msg) {
+bool handlePositiveIntField(int* posIntField, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
 	if ((tmpInt = atoi(value)) <= 0) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
+
 	*posIntField = tmpInt;
 	return true;
 }
 
 // TODO - maybe unite with previous one
-bool handleBoundedPosIntField(int* posIntField, const char* filename, int lineNum,
-		char* value, SP_CONFIG_MSG* msg, int from, int to) {
+bool handleBoundedPosIntField(int* posIntField, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg, int from, int to) {
 	int tmpInt;
 	if ((tmpInt = atoi(value)) < from || tmpInt > to) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
+
 	*posIntField = tmpInt;
 	return true;
 }
@@ -159,93 +189,122 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
 		char* value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(value, "true"))
 		*boolField = true;
+
 	else if (!strcmp(value, "false"))
 		*boolField = false;
+
 	else {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
+
 	return true;
 }
 
-bool handleKDTreeSplitMethod(SPConfig config, const char* filename, int lineNum,
-		char* value, SP_CONFIG_MSG* msg) {
+bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(value,  "RANDOM"))
 		config->spKDTreeSplitMethod = RANDOM;
+
 	else if (!strcmp(value,  "MAX_SPREAD"))
 		config->spKDTreeSplitMethod = MAX_SPREAD;
+
 	else if (!strcmp(value, "INCREMENTAL"))
 		config->spKDTreeSplitMethod = INCREMENTAL;
+
 	else {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
+
 	return true;
 }
 
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(varName, "spImagesDirectory"))
-		return handleStringField(&(config->spImagesDirectory), filename, lineNum, value, msg, false);
+		return handleStringField(&(config->spImagesDirectory), filename,
+				lineNum, value, msg, false);
 
 	else if (!strcmp(varName, "spImagesPrefix"))
-		return handleStringField(&(config->spImagesPrefix), filename, lineNum, value, msg, false);
+		return handleStringField(&(config->spImagesPrefix), filename, lineNum,
+				value, msg, false);
 
 	else if (!strcmp(varName, "spImagesSuffix"))
-		return handleStringField(&(config->spImagesSuffix), filename, lineNum, value, msg, true);
+		return handleStringField(&(config->spImagesSuffix), filename, lineNum,
+				value, msg, true);
 
 	else if (!strcmp(varName, "spNumOfImages"))
-		return handlePositiveIntField(&(config->spNumOfImages), filename, lineNum, value, msg);
+		return handlePositiveIntField(&(config->spNumOfImages), filename,
+				lineNum, value, msg);
 
 	else if (!strcmp(varName, "spPCADimension"))
-		return handleBoundedPosIntField(&(config->spPCADimension), filename, lineNum, value, msg, 10, 28);
+		return handleBoundedPosIntField(&(config->spPCADimension), filename,
+				lineNum, value, msg, 10, 28);
 
 	else if (!strcmp(varName, "spPCAFilename"))
-		return handleStringField(&(config->spPCAFilename), filename, lineNum, value, msg, false);
+		return handleStringField(&(config->spPCAFilename), filename, lineNum,
+				value, msg, false);
 
 	else if (!strcmp(varName, "spNumOfFeatures"))
-		return handlePositiveIntField(&(config->spNumOfFeatures), filename, lineNum, value, msg);
+		return handlePositiveIntField(&(config->spNumOfFeatures), filename,
+				lineNum, value, msg);
 
 	else if (!strcmp(varName, "spExtractionMode"))
-		return handleBoolField(&(config->spExtractionMode), filename, lineNum, value, msg);
+		return handleBoolField(&(config->spExtractionMode), filename,
+				lineNum, value, msg);
 
 	else if (!strcmp(varName, "spNumOfSimilarImages"))
-		return handlePositiveIntField(&(config->spNumOfSimilarImages), filename, lineNum, value, msg);
+		return handlePositiveIntField(&(config->spNumOfSimilarImages),
+				filename, lineNum, value, msg);
 
 	else if (!strcmp(varName, "spKDTreeSplitMethod"))
 		return handleKDTreeSplitMethod(config, filename, lineNum, value, msg);
 
 	else if (!strcmp(varName, "spKNN"))
-		return handlePositiveIntField(&(config->spKNN), filename, lineNum, value, msg);
+		return handlePositiveIntField(&(config->spKNN), filename, lineNum,
+				value, msg);
 
 	else if (!strcmp(varName, "spMinimalGUI"))
-		return handleBoolField(&(config->spMinimalGUI), filename, lineNum, value, msg);
+		return handleBoolField(&(config->spMinimalGUI), filename, lineNum,
+				value, msg);
 
 	else if (!strcmp(varName, "spLoggerLevel"))
-		return handleBoundedPosIntField(&(config->spLoggerLevel), filename, lineNum, value, msg, 1, 4);
+		return handleBoundedPosIntField(&(config->spLoggerLevel), filename,
+				lineNum, value, msg, 1, 4);
 
 	else if (!strcmp(varName, "spLoggerFilename"))
-		return handleStringField(&(config->spLoggerFilename), filename, lineNum, value, msg, false);
+		return handleStringField(&(config->spLoggerFilename), filename,
+				lineNum, value, msg, false);
 
 	*msg = SP_CONFIG_INVALID_STRING;
 	printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
 	return false;
 }
 
-bool parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg, const char* filename, int lineNum) {
+SPConfig onError(SPConfig config) {
+	spConfigDestroy(config);
+	return NULL;
+}
+
+SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
+		const char* filename, int lineNum) {
 	const char* parameterName;
 
 	if (!config->spImagesDirectory) {
 		parameterName = "spImagesDirectory";
 		*msg = SP_CONFIG_MISSING_DIR;
+
 	} else if (!config->spImagesPrefix) {
 		parameterName = "spImagesPrefix";
 		*msg = SP_CONFIG_MISSING_PREFIX;
+
 	} else if (!config->spImagesSuffix) {
 		parameterName = "spImagesSuffix";
 		*msg = SP_CONFIG_MISSING_SUFFIX;
+
 	} else if (!config->spNumOfImages) {
 		parameterName = "spNumOfImages";
 		*msg = SP_CONFIG_MISSING_NUM_IMAGES;
@@ -253,11 +312,10 @@ bool parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg, const char* filename
 
 	if (*msg != SP_CONFIG_SUCCESS) {
 		printErrorMessage(filename, lineNum, PARAMETER_NOT_SET, parameterName);
-		spConfigDestroy(config);
-		return false;
+		return onError(config);
 	}
 
-	return true;
+	return config;
 }
 
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
@@ -286,22 +344,29 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
 	}
-	initConfigToDefault(config);
+
+	// TODO 1 - if we fail in initialize to default should we fail the whole
+	// opertation?
+	// TODO 2 - maybe instead of returning bool in the functions we should
+	// check if msg is not success?
+	if (!initConfigToDefault(config, msg)) {
+		return onError(config);
+	}
 
 	while(fgets(line, 1024, configFile) != NULL) {
-		if (!parseLine(filename, lineNum, line, &varName, &value, &isCommentOrEmpty, msg)) {
-			spConfigDestroy(config);
-			return NULL;
+		if (!parseLine(filename, lineNum, line, &varName, &value,
+				&isCommentOrEmpty, msg)) {
+			return onError(config);
 		}
-		if (!isCommentOrEmpty && !handleVariable(config, filename, lineNum, varName, value, msg)) {
-			spConfigDestroy(config);
-			return NULL;
+		if (!isCommentOrEmpty && !handleVariable(config, filename, lineNum,
+				varName, value, msg)) {
+			return onError(config);
 		}
 		lineNum++;
 		isCommentOrEmpty = false;
 	}
 
-	return parameterSetCheck(config, msg, filename, lineNum) ? config : NULL;
+	return parameterSetCheck(config, msg, filename, lineNum);
 }
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
@@ -381,7 +446,6 @@ void spConfigDestroy(SPConfig config) {
 			free(config->spImagesSuffix);
 			config->spImagesSuffix = NULL;
 		}
-		// TODO - think what to do with defaults
 		if (config->spPCAFilename != NULL) {
 			free(config->spPCAFilename);
 			config->spPCAFilename = NULL;
@@ -392,12 +456,6 @@ void spConfigDestroy(SPConfig config) {
 		}
 		free(config);
 	}
-}
-
-char* mallocAndCopy(const char* str) {
-	char* ret = (char*)malloc(strlen(str) + 1);
-	strcpy(ret, "SP_CONFIG_MISSING_DIR");
-	return ret;
 }
 
 char* configMsgToStr(SP_CONFIG_MSG msg) {
