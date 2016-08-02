@@ -410,7 +410,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	// and config->spImagesSuffix
 	if (isFeats)
 		sprintf(imagePath, "%s%s%d%s", config->spImagesDirectory,
-				config->spImagesPrefix, index, ".feats");
+				config->spImagesPrefix, index, ".feats"); //TODO - export feats to macro
 	else
 		sprintf(imagePath, "%s%s%d%s", config->spImagesDirectory,
 				config->spImagesPrefix, index, config->spImagesSuffix);

@@ -60,7 +60,35 @@ void logImageProblem(char* problem, int imageIndex, const char* file,
 SPPoint** featuresMatrix = NULL;
 
 char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message){
-	return NULL; //TODO - implement in config
+	SP_CONFIG_MSG  configMessage;
+	char *path  = NULL, *tempMsg = NULL;
+
+	if (config == NULL) {
+		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+		*message =  SP_DP_INVALID_ARGUMENT;
+		return NULL;
+	}
+
+	path = (char*)calloc(sizeof(char),MAXLINE_LEN);
+	if (path == NULL){
+
+	}
+
+	configMessage = spConfigGetImagePathFeats(path,config,index,dataPath);
+
+	if (configMessage != SP_CONFIG_SUCCESS){
+		tempMsg = configMsgToStr(configMessage);
+		if (tempMsg != NULL)
+			spLoggerPrintError(tempMsg, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+		*message =  SP_DP_INVALID_ARGUMENT;
+		free(tempMsg);
+		free(path);
+		return NULL;
+	}
+	*message = SP_DP_SUCCESS;
+	return path;
+
 }
 
 double getPositiveNumberFromSubString(char* myString, int* start){
@@ -238,6 +266,7 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
 SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MESSAGES* message){
 	SPImageData *allImagesData = NULL, currentImageData = NULL;
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
+	char* tempMsg;
 	int i,j, numOfImages;
 
 	if (config == NULL)
@@ -248,7 +277,16 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 	numOfImages = spConfigGetNumOfImages(config,&configMessage);
 
 	if (configMessage != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(translateMessageToString(configMessage), __FILE__,__FUNCTION__, __LINE__);
+		tempMsg = configMsgToStr(configMessage);
+		if (tempMsg != NULL){
+			spLoggerPrintError(tempMsg, __FILE__,__FUNCTION__, __LINE__);
+			free(tempMsg);
+		}
+		else {
+			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+			spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+		}
+
 		*message =  SP_DP_INVALID_ARGUMENT;
 		return NULL;
 	}
@@ -509,6 +547,7 @@ SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData){
 SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData){
 	SP_DP_MESSAGES outputMessage = SP_DP_SUCCESS;
 	SP_CONFIG_MSG configMessage;
+	char* tempMsg;
 	int i, numOfImages;
 
 	if (config == NULL || imagesData == NULL)
@@ -517,7 +556,16 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData)
 	numOfImages = spConfigGetNumOfImages(config, &configMessage);
 
 	if (configMessage != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(translateMessageToString(configMessage), __FILE__,__FUNCTION__, __LINE__);
+
+		tempMsg = configMsgToStr(configMessage);
+		if (tempMsg != NULL){
+			spLoggerPrintError(tempMsg, __FILE__,__FUNCTION__, __LINE__);
+			free(tempMsg);
+		}
+		else {
+			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+			spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
+		}
 		return SP_DP_INVALID_ARGUMENT;
 	}
 
