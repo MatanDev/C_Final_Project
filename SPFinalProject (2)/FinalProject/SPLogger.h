@@ -143,6 +143,7 @@ SP_LOGGER_MSG spLoggerPrintError(const char* msg, const char* file,
  */
 SP_LOGGER_MSG spLoggerPrintWarning(const char* msg, const char* file,
 		const char* function, const int line);
+
 /**
  * 	Prints Info message. The info message format is given below:
  * 	---INFO---

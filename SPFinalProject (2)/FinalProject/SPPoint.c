@@ -1,6 +1,9 @@
 #include "SPPoint.h"
+#include "SPLogger.h"
 #include <stdlib.h>
 #include <assert.h>
+
+#define WARNING_POINT_NULL "Point is null when free is called"
 
 /*
  * A structure used for the point data type
@@ -80,6 +83,9 @@ void spPointDestroy(SPPoint point) {
 
 		free(point);
 		point = NULL;
+	}
+	else {
+		spLoggerPrintWarning(WARNING_POINT_NULL, __FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
