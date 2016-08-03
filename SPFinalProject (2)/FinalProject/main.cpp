@@ -12,7 +12,8 @@ extern "C" {
 #include "SPImagesParser.h"
 #include "SPPoint.h"
 #include "SPImagesParserParserUnitTest.h"
-#include "SPUI.h"
+#include "SPImageQuery.h"
+#include "SPMainAux.h"
 }
 
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
@@ -25,13 +26,13 @@ int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	SPConfig config;
+	int* similarImagesIndexes, countOfSimilar,i,numOfImages;
 	SPImageData currentImageData;
 	SPImageData* imagesDataList = NULL;
 	const char* configFilename;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
 	SP_LOGGER_MSG loggerMsg;
-	int i,numOfImages;
-	bool extractFlag;
+	bool extractFlag, GUIFlag;
 
 	if (argc == 1) {
 		configFilename = DEFAULT_CONFIG_FILE;
@@ -68,47 +69,44 @@ int main(int argc, char** argv) {
 
 	// call extract/non extract function according to Extraction Mode field in the config struct
 
+	//load relevant data from settings
+	msg = loadRelevantSettingsData(config, &numOfImages,&countOfSimilar,&extractFlag, &GUIFlag);
+	if (msg != SP_CONFIG_SUCCESS) {
+			//TODO - report relevant error
+			return -1;
+	}
 
 	//build features database
 	sp::ImageProc imageProcObject(config);
-	extractFlag = spConfigIsExtractionMode(config , &msg);
-	numOfImages = spConfigGetNumOfImages(config, &msg);
-	if (msg != SP_CONFIG_SUCCESS) {
-		//TODO - report relevant error
-		return -1;
-	}
+
+
 	if (extractFlag) {
-		imagesDataList = (SPImageData*)calloc(sizeof(SPImageData),numOfImages);
+		initializeImagesDataList(&imagesDataList,numOfImages);
+		if (imagesDataList == NULL) {
+			//TODO - report relevant error
+			return -1;
+		}
 		for (i=0 ; i<numOfImages; i++){
-			//extract each relevant image data
-			imagesDataList[i] = (SPImageData)malloc(sizeof(struct sp_image_data));
-			if (imagesDataList[i] == NULL || tempPath == NULL){ //error allocating memory
-				//TODO - report relevant error
+			msg = spConfigGetImagePath(tempPath, config,i);
+			if (msg != SP_CONFIG_SUCCESS){
+				//TODO - report error
 				return -1;
 			}
-			msg = spConfigGetImagePath(tempPath, config,i);
-			imagesDataList[i]->index = i;
 			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath,i,&(imagesDataList[i]->numOfFeatures));
 		}
-		setFeaturesMatrix(imagesDataList);
 	}
-	//else
-	//	setFeaturesMatrix(NULL);
 
+	//handle images data
 	imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage);
 
 	//spUI_beginUserInteraction(config, imagesDataList);
-	currentImageData = (SPImageData)malloc(sizeof(struct sp_image_data));
-	if (currentImageData == NULL)
-	{
-		return 0; //TODO - log relevant error
+	currentImageData = initializeWorkingImage();
+	if (currentImageData == NULL) {
+		return -1;
 	}
-	currentImageData->index = 0;
+
 	// first run must always happen
-	printf("%s", ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE);
-	fflush(NULL);
-	scanf("%s", workingImagePath);
-	fflush(NULL);
+	getQuery(workingImagePath);
 
 	// iterating until the user inputs "#"
 	while (strcmp(workingImagePath, "#"))
@@ -117,21 +115,27 @@ int main(int argc, char** argv) {
 			free(currentImageData->featuresArray);
 		}
 		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
-		spUI_searchSimilarImages(config, imagesDataList, currentImageData);
+		similarImagesIndexes = searchSimilarImages(config, imagesDataList, currentImageData, countOfSimilar);
 
-		printf("%s", ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE);
-		fflush(NULL);
-		scanf("%s", workingImagePath);
-		fflush(NULL);
+		if (GUIFlag){
+			for (i=0;i<countOfSimilar;i++){
+				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
+				if (msg != SP_CONFIG_SUCCESS){
+					//TODO - report error
+					return -1;
+				}
+				imageProcObject.showImage(tempPath);
+			}
+		}
+		else{
+			presentSimilarImagesNoGUI(similarImagesIndexes, countOfSimilar);
+		}
+
+		getQuery(workingImagePath);
 	}
 
-	// announce the user for exiting
-	printf("%s", EXITING);
-
-
-	spConfigDestroy(config);
-	freeImageData(currentImageData);
-	freeAllImagesData(imagesDataList,numOfImages);
+	// end control flow
+	endControlFlow(config,currentImageData,imagesDataList,numOfImages);
 	return 0;
 }
 /*

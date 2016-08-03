@@ -9,8 +9,8 @@
 
 #define BREAKLINE "\r\n"
 #define MAXLINE_LEN 2048 //TODO - verify what this should be
-#define HEADER_STRING_FORMAT "%d,%d\r\n\0"
-#define POINT_STRING_FORMAT "%d%s\r\n\0"
+#define HEADER_STRING_FORMAT "%d,%d\r\n"
+#define POINT_STRING_FORMAT "%d%s\r\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT ",%f%s"
 
 #define ERROR_GETTING_PATH "Error creating file path"

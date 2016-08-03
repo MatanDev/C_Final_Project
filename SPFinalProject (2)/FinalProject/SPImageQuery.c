@@ -175,7 +175,7 @@ int* spIQ_searchForSimmilarImages(SPImageData queryImage)
 	return topItems;
 }
 
-int* spIQ_getSimilarImages(SPConfig config,SPImageData* imagesDatabase,SPImageData workingImage, int* countOfSimilar){
+int* spIQ_getSimilarImages(SPConfig config,SPImageData* imagesDatabase,SPImageData workingImage, int countOfSimilar){
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
 	int* rsltArray = NULL;
 	if (config == NULL || imagesDatabase == NULL || workingImage == NULL){
@@ -187,16 +187,8 @@ int* spIQ_getSimilarImages(SPConfig config,SPImageData* imagesDatabase,SPImageDa
 		return NULL; //TODO - log relevant error
 	}
 
-	topImages = 5; //TODO - create a getter for "spNumOfSimilarImages" and use here like this:
-	/*topImages = spConfigGetNumOfSimilarImages(config, &configMessage);
-	if (configMessage != SP_CONFIG_SUCCESS){
-		return NULL; //TODO - log relevant error
-	}*/
-
-	*countOfSimilar = topImages; //TODO - check if we can assume that top images >= count if images otherwise this is not good
-
+	topImages = countOfSimilar;
 	workingImagesDatabase = imagesDatabase;
-
 	rsltArray = spIQ_searchForSimmilarImages(workingImage);
 
 	return rsltArray;
