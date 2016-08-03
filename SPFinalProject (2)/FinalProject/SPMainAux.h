@@ -96,6 +96,12 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages);
  */
 SPImageData initializeWorkingImage();
 
-
+/*
+ * The method gets a path to a file and returns true iff its a correct path to an available file
+ *
+ * @param path - the path to the file
+ *
+ * @returns true iff 'path' is a correct path to an available file
+ */
 bool verifyPathAndAvailableFile(char* path);
 #endif /* SPMAINAUX_H_ */
