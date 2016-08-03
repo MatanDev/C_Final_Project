@@ -107,6 +107,10 @@ int main(int argc, char** argv) {
 	// iterating until the user inputs "#"
 	while (strcmp(workingImagePath, "#"))
 	{
+		if (!verifyPathAndAvailableFile(workingImagePath)){
+			endControlFlow(config,currentImageData,imagesDataList,numOfImages);
+			return -1;
+		}
 		if (currentImageData->featuresArray != NULL){
 			free(currentImageData->featuresArray);
 		}
@@ -116,7 +120,9 @@ int main(int argc, char** argv) {
 		if (GUIFlag){
 			for (i=0;i<countOfSimilar;i++){
 				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
+
 				if (msg != SP_CONFIG_SUCCESS){
+					endControlFlow(config,currentImageData,imagesDataList,numOfImages);
 					//TODO - report error
 					return -1;
 				}

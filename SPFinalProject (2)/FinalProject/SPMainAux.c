@@ -11,8 +11,23 @@
 #define CLOSEST_IMAGES "The closest images are: "
 #define EXITING "Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 0
+#define QUERY_STRING_ERROR "Query is not in the correct format, or file is not available\n"
 
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
+
+bool verifyPathAndAvailableFile(char* path){
+	FILE* fp;
+	if (path == NULL)
+		return false;
+   fp = fopen(path,"r");
+   if (fp == NULL){
+	   //TODO log error QUERY_STRING_ERROR
+	   printf(QUERY_STRING_ERROR);
+	   return false;
+   }
+   fclose(fp);
+   return true;
+}
 
 void getQuery(char* destination){
 	//TODO - need to verify the user's input somehow

@@ -96,4 +96,6 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages);
  */
 SPImageData initializeWorkingImage();
 
+
+bool verifyPathAndAvailableFile(char* path);
 #endif /* SPMAINAUX_H_ */
