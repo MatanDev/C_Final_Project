@@ -10,10 +10,12 @@
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
 #define CLOSEST_IMAGES "The closest images are: "
 #define EXITING "Exiting...\n"
+#define QUERY_IMAGE_DEFAULT_INDEX 0
 
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
 
 void getQuery(char* destination){
+	//TODO - need to verify the user's input somehow
 	getAsString(ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE, destination);
 }
 
@@ -92,6 +94,6 @@ SPImageData initializeWorkingImage(){
 	{
 		return NULL; //TODO - log relevant error
 	}
-	workingImage->index = 0;
+	workingImage->index = QUERY_IMAGE_DEFAULT_INDEX;
 	return workingImage;
 }

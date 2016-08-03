@@ -16,9 +16,6 @@ extern "C" {
 #include "SPMainAux.h"
 }
 
-#define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
-#define EXITING "Exiting...\n"
-
 #define DEFAULT_CONFIG_FILE	"spcbir.config"
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
 
@@ -99,7 +96,6 @@ int main(int argc, char** argv) {
 	//handle images data
 	imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage);
 
-	//spUI_beginUserInteraction(config, imagesDataList);
 	currentImageData = initializeWorkingImage();
 	if (currentImageData == NULL) {
 		return -1;

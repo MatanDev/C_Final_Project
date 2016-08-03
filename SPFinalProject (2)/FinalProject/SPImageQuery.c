@@ -141,8 +141,7 @@ int* spIQ_searchForSimmilarImages(SPImageData queryImage)
 	}
 
 	// set up the counter array
-	for (i = 0; i < numOfImages; i++)
-	{
+	for (i = 0; i < numOfImages; i++) {
 		counterArray[i] = 0;
 	}
 
@@ -150,22 +149,17 @@ int* spIQ_searchForSimmilarImages(SPImageData queryImage)
 
 	// for each feature in the working image send a request to compare the best NUM_OF_BEST_DIST_IMGS
 	// for each NUM_OF_BEST_DIST_IMGS returned increase a counter at the relevant index
-	for (i = 0; i < queryImage->numOfFeatures; i++)
-	{
+	for (i = 0; i < queryImage->numOfFeatures; i++) {
 		resultsArray = spIQ_BestSIFTL2SquaredDistance((queryImage->featuresArray)[i], totalNumberOfFeatures);
 
-		if (resultsArray == NULL)
-		{
+		if (resultsArray == NULL) {
 			//TODO - report relevant problem
 			free(counterArray);
 			return NULL;
 		}
-
-		for (j = 0; j < NUM_OF_BEST_DIST_IMGS; j++)
-		{
+		for (j = 0; j < NUM_OF_BEST_DIST_IMGS; j++) {
 			counterArray[resultsArray[j]]++;
 		}
-
 		if (resultsArray != NULL)
 			free(resultsArray);
 	}
