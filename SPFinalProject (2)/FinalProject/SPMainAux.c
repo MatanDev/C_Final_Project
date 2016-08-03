@@ -1,19 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "SPMainAux.h"
-
 #include "SPImageQuery.h"
+#include "SPLogger.h"
 
-
+#define DEFAULT_CONFIG_FILE	"spcbir.config"
+#define CANNOT_OPEN_MSG "The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
 #define CLOSEST_IMAGES "The closest images are: "
 #define EXITING "Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 0
-#define QUERY_STRING_ERROR "Query is not in the correct format, or file is not available\n"
+#define QUERY_STRING_ERROR 	"Query is not in the correct format, or file is not available\n"
 
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
+
+const char* getConfigFilename(int argc, char** argv) {
+	if (argc == 1)
+		return DEFAULT_CONFIG_FILE;
+	if (argc == 3 && !strcmp(argv[1], "-c"))
+		return argv[2];
+	return NULL;
+}
+
+SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
+	SPConfig config;
+	config = spConfigCreate(configFilename, msg);
+	if (*msg == SP_CONFIG_CANNOT_OPEN_FILE)
+		printf(CANNOT_OPEN_MSG, configFilename);
+	return config;
+}
+
+SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename) {
+	assert(1 <= loggerLevel <= 4);
+	switch (loggerLevel) {
+	case 1:
+		return spLoggerCreate(loggerFilename, SP_LOGGER_ERROR_LEVEL);
+	case 2:
+		return spLoggerCreate(loggerFilename, SP_LOGGER_WARNING_ERROR_LEVEL);
+	case 3:
+		return spLoggerCreate(loggerFilename, SP_LOGGER_INFO_WARNING_ERROR_LEVEL);
+	case 4:
+		return spLoggerCreate(loggerFilename, SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
+	}
+}
+
 
 bool verifyPathAndAvailableFile(char* path){
 	FILE* fp;

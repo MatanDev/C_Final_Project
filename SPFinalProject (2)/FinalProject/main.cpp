@@ -1,8 +1,8 @@
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cassert>
+#include <cstdio>
+#include <cctype>
+#include <cstdlib>
 #include "SPImageProc.h"
 
 extern "C" {
@@ -16,53 +16,35 @@ extern "C" {
 #include "SPMainAux.h"
 }
 
-#define DEFAULT_CONFIG_FILE	"spcbir.config"
+#define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
 
+
 int main(int argc, char** argv) {
+	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	SPConfig config;
+	SP_LOGGER_MSG loggerMsg;
+	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	int* similarImagesIndexes, countOfSimilar,i,numOfImages;
 	SPImageData currentImageData;
 	SPImageData* imagesDataList = NULL;
-	const char* configFilename;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
-	SP_LOGGER_MSG loggerMsg;
 	bool extractFlag, GUIFlag;
 
-	if (argc == 1) {
-		configFilename = DEFAULT_CONFIG_FILE;
-		config = spConfigCreate(configFilename, &msg);
-		if (msg == SP_CONFIG_CANNOT_OPEN_FILE)
-			printf("The default configuration file spcbir.config couldn’t be open\n");
-	}
-	else if (argc == 3 && !strcmp(argv[1], "-c")) {
-		configFilename = argv[2];
-		config = spConfigCreate(configFilename, &msg);
-		if (msg == SP_CONFIG_CANNOT_OPEN_FILE)
-			printf("The configuration file %s couldn’t be open\n", configFilename);
-	}
-	else {
-		printf("Invalid command line : use -c <config_filename>\n");
-		//exit - maybe return something...
+	configFilename = getConfigFilename(argc, argv);
+	if (!configFilename) {
+		printf(INVALID_CMD_LINE);
+		return -1; //exit - maybe return something...
 	}
 
-	switch (config->spLoggerLevel) {
-	case 1:
-		loggerMsg = spLoggerCreate(config->spLoggerFilename, SP_LOGGER_ERROR_LEVEL);
-		break;
-	case 2:
-		loggerMsg = spLoggerCreate(config->spLoggerFilename, SP_LOGGER_WARNING_ERROR_LEVEL);
-		break;
-	case 3:
-		loggerMsg = spLoggerCreate(config->spLoggerFilename, SP_LOGGER_INFO_WARNING_ERROR_LEVEL);
-		break;
-	case 4:
-		loggerMsg = spLoggerCreate(config->spLoggerFilename, SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
-		break;
-	}
-	assert(loggerMsg == SP_LOGGER_SUCCESS);
+	config = getConfigFromFile(configFilename, &msg);
+	if (config == NULL || msg != SP_CONFIG_SUCCESS)
+		return -1; // TODO - maybe report relevant error (log still not initialized)
+
+	loggerMsg = initializeLogger(config->spLoggerLevel, config->spLoggerFilename);
+	if (loggerMsg != SP_LOGGER_SUCCESS)
+		return -1 ;// TODO - maybe report relevant error (log not initialized)
 
 	// call extract/non extract function according to Extraction Mode field in the config struct
 

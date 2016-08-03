@@ -1,16 +1,13 @@
-/*
- * SPMainAux.h
- *
- *  Created on: 3 баев 2016
- *      Author: Matan
- */
-
 #ifndef SPMAINAUX_H_
 #define SPMAINAUX_H_
 
-#include "SPLogger.h"
 #include "SPConfig.h"
 #include "SPImagesParser.h"
+
+const char* getConfigFilename(int argc, char** argv);
+SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
+
+SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename);
 
 /*
  * The method prints exiting string and free's all relevant allocated memory
