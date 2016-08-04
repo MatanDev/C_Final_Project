@@ -127,8 +127,8 @@ int main() {
 	testGivenConfFile();
 	return 0;
 }
-
-int main(){
+*/
+/*int main(){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
 	RunImagesParserTests(config);

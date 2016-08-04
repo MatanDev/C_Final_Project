@@ -144,6 +144,20 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
 
+/*
+ * Returns the number of similar images set in the configuration file, i.e the value
+ * of spNumOfSimilarImages.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return positive integer in success, negative integer otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
+
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
  * ith image.

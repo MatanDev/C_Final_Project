@@ -34,7 +34,7 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 }
 
 SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename) {
-	assert(1 <= loggerLevel <= 4);
+	assert(1 <= loggerLevel && loggerLevel <= 4);
 	switch (loggerLevel) {
 	case 1:
 		return spLoggerCreate(loggerFilename, SP_LOGGER_ERROR_LEVEL);
@@ -45,10 +45,11 @@ SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename) {
 	case 4:
 		return spLoggerCreate(loggerFilename, SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
 	}
+	return SP_LOGGER_SUCCESS; // TODO - decide what should be here
 }
 
 
-bool verifyPathAndAvailableFile(char* path){
+bool verifyPathAndAvailableFile(char* path) {
 	FILE* fp;
 	if (path == NULL)
 		return false;
@@ -62,27 +63,27 @@ bool verifyPathAndAvailableFile(char* path){
    return true;
 }
 
-void getQuery(char* destination){
+void getQuery(char* destination) {
 	//TODO - need to verify the user's input somehow
 	getAsString(ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE, destination);
 }
 
-void getAsString(const char* message, char* destination)
-{
+void getAsString(const char* message, char* destination) {
 	printf("%s", message);
 	fflush(NULL);
 	scanf("%s", destination);
 	fflush(NULL);
 }
 
-void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList, int numOfImages){
+void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
+		int numOfImages) {
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	freeImageData(image);
 	freeAllImagesData(imagesList,numOfImages);
 }
 
-void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount){
+void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
 	int i = 0;
 	printf(CLOSEST_IMAGES);
 	fflush(NULL);
@@ -93,11 +94,13 @@ void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount){
 }
 
 
-int* searchSimilarImages(const SPConfig config,SPImageData* imagesDatabase,SPImageData workingImage, int simmilarCount){
+int* searchSimilarImages(const SPConfig config,SPImageData* imagesDatabase,
+		SPImageData workingImage, int simmilarCount) {
 	return spIQ_getSimilarImages(config, imagesDatabase, workingImage, simmilarCount);
 }
 
-SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages, int* numOfSimilar, bool* extractFlag, bool* GUIFlag){
+SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
 	*extractFlag = spConfigIsExtractionMode(config , &rslt);
 	if (rslt != SP_CONFIG_SUCCESS)
@@ -105,19 +108,18 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages, 
 
 	*numOfImages = spConfigGetNumOfImages(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS)
-			return rslt;
+		return rslt;
 
 	*GUIFlag = spConfigMinimalGui(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS)
-				return rslt;
+		return rslt;
 
-	*numOfSimilar = 5; //TODO - create a getter for "spNumOfSimilarImages" and use here
-	/*if (rslt != SP_CONFIG_SUCCESS)
-			return rslt;*/
+	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
+
 	return rslt;
 }
 
-void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages){
+void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 	int i;
 	*imagesDataList = (SPImageData*)calloc(sizeof(SPImageData),numOfImages);
 	for (i=0 ; i<numOfImages; i++){
@@ -135,7 +137,7 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages){
 }
 
 
-SPImageData initializeWorkingImage(){
+SPImageData initializeWorkingImage() {
 	SPImageData workingImage = NULL;
 	workingImage = (SPImageData)malloc(sizeof(struct sp_image_data));
 	if (workingImage == NULL)

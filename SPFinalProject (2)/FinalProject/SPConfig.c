@@ -5,6 +5,62 @@
 #include <string.h>
 #include "SPConfig.h"
 
+#define DEFAULT_PCA_DIMENSION	20
+#define DEFAULT_PCA_FILENAME	"pca.yml"
+#define DEFAULT_NUM_OF_FEATURES	100
+#define DEFAULT_NUM_OF_SIM_IMGS	1
+#define DEFAULT_KNN				1
+#define DEFAULT_LOGGER_LEVEL	3
+#define DEFAULT_LOGGER_FILENAME	"stdout"
+#define FILE_TEMPLATE_FOR_ERROR	"File: %s\n"
+#define LINE_TEMPLATE_FOR_ERROR	"Line: %d\n"
+#define INVALID_CONF_MSG		"Message: Invalid configuration line\n"
+#define INVALID_VALUE_MSG		"Message: Invalid value - constraint not met\n"
+#define PARAM_NOT_SET_MSG		"Message: Parameter %s is not set\n"
+#define COMMENT_SPECIFIER		'#'
+#define ASSIGNMENT_SPECIFIER	'='
+//#define NULL_CHARACTER			'\0'
+#define JPG_FILE_EXTENSION		".jpg"
+#define PNG_FILE_EXTENSION		".png"
+#define BMP_FILE_EXTENSION		".bmp"
+#define GIF_FILE_EXTENSION		".gif"
+#define FEATS_FILE_EXTENSION	".feats"
+#define TRUE_AS_STR				"true"
+#define FALSE_AS_STR			"false"
+#define RAND_SPLIT_METHOD		"RANDOM"
+#define MAX_SPREAD_SPLIT_METHOD	"MAX_SPREAD"
+#define INC_SPLIT_METHOD		"INCREMENTAL"
+#define SP_IMAGES_DIRECTORY		"spImagesDirectory"
+#define SP_IMAGES_PREFIX		"spImagesPrefix"
+#define SP_IMAGES_SUFFIX		"spImagesSuffix"
+#define SP_NUM_OF_IMAGES		"spNumOfImages"
+#define SP_PCA_DIMENSION		"spPCADimension"
+#define SP_PCA_FILENAME			"spPCAFilename"
+#define SP_NUM_OF_FEATURES		"spNumOfFeatures"
+#define SP_EXTRACION_MODE		"spExtractionMode"
+#define SP_NUM_OF_SIM_IMAGES	"spNumOfSimilarImages"
+#define SP_KDTREE_SPLIT_METHOD	"spKDTreeSplitMethod"
+#define SP_KNN					"spKNN"
+#define SP_MINIMAL_GUI			"spMinimalGUI"
+#define SP_LOGGER_LEVEL			"spLoggerLevel"
+#define SP_LOGGER_FILENAME		"spLoggerFilename"
+#define MAX_LINE_LENGTH			1024
+//#define FIRST_LINE_INDEX		0
+//#define OPEN_FILE_READ_MODE		"r"
+#define IMAGE_PATH_FORMAT		"%s%s%d%s"
+#define PCA_PATH_FORMAT			"%s%s"
+#define MISSING_DIR_MSG			"SP_CONFIG_MISSING_DIR"
+#define MISSING_PREFIX_MSG		"SP_CONFIG_MISSING_PREFIX"
+#define MISSING_SUFFIX_MSG		"SP_CONFIG_MISSING_SUFFIX"
+#define MISSING_IMAGES_NUM_MSG	"SP_CONFIG_MISSING_NUM_IMAGES"
+#define CANNOT_OPEN_FILE_MSG	"SP_CONFIG_CANNOT_OPEN_FILE"
+#define ALLOCATION_FAILED_MSG	"SP_CONFIG_ALLOC_FAIL"
+#define INVALID_INT_MSG			"SP_CONFIG_INVALID_INTEGER"
+#define INVALID_STR_MSG			"SP_CONFIG_INVALID_STRING"
+#define INVALID_ARG_MSG			"SP_CONFIG_INVALID_ARGUMENT"
+#define INDEX_OUT_OF_RANGE_MSG	"SP_CONFIG_INDEX_OUT_OF_RANGE"
+#define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
+
 /*struct sp_config_t {
 	char* spImagesDirectory;
 	char* spImagesPrefix;
@@ -35,45 +91,47 @@ char* mallocAndCopy(const char* str) {
 	return ret;
 }
 
-bool initConfigToDefault(SPConfig config, SP_CONFIG_MSG* msg) {
-	config->spImagesDirectory = NULL;
-	config->spImagesPrefix = NULL;
-	config->spImagesSuffix = NULL;
-	config->spNumOfImages = 0;
-	config->spPCADimension = 20;
-	config->spPCAFilename = mallocAndCopy("pca.yml");
-	if (config->spPCAFilename == NULL) {
-		*msg = SP_CONFIG_ALLOC_FAIL;
-		return false;
-	}
-	config->spNumOfFeatures = 100;
-	config->spExtractionMode = true;
-	config->spNumOfSimilarImages = 1;
-	config->spKDTreeSplitMethod = MAX_SPREAD;
-	config->spKNN = 1;
-	config->spMinimalGUI = false;
-	config->spLoggerLevel = 3;
-	config->spLoggerFilename = mallocAndCopy("stdout");
-	if (config->spLoggerFilename == NULL) {
-		*msg = SP_CONFIG_ALLOC_FAIL;
-		return false;
+bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
+	if (*field == NULL) {
+		*field = mallocAndCopy(def);
+		if (*field == NULL) {
+			*msg = SP_CONFIG_ALLOC_FAIL;
+			return false;
+		}
 	}
 	return true;
 }
 
+void initConfigToDefault(SPConfig config) {
+	config->spImagesDirectory = NULL;
+	config->spImagesPrefix = NULL;
+	config->spImagesSuffix = NULL;
+	config->spNumOfImages = 0;
+	config->spPCADimension = DEFAULT_PCA_DIMENSION;
+	config->spPCAFilename = NULL;
+	config->spNumOfFeatures = DEFAULT_NUM_OF_FEATURES;
+	config->spExtractionMode = true;
+	config->spNumOfSimilarImages = DEFAULT_NUM_OF_SIM_IMGS;
+	config->spKDTreeSplitMethod = MAX_SPREAD;
+	config->spKNN = DEFAULT_KNN;
+	config->spMinimalGUI = false;
+	config->spLoggerLevel = DEFAULT_LOGGER_LEVEL;
+	config->spLoggerFilename = NULL;
+}
+
 void printErrorMessage(const char* filename, int lineNum,
 		ERROR_MSG_TYPE errorMsgType, const char* parameterName) {
-	printf("File: %s\n", filename);
-	printf("Line: %d\n", lineNum);
+	printf(FILE_TEMPLATE_FOR_ERROR, filename);
+	printf(LINE_TEMPLATE_FOR_ERROR, lineNum);
 	switch(errorMsgType) {
 	case INVALID_CONF_FILE:
-		printf("Message: Invalid configuration line\n");
+		printf(INVALID_CONF_MSG);
 		break;
 	case INVALID_VALUE:
-		printf("Message: Invalid value - constraint not met\n");
+		printf(INVALID_VALUE_MSG);
 		break;
 	case PARAMETER_NOT_SET:
-		printf("Message: Parameter %s is not set\n", parameterName);
+		printf(PARAM_NOT_SET_MSG, parameterName);
 		break;
 	default:
 		break;
@@ -96,11 +154,11 @@ bool parseLine(const char* filename, int lineNum, char* line,
 
 	// first non-space character is '#' - comment line,
 	// or line includes only spaces - empty line
-	if (line[startIndex] == '#' || startIndex == strlen(line))
+	if (line[startIndex] == COMMENT_SPECIFIER || startIndex == strlen(line))
 		return *isCommentOrEmpty = true;
 
 	// the second case can happen only in the last line
-	if((tmpPtr = strchr(line + startIndex, '=')) == NULL ||
+	if((tmpPtr = strchr(line + startIndex, ASSIGNMENT_SPECIFIER)) == NULL ||
 			tmpPtr == line + strlen(line) - 1) {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
@@ -145,8 +203,9 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 	}
 
 	if (strlen(value) == 0 ||
-			(isImagesSuffix && strcmp(value, ".jpg") && strcmp(value, ".png")
-					&& strcmp(value, ".bmp") && strcmp(value, ".gif"))) {
+			(isImagesSuffix && strcmp(value, JPG_FILE_EXTENSION) &&
+					strcmp(value, PNG_FILE_EXTENSION) && strcmp(value, BMP_FILE_EXTENSION)
+					&& strcmp(value, GIF_FILE_EXTENSION))) {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
@@ -187,10 +246,10 @@ bool handleBoundedPosIntField(int* posIntField, const char* filename,
 
 bool handleBoolField(bool* boolField, const char* filename, int lineNum,
 		char* value, SP_CONFIG_MSG* msg) {
-	if (!strcmp(value, "true"))
+	if (!strcmp(value, TRUE_AS_STR))
 		*boolField = true;
 
-	else if (!strcmp(value, "false"))
+	else if (!strcmp(value, FALSE_AS_STR))
 		*boolField = false;
 
 	else {
@@ -204,13 +263,13 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
 
 bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
-	if (!strcmp(value,  "RANDOM"))
+	if (!strcmp(value, RAND_SPLIT_METHOD))
 		config->spKDTreeSplitMethod = RANDOM;
 
-	else if (!strcmp(value,  "MAX_SPREAD"))
+	else if (!strcmp(value, MAX_SPREAD_SPLIT_METHOD))
 		config->spKDTreeSplitMethod = MAX_SPREAD;
 
-	else if (!strcmp(value, "INCREMENTAL"))
+	else if (!strcmp(value, INC_SPLIT_METHOD))
 		config->spKDTreeSplitMethod = INCREMENTAL;
 
 	else {
@@ -224,58 +283,58 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
-	if (!strcmp(varName, "spImagesDirectory"))
+	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
 		return handleStringField(&(config->spImagesDirectory), filename,
 				lineNum, value, msg, false);
 
-	else if (!strcmp(varName, "spImagesPrefix"))
+	if (!strcmp(varName, SP_IMAGES_PREFIX))
 		return handleStringField(&(config->spImagesPrefix), filename, lineNum,
 				value, msg, false);
 
-	else if (!strcmp(varName, "spImagesSuffix"))
+	if (!strcmp(varName, SP_IMAGES_SUFFIX))
 		return handleStringField(&(config->spImagesSuffix), filename, lineNum,
 				value, msg, true);
 
-	else if (!strcmp(varName, "spNumOfImages"))
+	if (!strcmp(varName, SP_NUM_OF_IMAGES))
 		return handlePositiveIntField(&(config->spNumOfImages), filename,
 				lineNum, value, msg);
 
-	else if (!strcmp(varName, "spPCADimension"))
+	if (!strcmp(varName, SP_PCA_DIMENSION))
 		return handleBoundedPosIntField(&(config->spPCADimension), filename,
 				lineNum, value, msg, 10, 28);
 
-	else if (!strcmp(varName, "spPCAFilename"))
+	if (!strcmp(varName, SP_PCA_FILENAME))
 		return handleStringField(&(config->spPCAFilename), filename, lineNum,
 				value, msg, false);
 
-	else if (!strcmp(varName, "spNumOfFeatures"))
+	if (!strcmp(varName, SP_NUM_OF_FEATURES))
 		return handlePositiveIntField(&(config->spNumOfFeatures), filename,
 				lineNum, value, msg);
 
-	else if (!strcmp(varName, "spExtractionMode"))
+	if (!strcmp(varName, SP_EXTRACION_MODE))
 		return handleBoolField(&(config->spExtractionMode), filename,
 				lineNum, value, msg);
 
-	else if (!strcmp(varName, "spNumOfSimilarImages"))
+	if (!strcmp(varName, SP_NUM_OF_SIM_IMAGES))
 		return handlePositiveIntField(&(config->spNumOfSimilarImages),
 				filename, lineNum, value, msg);
 
-	else if (!strcmp(varName, "spKDTreeSplitMethod"))
+	if (!strcmp(varName, SP_KDTREE_SPLIT_METHOD))
 		return handleKDTreeSplitMethod(config, filename, lineNum, value, msg);
 
-	else if (!strcmp(varName, "spKNN"))
+	if (!strcmp(varName, SP_KNN))
 		return handlePositiveIntField(&(config->spKNN), filename, lineNum,
 				value, msg);
 
-	else if (!strcmp(varName, "spMinimalGUI"))
+	if (!strcmp(varName, SP_MINIMAL_GUI))
 		return handleBoolField(&(config->spMinimalGUI), filename, lineNum,
 				value, msg);
 
-	else if (!strcmp(varName, "spLoggerLevel"))
+	if (!strcmp(varName, SP_LOGGER_LEVEL))
 		return handleBoundedPosIntField(&(config->spLoggerLevel), filename,
 				lineNum, value, msg, 1, 4);
 
-	else if (!strcmp(varName, "spLoggerFilename"))
+	if (!strcmp(varName, SP_LOGGER_FILENAME))
 		return handleStringField(&(config->spLoggerFilename), filename,
 				lineNum, value, msg, false);
 
@@ -294,19 +353,19 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 	const char* parameterName;
 
 	if (!config->spImagesDirectory) {
-		parameterName = "spImagesDirectory";
+		parameterName = SP_IMAGES_DIRECTORY;
 		*msg = SP_CONFIG_MISSING_DIR;
 
 	} else if (!config->spImagesPrefix) {
-		parameterName = "spImagesPrefix";
+		parameterName = SP_IMAGES_PREFIX;
 		*msg = SP_CONFIG_MISSING_PREFIX;
 
 	} else if (!config->spImagesSuffix) {
-		parameterName = "spImagesSuffix";
+		parameterName = SP_IMAGES_SUFFIX;
 		*msg = SP_CONFIG_MISSING_SUFFIX;
 
 	} else if (!config->spNumOfImages) {
-		parameterName = "spNumOfImages";
+		parameterName = SP_NUM_OF_IMAGES;
 		*msg = SP_CONFIG_MISSING_NUM_IMAGES;
 	}
 
@@ -322,7 +381,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	assert(msg != NULL);
 	SPConfig config;
 	FILE* configFile;
-	char line[1024];
+	char line[MAX_LINE_LENGTH];
 	int lineNum = 0; // TODO - should lines start from 0 or 1?
 	char* varName, *value;
 	bool isCommentOrEmpty = false;
@@ -345,13 +404,9 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		return NULL;
 	}
 
-	// TODO 1 - if we fail in initialize to default should we fail the whole
-	// opertation?
-	// TODO 2 - maybe instead of returning bool in the functions we should
+	// TODO - maybe instead of returning bool in the functions we should
 	// check if msg is not success?
-	if (!initConfigToDefault(config, msg)) {
-		return onError(config);
-	}
+	initConfigToDefault(config);
 
 	while(fgets(line, 1024, configFile) != NULL) {
 		if (!parseLine(filename, lineNum, line, &varName, &value,
@@ -364,6 +419,13 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		}
 		lineNum++;
 		isCommentOrEmpty = false;
+	}
+
+	// TODO - if we fail in initialize to default should we fail the whole
+	// opertation? (meaning just assign instead of malloc and copy)
+	if (!checkAndSetDefIfNeeded(&config->spPCAFilename, DEFAULT_PCA_FILENAME, msg) ||
+		!checkAndSetDefIfNeeded(&config->spLoggerFilename, DEFAULT_LOGGER_FILENAME, msg)) {
+		return onError(config);
 	}
 
 	return parameterSetCheck(config, msg, filename, lineNum);
@@ -399,6 +461,10 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg) ? config->spPCADimension : -1;
 }
 
+int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg) ? config->spNumOfSimilarImages : -1;
+}
+
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		int index, bool isFeats) {
 	if (imagePath == NULL || config == NULL)
@@ -409,10 +475,10 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
 	if (isFeats)
-		sprintf(imagePath, "%s%s%d%s", config->spImagesDirectory,
-				config->spImagesPrefix, index, ".feats"); //TODO - export feats to macro
+		sprintf(imagePath, IMAGE_PATH_FORMAT, config->spImagesDirectory,
+				config->spImagesPrefix, index, FEATS_FILE_EXTENSION);
 	else
-		sprintf(imagePath, "%s%s%d%s", config->spImagesDirectory,
+		sprintf(imagePath, IMAGE_PATH_FORMAT, config->spImagesDirectory,
 				config->spImagesPrefix, index, config->spImagesSuffix);
 	return SP_CONFIG_SUCCESS;
 }
@@ -427,7 +493,7 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 		return SP_CONFIG_INVALID_ARGUMENT;
 
 	// if config is valid, then so are config->spImagesDirectory and config->spPCAFilename
-	sprintf(pcaPath, "%s%s", config->spImagesDirectory,
+	sprintf(pcaPath, PCA_PATH_FORMAT, config->spImagesDirectory,
 			config->spPCAFilename);
 	return SP_CONFIG_SUCCESS;
 }
@@ -461,27 +527,27 @@ void spConfigDestroy(SPConfig config) {
 char* configMsgToStr(SP_CONFIG_MSG msg) {
 	switch(msg) {
 	case SP_CONFIG_MISSING_DIR:
-		return mallocAndCopy("SP_CONFIG_MISSING_DIR");
+		return mallocAndCopy(MISSING_DIR_MSG);
 	case SP_CONFIG_MISSING_PREFIX:
-		return mallocAndCopy("SP_CONFIG_MISSING_PREFIX");
+		return mallocAndCopy(MISSING_PREFIX_MSG);
 	case SP_CONFIG_MISSING_SUFFIX:
-		return mallocAndCopy("SP_CONFIG_MISSING_SUFFIX");
+		return mallocAndCopy(MISSING_SUFFIX_MSG);
 	case SP_CONFIG_MISSING_NUM_IMAGES:
-		return mallocAndCopy("SP_CONFIG_MISSING_NUM_IMAGES");
+		return mallocAndCopy(MISSING_IMAGES_NUM_MSG);
 	case SP_CONFIG_CANNOT_OPEN_FILE:
-		return mallocAndCopy("SP_CONFIG_CANNOT_OPEN_FILE");
+		return mallocAndCopy(CANNOT_OPEN_FILE_MSG);
 	case SP_CONFIG_ALLOC_FAIL:
-		return mallocAndCopy("SP_CONFIG_ALLOC_FAIL");
+		return mallocAndCopy(ALLOCATION_FAILED_MSG);
 	case SP_CONFIG_INVALID_INTEGER:
-		return mallocAndCopy("SP_CONFIG_INVALID_INTEGER");
+		return mallocAndCopy(INVALID_INT_MSG);
 	case SP_CONFIG_INVALID_STRING:
-		return mallocAndCopy("SP_CONFIG_INVALID_STRING");
+		return mallocAndCopy(INVALID_STR_MSG);
 	case SP_CONFIG_INVALID_ARGUMENT:
-		return mallocAndCopy("SP_CONFIG_INVALID_ARGUMENT");
+		return mallocAndCopy(INVALID_ARG_MSG);
 	case SP_CONFIG_INDEX_OUT_OF_RANGE:
-		return mallocAndCopy("SP_CONFIG_INDEX_OUT_OF_RANGE");
+		return mallocAndCopy(INDEX_OUT_OF_RANGE_MSG);
 	case SP_CONFIG_SUCCESS:
-		return mallocAndCopy("SP_CONFIG_SUCCESS");
+		return mallocAndCopy(SUCCESS_MSG);
 	}
 	return NULL;
 }
