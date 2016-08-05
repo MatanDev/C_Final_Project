@@ -7,6 +7,8 @@
 #include "SPImageQuery.h"
 #include "SPLogger.h"
 
+//TODO - remove fflush(NULL) at production
+
 #define DEFAULT_CONFIG_FILE	"spcbir.config"
 #define CANNOT_OPEN_MSG "The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
@@ -16,6 +18,15 @@
 #define QUERY_STRING_ERROR 	"Query is not in the correct format, or file is not available\n"
 
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
+
+#define ERROR_INVALID_ARGUMENT "Error Invalid argument"
+#define ERROR_WRONG_QUERY "Query is not a valid path, or file is not available"
+#define ERROR_READING_SETTINGS "Could not load data from the configurations"
+
+#define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM "Error creating query image item"
+#define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS "Error creating image database items"
+
+
 
 const char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
@@ -50,12 +61,16 @@ SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename) {
 
 
 bool verifyPathAndAvailableFile(char* path) {
+	if (path == NULL){
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,__FUNCTION__, __LINE__);
+		return false;
+	}
 	FILE* fp;
 	if (path == NULL)
 		return false;
    fp = fopen(path,"r");
    if (fp == NULL){
-	   //TODO log error QUERY_STRING_ERROR
+	   spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 	   printf(QUERY_STRING_ERROR);
 	   return false;
    }
@@ -64,7 +79,6 @@ bool verifyPathAndAvailableFile(char* path) {
 }
 
 void getQuery(char* destination) {
-	//TODO - need to verify the user's input somehow
 	getAsString(ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE, destination);
 }
 
@@ -85,6 +99,12 @@ void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 
 void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
 	int i = 0;
+
+	if (imagesIndexesArray == NULL || imagesCount < 0){
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,__FUNCTION__, __LINE__);
+		return;
+	}
+
 	printf(CLOSEST_IMAGES);
 	fflush(NULL);
 	for (i = 0; i < imagesCount; i++) {
@@ -102,31 +122,54 @@ int* searchSimilarImages(const SPConfig config,SPImageData* imagesDatabase,
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 		int* numOfSimilar, bool* extractFlag, bool* GUIFlag) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
+	assert( config != NULL);
+
 	*extractFlag = spConfigIsExtractionMode(config , &rslt);
-	if (rslt != SP_CONFIG_SUCCESS)
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
+	}
 
 	*numOfImages = spConfigGetNumOfImages(config, &rslt);
-	if (rslt != SP_CONFIG_SUCCESS)
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
+	}
 
 	*GUIFlag = spConfigMinimalGui(config, &rslt);
-	if (rslt != SP_CONFIG_SUCCESS)
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
+	}
 
 	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		return rslt;
+	}
 
 	return rslt;
 }
 
 void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
-	int i;
+	int i,j;
 	*imagesDataList = (SPImageData*)calloc(sizeof(SPImageData),numOfImages);
+	if ((*imagesDataList) == NULL){
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, __FILE__,__FUNCTION__, __LINE__);
+		return;
+	}
 	for (i=0 ; i<numOfImages; i++){
 		//extract each relevant image data
 		(*imagesDataList)[i] = (SPImageData)malloc(sizeof(struct sp_image_data));
 		if ((*imagesDataList)[i] == NULL){ //error allocating memory
 			//TODO - report relevant error
+			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+			spLoggerPrintError(ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, __FILE__,__FUNCTION__, __LINE__);
+			//roll-back
+			for (j=0;j<i;j++){
+				free((*imagesDataList)[j]);
+			}
 			free((*imagesDataList));
 			(*imagesDataList) = NULL;
 			return;
@@ -142,7 +185,9 @@ SPImageData initializeWorkingImage() {
 	workingImage = (SPImageData)malloc(sizeof(struct sp_image_data));
 	if (workingImage == NULL)
 	{
-		return NULL; //TODO - log relevant error
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_AT_CREATEING_QUERY_IMAGE_ITEM, __FILE__,__FUNCTION__, __LINE__);
+		return NULL;
 	}
 	workingImage->index = QUERY_IMAGE_DEFAULT_INDEX;
 	return workingImage;

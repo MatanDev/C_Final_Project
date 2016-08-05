@@ -18,6 +18,9 @@ extern "C" {
 
 #define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
+#define QUERY_EXIT_INPUT "#"
+
+#define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 
 
 int main(int argc, char** argv) {
@@ -51,7 +54,6 @@ int main(int argc, char** argv) {
 	//load relevant data from settings
 	msg = loadRelevantSettingsData(config, &numOfImages,&countOfSimilar,&extractFlag, &GUIFlag);
 	if (msg != SP_CONFIG_SUCCESS) {
-			//TODO - report relevant error
 			return -1;
 	}
 
@@ -62,13 +64,12 @@ int main(int argc, char** argv) {
 	if (extractFlag) {
 		initializeImagesDataList(&imagesDataList,numOfImages);
 		if (imagesDataList == NULL) {
-			//TODO - report relevant error
 			return -1;
 		}
 		for (i=0 ; i<numOfImages; i++){
 			msg = spConfigGetImagePath(tempPath, config,i);
 			if (msg != SP_CONFIG_SUCCESS){
-				//TODO - report error
+				spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
 				return -1;
 			}
 			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath,i,&(imagesDataList[i]->numOfFeatures));
@@ -77,6 +78,9 @@ int main(int argc, char** argv) {
 
 	//handle images data
 	imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage);
+	if (imagesDataList == NULL) {
+		return -1;
+	}
 
 	currentImageData = initializeWorkingImage();
 	if (currentImageData == NULL) {
@@ -87,7 +91,7 @@ int main(int argc, char** argv) {
 	getQuery(workingImagePath);
 
 	// iterating until the user inputs "#"
-	while (strcmp(workingImagePath, "#"))
+	while (strcmp(workingImagePath, QUERY_EXIT_INPUT))
 	{
 		if (!verifyPathAndAvailableFile(workingImagePath)){
 			endControlFlow(config,currentImageData,imagesDataList,numOfImages);
@@ -105,7 +109,7 @@ int main(int argc, char** argv) {
 
 				if (msg != SP_CONFIG_SUCCESS){
 					endControlFlow(config,currentImageData,imagesDataList,numOfImages);
-					//TODO - report error
+					spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
 					return -1;
 				}
 				imageProcObject.showImage(tempPath);
