@@ -7,45 +7,42 @@
 
 #define DOUBLE_PRECISION 6
 
-#define BREAKLINE "\r\n"
-#define MAXLINE_LEN 2048 //TODO - verify what this should be
-#define HEADER_STRING_FORMAT "%d,%d\r\n"
-#define POINT_STRING_FORMAT "%d%s\r\n"
-#define INTERNAL_POINT_DATA_STRING_FORMAT ",%f%s"
+#define BREAKLINE                                  "\r\n"
+#define MAXLINE_LEN                                2048 //TODO - verify what this should be
+#define HEADER_STRING_FORMAT                       "%d,%d\r\n"
+#define POINT_STRING_FORMAT                        "%d%s\r\n"
+#define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
 
+#define ERROR_INVALID_ARGUMENTS                    "Invalid arguments supplied to method"
+#define ERROR_OPEN_FILE                            "Could not open file"
+#define ERROR_WRITING_FILE                         "Error writing to file"
+#define ERROR_READING_FILE                         "Error while reading from file"
+#define ERROR_GETTING_HEADER                       "Error creating header"
+#define ERROR_TRANSLATING_POINT                    "Error translating point to CSV string"
+#define ERROR_STRING_PARSING_WRONG_FORMAT          "Wrong format in image2string parsing"
+#define ERROR_GETTING_PATH                         "Error creating file path"
+#define ERROR_ALLOCATING_MEMORY                    "Could not allocate memory"
+#define ERROR_ANALYZING_FEATURES                   "Error while analyzing features"
+#define ERROR_CREATING_LOG_MESSAGE                 "Error creating log message"
+#define ERROR_CREATING_IMAGE_PATH                  "Error creating image or image data path"
+#define ERROR_CONVERTING_POINT_TO_STRING           "Error converting point to string"
+#define ERROR_PARSING_STRING_TO_POINT              "Error parsing point from string"
+#define ERROR_CREATING_IMAGE_STRING_HEADER         "Error converting image to string - error in creating header"
+#define ERROR_PARSING_IMAGE_DATA_FROM_HEADER       "Error parsing image data from header"
+#define ERROR_LOADING_IMAGES_DATA                  "Error at loading images data"
+#define ERROR_LOADING_IMAGE_DATA                   "Error at loading an image data"
+#define ERROR_AT_READING_FEATURES_FROM_FILE        "Problem at reading features from file"
+#define ERROR_WRITING_IMAGES_DATA                  "Error at writing images data"
+#define ERROR_WRITING_IMAGE_DATA                   "Error at writing an image data"
+#define ERROR_AT_IMAGE_PARSING_PROCESS             "Error at image parsing process"
+#define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \r\n Description : %s"
 
-#define ERROR_INVALID_ARGUMENTS "Invalid arguments supplied to method"
-#define ERROR_OPEN_FILE "Could not open file"
-#define ERROR_WRITING_FILE "Error writing to file"
-#define ERROR_READING_FILE "Error while reading from file"
-#define ERROR_GETTING_HEADER "Error creating header"
-#define ERROR_TRANSLATING_POINT "Error translating point to CSV string"
-#define ERROR_STRING_PARSING_WRONG_FORMAT "Wrong format in image2string parsing"
-
-#define ERROR_GETTING_PATH "Error creating file path"
-#define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
-
-#define ERROR_ANALYZING_FEATURES "Error while analyzing features"
-#define ERROR_CREATING_LOG_MESSAGE "Error creating log message"
-#define ERROR_CREATING_IMAGE_PATH "Error creating image or image data path"
-#define ERROR_CONVERTING_POINT_TO_STRING "Error converting point to string"
-#define ERROR_PARSING_STRING_TO_POINT "Error parsing point from string"
-#define ERROR_CREATING_IMAGE_STRING_HEADER "Error converting image to string - error in creating header"
-#define ERROR_PARSING_IMAGE_DATA_FROM_HEADER "Error parsing image data from header"
-#define ERROR_LOADING_IMAGES_DATA "Error at loading images data"
-#define ERROR_LOADING_IMAGE_DATA "Error at loading an image data"
-#define ERROR_AT_READING_FEATURES_FROM_FILE "Problem at reading features from file"
-#define ERROR_WRITING_IMAGES_DATA "Error at writing images data"
-#define ERROR_WRITING_IMAGE_DATA "Error at writing an image data"
-#define ERROR_AT_IMAGE_PARSING_PROCESS "Error at image parsing process"
-#define IMAGE_ERROR_DETAILS_FORMAT "Problem: Image index : %d \r\n Description : %s"
-
-#define WARNING_WRONG_POINT_SIZE_CALC "Wrong point CSV size calculation"
-#define WARNING_WRONG_DIGITS_CALC "Wrong digits calculation"
-#define WARNING_TRY_TO_SET_NULL_FEATURES "Features data is set to NULL"
-#define WARNING_IMAGES_DATA_NULL "Images data object is null when free is called"
-#define WARNING_IMAGE_DATA_NULL "Image data object is null when free is called"
-#define WARNING_IMAGE_DATA_POINTS_ARRAY_NULL "Image data points array is null when free is called"
+#define WARNING_WRONG_POINT_SIZE_CALC              "Wrong point CSV size calculation"
+#define WARNING_WRONG_DIGITS_CALC                  "Wrong digits calculation"
+#define WARNING_TRY_TO_SET_NULL_FEATURES           "Features data is set to NULL"
+#define WARNING_IMAGES_DATA_NULL                   "Images data object is null when free is called"
+#define WARNING_IMAGE_DATA_NULL                    "Image data object is null when free is called"
+#define WARNING_IMAGE_DATA_POINTS_ARRAY_NULL       "Image data array is null when free is called"
 
 
 //global variable for holding the features matrix
@@ -240,7 +237,7 @@ SPPoint parsePointFromString(char* pointdata, int index, SP_DP_MESSAGES* message
 
 char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 	char *rslt = NULL;
-	int stringLen = 3; // for : ',' + '\r\n\ + '\0\'
+	int stringLen = 4; // for : ',' + '\r\n\ + '\0\'
 	int successFlag;
 
 	if (imageData == NULL) {
@@ -330,7 +327,7 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 			// rollback and exit
 			for (j=0;j<i;j++)
 			{
-				freeImageData(allImagesData[j]);
+				freeImageData(allImagesData[j], false);
 				free(allImagesData);
 				allImagesData = NULL;
 			}
@@ -660,7 +657,7 @@ SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESS
 	if (*msg == SP_DP_SUCCESS && createDatabase){
 		*msg = saveAllImagesData(config, allImagesData);
 	}
-	else{
+	if (*msg != SP_DP_SUCCESS){
 		spLoggerPrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
 	}
 
@@ -681,7 +678,7 @@ void freeFeatures(SPPoint* features, int numOfFeatures){
 	}
 }
 
-void freeImageData(SPImageData imageData){
+void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning){
 	if (imageData != NULL){
 		if (imageData->featuresArray != NULL) {
 			freeFeatures(imageData->featuresArray,imageData->numOfFeatures);
@@ -689,7 +686,8 @@ void freeImageData(SPImageData imageData){
 			imageData->featuresArray = NULL;
 		}
 		else {
-			spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
+			if (!suppressFeaturesArrayWarning)
+				spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
 		}
 		free(imageData);
 		imageData = NULL;
@@ -704,7 +702,7 @@ void freeAllImagesData(SPImageData* imagesData, int size){
 	int i;
 	if (imagesData != NULL){
 		for (i=0;i<size;i++){
-			freeImageData(imagesData[i]);
+			freeImageData(imagesData[i], false);
 		}
 		free(imagesData);
 		imagesData = NULL;

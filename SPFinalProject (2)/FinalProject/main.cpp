@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 	SPImageData currentImageData;
 	SPImageData* imagesDataList = NULL;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
-	bool extractFlag, GUIFlag;
+	bool extractFlag, GUIFlag,oneImageWasSet = false;
 
 	configFilename = getConfigFilename(argc, argv);
 	if (!configFilename) {
@@ -95,8 +95,9 @@ int main(int argc, char** argv) {
 	// iterating until the user inputs "#"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT))
 	{
+		oneImageWasSet = true;
 		if (!verifyPathAndAvailableFile(workingImagePath)){
-			endControlFlow(config,currentImageData,imagesDataList,numOfImages);
+			endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 			return -1;
 		}
 		if (currentImageData->featuresArray != NULL){
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
 				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
 
 				if (msg != SP_CONFIG_SUCCESS){
-					endControlFlow(config,currentImageData,imagesDataList,numOfImages);
+					endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 					spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
 					return -1;
 				}
@@ -125,7 +126,7 @@ int main(int argc, char** argv) {
 	}
 
 	// end control flow
-	endControlFlow(config,currentImageData,imagesDataList,numOfImages);
+	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
 }
 /*
@@ -133,12 +134,13 @@ int main() {
 	runConfigTests();
 	return 0;
 }
-*/
-/*int main(){
+
+
+int main(){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
 	RunImagesParserTests(config);
 	spConfigDestroy(config);
 	return 0;
-}
-*/
+}*/
+

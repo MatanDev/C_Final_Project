@@ -90,10 +90,10 @@ void getAsString(const char* message, char* destination) {
 }
 
 void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
-		int numOfImages) {
+		int numOfImages, bool oneImageWasSet) {
 	printf("%s", EXITING);
 	spConfigDestroy(config);
-	freeImageData(image);
+	freeImageData(image, !oneImageWasSet);
 	freeAllImagesData(imagesList,numOfImages);
 }
 

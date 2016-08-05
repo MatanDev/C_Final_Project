@@ -16,9 +16,10 @@ SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename);
  * @param image - an image to be freed
  * @param imagesList - images array to be freed
  * @param numOfImages - number of images to free at images list
+ * @param oneImageWasSet - indicates that image->features is not NULL
  *
  */
-void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList, int numOfImages);
+void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList, int numOfImages, bool oneImageWasSet);
 
 /*
  * The method prints a message to the console and gets an input from the user

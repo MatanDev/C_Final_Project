@@ -366,10 +366,11 @@ void freeFeatures(SPPoint* features, int numOfFeatures);
  * Deallocates an image data item
  *
  * @param imageData - the image data to destroy
+ * @param suppressFeaturesArrayWarning - indicates if imageData->features = NULL should cause a warning
  *
  * @logger - prints a warning if image data is null
  */
-void freeImageData(SPImageData imageData);
+void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning);
 
 /*
  * Deallocates an images data items array
