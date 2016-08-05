@@ -21,6 +21,7 @@ extern "C" {
 #define QUERY_EXIT_INPUT "#"
 
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
+#define STDOUT	"stdout"
 
 
 int main(int argc, char** argv) {
@@ -45,7 +46,8 @@ int main(int argc, char** argv) {
 	if (config == NULL || msg != SP_CONFIG_SUCCESS)
 		return -1; // TODO - maybe report relevant error (log still not initialized)
 
-	loggerMsg = initializeLogger(config->spLoggerLevel, config->spLoggerFilename);
+	loggerMsg = initializeLogger(config->spLoggerLevel,
+			!strcmp(config->spLoggerFilename, STDOUT) ? NULL : config->spLoggerFilename);
 	if (loggerMsg != SP_LOGGER_SUCCESS)
 		return -1 ;// TODO - maybe report relevant error (log not initialized)
 
