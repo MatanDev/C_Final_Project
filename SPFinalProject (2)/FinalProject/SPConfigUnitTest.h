@@ -1,6 +1,6 @@
 #ifndef SPCONFIGUNITTEST_H_
 #define SPCONFIGUNITTEST_H_
 
-bool testGivenConfFile();
+void runConfigTests();
 
 #endif /* SPCONFIGUNITTEST_H_ */

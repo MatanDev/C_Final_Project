@@ -61,6 +61,9 @@
 #define INDEX_OUT_OF_RANGE_MSG	"SP_CONFIG_INDEX_OUT_OF_RANGE"
 #define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
 
+/**
+ * A data-structure which is used for configuring the system.
+ */
 /*struct sp_config_t {
 	char* spImagesDirectory;
 	char* spImagesPrefix;
@@ -78,23 +81,16 @@
 	char* spLoggerFilename;
 };*/
 
-typedef enum error_message_type_t {
-	INVALID_CONF_FILE,
-	INVALID_VALUE,
-	PARAMETER_NOT_SET
-} ERROR_MSG_TYPE;
-
-char* mallocAndCopy(const char* str) {
+/*char* mallocAndCopy(const char* str) {
 	char* ret = (char*)malloc(strlen(str) + 1);
 	if (ret != NULL)
 		strcpy(ret, str);
 	return ret;
-}
+}*/
 
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
-		*field = mallocAndCopy(def);
-		if (*field == NULL) {
+		if ((*field = strdup(def)) == NULL) {
 			*msg = SP_CONFIG_ALLOC_FAIL;
 			return false;
 		}
@@ -211,7 +207,7 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		return false;
 	}
 
-	if ((*strField = mallocAndCopy(value)) == NULL)
+	if ((*strField = strdup(value)) == NULL)
 		*msg = SP_CONFIG_ALLOC_FAIL;
 
 	return *strField != NULL;
@@ -232,9 +228,9 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
 
 // TODO - maybe unite with previous one
 bool handleBoundedPosIntField(int* posIntField, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg, int from, int to) {
+		int lineNum, char* value, SP_CONFIG_MSG* msg, int minVal, int maxVal) {
 	int tmpInt;
-	if ((tmpInt = atoi(value)) < from || tmpInt > to) {
+	if ((tmpInt = atoi(value)) < minVal || tmpInt > maxVal) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
@@ -423,8 +419,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 
 	// TODO - if we fail in initialize to default should we fail the whole
 	// opertation? (meaning just assign instead of malloc and copy)
-	if (!checkAndSetDefIfNeeded(&config->spPCAFilename, DEFAULT_PCA_FILENAME, msg) ||
-		!checkAndSetDefIfNeeded(&config->spLoggerFilename, DEFAULT_LOGGER_FILENAME, msg)) {
+	if (!checkAndSetDefIfNeeded(&(config->spPCAFilename), DEFAULT_PCA_FILENAME, msg) ||
+		!checkAndSetDefIfNeeded(&(config->spLoggerFilename), DEFAULT_LOGGER_FILENAME, msg)) {
 		return onError(config);
 	}
 
@@ -498,28 +494,20 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 	return SP_CONFIG_SUCCESS;
 }
 
+void freeAndSetToNull(char** field) {
+	if (*field != NULL) {
+		free(*field);
+		*field = NULL;
+	}
+}
+
 void spConfigDestroy(SPConfig config) {
 	if (config != NULL) {
-		if (config->spImagesDirectory != NULL) {
-			free(config->spImagesDirectory);
-			config->spImagesDirectory = NULL;
-		}
-		if (config->spImagesPrefix != NULL) {
-			free(config->spImagesPrefix);
-			config->spImagesPrefix = NULL;
-		}
-		if (config->spImagesSuffix != NULL) {
-			free(config->spImagesSuffix);
-			config->spImagesSuffix = NULL;
-		}
-		if (config->spPCAFilename != NULL) {
-			free(config->spPCAFilename);
-			config->spPCAFilename = NULL;
-		}
-		if (config->spLoggerFilename != NULL) {
-			free(config->spLoggerFilename);
-			config->spLoggerFilename = NULL;
-		}
+		freeAndSetToNull(&(config->spImagesDirectory));
+		freeAndSetToNull(&(config->spImagesPrefix));
+		freeAndSetToNull(&(config->spImagesSuffix));
+		freeAndSetToNull(&(config->spPCAFilename));
+		freeAndSetToNull(&(config->spLoggerFilename));
 		free(config);
 	}
 }
@@ -527,27 +515,27 @@ void spConfigDestroy(SPConfig config) {
 char* configMsgToStr(SP_CONFIG_MSG msg) {
 	switch(msg) {
 	case SP_CONFIG_MISSING_DIR:
-		return mallocAndCopy(MISSING_DIR_MSG);
+		return strdup(MISSING_DIR_MSG);
 	case SP_CONFIG_MISSING_PREFIX:
-		return mallocAndCopy(MISSING_PREFIX_MSG);
+		return strdup(MISSING_PREFIX_MSG);
 	case SP_CONFIG_MISSING_SUFFIX:
-		return mallocAndCopy(MISSING_SUFFIX_MSG);
+		return strdup(MISSING_SUFFIX_MSG);
 	case SP_CONFIG_MISSING_NUM_IMAGES:
-		return mallocAndCopy(MISSING_IMAGES_NUM_MSG);
+		return strdup(MISSING_IMAGES_NUM_MSG);
 	case SP_CONFIG_CANNOT_OPEN_FILE:
-		return mallocAndCopy(CANNOT_OPEN_FILE_MSG);
+		return strdup(CANNOT_OPEN_FILE_MSG);
 	case SP_CONFIG_ALLOC_FAIL:
-		return mallocAndCopy(ALLOCATION_FAILED_MSG);
+		return strdup(ALLOCATION_FAILED_MSG);
 	case SP_CONFIG_INVALID_INTEGER:
-		return mallocAndCopy(INVALID_INT_MSG);
+		return strdup(INVALID_INT_MSG);
 	case SP_CONFIG_INVALID_STRING:
-		return mallocAndCopy(INVALID_STR_MSG);
+		return strdup(INVALID_STR_MSG);
 	case SP_CONFIG_INVALID_ARGUMENT:
-		return mallocAndCopy(INVALID_ARG_MSG);
+		return strdup(INVALID_ARG_MSG);
 	case SP_CONFIG_INDEX_OUT_OF_RANGE:
-		return mallocAndCopy(INDEX_OUT_OF_RANGE_MSG);
+		return strdup(INDEX_OUT_OF_RANGE_MSG);
 	case SP_CONFIG_SUCCESS:
-		return mallocAndCopy(SUCCESS_MSG);
+		return strdup(SUCCESS_MSG);
 	}
 	return NULL;
 }

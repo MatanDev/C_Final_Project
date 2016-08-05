@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 }
 /*
 int main() {
-	testGivenConfFile();
+	runConfigTests();
 	return 0;
 }
 */
