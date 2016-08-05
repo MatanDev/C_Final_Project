@@ -11,7 +11,7 @@ extern "C" {
 #include "SPConfigUnitTest.h"
 #include "SPImagesParser.h"
 #include "SPPoint.h"
-#include "SPImagesParserParserUnitTest.h"
+#include "SPImagesParserUnitTest.h"
 #include "SPImageQuery.h"
 #include "SPMainAux.h"
 }
@@ -23,7 +23,7 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define STDOUT	"stdout"
 
-
+/*
 int main(int argc, char** argv) {
 	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -129,18 +129,18 @@ int main(int argc, char** argv) {
 	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
 }
-/*
+
 int main() {
 	runConfigTests();
 	return 0;
 }
 
-
+*/
 int main(){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
 	RunImagesParserTests(config);
 	spConfigDestroy(config);
 	return 0;
-}*/
+}
 

@@ -5,8 +5,8 @@
  *      Author: Matan
  */
 
-#ifndef SPIMAGESPARSERPARSERUNITTEST_H_
-#define SPIMAGESPARSERPARSERUNITTEST_H_
+#ifndef SPIMAGESPARSERUNITTEST_H_
+#define SPIMAGESPARSERUNITTEST_H_
 
 void RunImagesParserTests(SPConfig config);
 

@@ -9,6 +9,7 @@
 #include "unit_test_util.h"
 #include "SPPoint.h"
 #include "SPConfig.h"
+#include "SPImagesParserUnitTest.h"
 
 SPConfig internalConfig = NULL;
 
@@ -46,11 +47,11 @@ static bool pointToStringTests(){
 	char* csvLine = NULL;
 	int rslt ;
 	SP_DP_MESSAGES msg = SP_DP_SUCCESS;
-	double data[4] = { 5,6,0.43434343434,6.7};
+	double data[4] = { -5,6,0.43434343434,6.7};
 	SPPoint point1 = spPointCreate(data, 4, 7);
 
 	csvLine = pointToString(point1, &msg);
-	rslt = strcmp(csvLine,"4,5.000000,6.000000,0.434343,6.700000\r\n");
+	rslt = strcmp(csvLine,"4,-5.000000,6.000000,0.434343,6.700000\r\n");
 	ASSERT_TRUE(rslt == 0);
 	ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
@@ -67,10 +68,10 @@ static bool stringToPoint(){
 	int i;
 	int dim = 4;
 	int index = 7;
-	double data[4] = { 5,6,0.434343,6.7};
+	double data[4] = { -5,6,0.434343,6.7};
 	SPPoint point1 = spPointCreate(data, dim, index), point2;
 
-	point2 = parsePointFromString("4,5.000000,6.000000,0.434343,6.700000\r\n", index, &msg);
+	point2 = parsePointFromString("4,-5.000000,6.000000,0.434343,6.700000\r\n", index, &msg);
 
 	ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
