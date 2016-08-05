@@ -119,6 +119,34 @@ bool testParseLine() {
 	ASSERT_TRUE(!isCommentOrEmpty);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
+	strcpy(line, "");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	isCommentOrEmpty = false;
+
+	strcpy(line, "         ");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	isCommentOrEmpty = false;
+
+	strcpy(line, "#");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	isCommentOrEmpty = false;
+
+	strcpy(line, "#		a = b");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	isCommentOrEmpty = false;
+
 	return true;
 }
 
@@ -126,3 +154,4 @@ void runConfigTests() {
 	RUN_TEST(testGivenConfFile);
 	RUN_TEST(testParseLine);
 }
+
