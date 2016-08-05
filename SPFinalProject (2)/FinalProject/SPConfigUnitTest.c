@@ -84,15 +84,41 @@ bool testGivenConfFile() {
 bool testParseLine() {
 	char line[1024];
 	char *varName, *value;
-	bool isCommentOrEmpty;
+	bool isCommentOrEmpty = false;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
 	strcpy(line, "a = b\n");
 	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
-			&isCommentOrEmpty, &msg) == true);
+			&isCommentOrEmpty, &msg));
 	ASSERT_TRUE(!strcmp(varName, "a"));
 	ASSERT_TRUE(!strcmp(value, "b"));
 	ASSERT_TRUE(!isCommentOrEmpty);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	strcpy(line, "c=d\n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(!strcmp(varName, "c"));
+	ASSERT_TRUE(!strcmp(value, "d"));
+	ASSERT_TRUE(!isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	strcpy(line, "now with spaces	 =in the value also\n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(!strcmp(varName, "now with spaces"));
+	ASSERT_TRUE(!strcmp(value, "in the value also"));
+	ASSERT_TRUE(!isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	strcpy(line, "now with spaces=		in the value also  \n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(!strcmp(varName, "now with spaces"));
+	ASSERT_TRUE(!strcmp(value, "in the value also"));
+	ASSERT_TRUE(!isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
 	return true;
 }
 
