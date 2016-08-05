@@ -67,7 +67,7 @@ int getNumOfDigits(int x);
  *
  * @returns - a double value of the relevant substring
  */
-double getPositiveNumberFromSubString(char* myString, int* start);
+double getFloatingNumberFromSubString(char* myString, int* start);
 
 /*
  * Creates a string signature at a CSV format of the given Point, with the following order:
