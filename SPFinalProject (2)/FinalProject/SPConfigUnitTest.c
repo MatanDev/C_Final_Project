@@ -82,3 +82,22 @@ bool testGivenConfFile() {
 	fflush(NULL);
 	return true;
 }
+
+bool testParseLine() {
+	char line[1024];
+	char *varName, *value;
+	bool isCommentOrEmpty;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	ASSERT_TRUE(parseLine("a", 1, line = "a = b\n", &varName, &value,
+			&isCommentOrEmpty, &msg) == true);
+	ASSERT_TRUE(!strcmp(varName, "a"));
+	ASSERT_TRUE(!strcmp(value, "b"));
+	ASSERT_TRUE(!isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	return true;
+}
+
+void runConfigTests() {
+	RUN_TEST(testGivenConfFile);
+	RUN_TEST(testParseLine);
+}
