@@ -90,8 +90,7 @@
 
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
-		strdup(*field, def);
-		if (*field == NULL) {
+		if ((*field = strdup(def)) == NULL) {
 			*msg = SP_CONFIG_ALLOC_FAIL;
 			return false;
 		}
@@ -208,8 +207,7 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		return false;
 	}
 
-	strdup(*strField, value);
-	if (*strField == NULL)
+	if ((*strField = strdup(value)) == NULL)
 		*msg = SP_CONFIG_ALLOC_FAIL;
 
 	return *strField != NULL;
@@ -421,8 +419,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 
 	// TODO - if we fail in initialize to default should we fail the whole
 	// opertation? (meaning just assign instead of malloc and copy)
-	if (!checkAndSetDefIfNeeded(&config->spPCAFilename, DEFAULT_PCA_FILENAME, msg) ||
-		!checkAndSetDefIfNeeded(&config->spLoggerFilename, DEFAULT_LOGGER_FILENAME, msg)) {
+	if (!checkAndSetDefIfNeeded(&(config->spPCAFilename), DEFAULT_PCA_FILENAME, msg) ||
+		!checkAndSetDefIfNeeded(&(config->spLoggerFilename), DEFAULT_LOGGER_FILENAME, msg)) {
 		return onError(config);
 	}
 
@@ -505,52 +503,40 @@ void freeAndSetToNull(char** field) {
 
 void spConfigDestroy(SPConfig config) {
 	if (config != NULL) {
-		freeAndSetToNull(config->spImagesDirectory);
-		freeAndSetToNull(config->spImagesPrefix);
-		freeAndSetToNull(config->spImagesSuffix);
-		freeAndSetToNull(config->spPCAFilename);
-		freeAndSetToNull(config->spLoggerFilename);
+		freeAndSetToNull(&(config->spImagesDirectory));
+		freeAndSetToNull(&(config->spImagesPrefix));
+		freeAndSetToNull(&(config->spImagesSuffix));
+		freeAndSetToNull(&(config->spPCAFilename));
+		freeAndSetToNull(&(config->spLoggerFilename));
 		free(config);
 	}
 }
 
 char* configMsgToStr(SP_CONFIG_MSG msg) {
-	char* ret_msg;
 	switch(msg) {
 	case SP_CONFIG_MISSING_DIR:
-		strdup(ret_msg, MISSING_DIR_MSG);
-		break;
+		return strdup(MISSING_DIR_MSG);
 	case SP_CONFIG_MISSING_PREFIX:
-		strdup(ret_msg, MISSING_PREFIX_MSG);
-		break;
+		return strdup(MISSING_PREFIX_MSG);
 	case SP_CONFIG_MISSING_SUFFIX:
-		strdup(ret_msg, MISSING_SUFFIX_MSG);
-		break;
+		return strdup(MISSING_SUFFIX_MSG);
 	case SP_CONFIG_MISSING_NUM_IMAGES:
-		strdup(ret_msg, MISSING_IMAGES_NUM_MSG);
-		break;
+		return strdup(MISSING_IMAGES_NUM_MSG);
 	case SP_CONFIG_CANNOT_OPEN_FILE:
-		strdup(ret_msg, CANNOT_OPEN_FILE_MSG);
-		break;
+		return strdup(CANNOT_OPEN_FILE_MSG);
 	case SP_CONFIG_ALLOC_FAIL:
-		strdup(ret_msg, ALLOCATION_FAILED_MSG);
-		break;
+		return strdup(ALLOCATION_FAILED_MSG);
 	case SP_CONFIG_INVALID_INTEGER:
-		strdup(ret_msg, INVALID_INT_MSG);
-		break;
+		return strdup(INVALID_INT_MSG);
 	case SP_CONFIG_INVALID_STRING:
-		strdup(ret_msg, INVALID_STR_MSG);
-		break;
+		return strdup(INVALID_STR_MSG);
 	case SP_CONFIG_INVALID_ARGUMENT:
-		strdup(ret_msg, INVALID_ARG_MSG);
-		break;
+		return strdup(INVALID_ARG_MSG);
 	case SP_CONFIG_INDEX_OUT_OF_RANGE:
-		strdup(ret_msg, INDEX_OUT_OF_RANGE_MSG);
-		break;
+		return strdup(INDEX_OUT_OF_RANGE_MSG);
 	case SP_CONFIG_SUCCESS:
-		strdup(ret_msg, SUCCESS_MSG);
-		break;
+		return strdup(SUCCESS_MSG);
 	}
-	return ret_msg;
+	return NULL;
 }
 

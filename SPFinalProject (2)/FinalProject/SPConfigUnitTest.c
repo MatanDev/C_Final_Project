@@ -78,8 +78,6 @@ bool testGivenConfFile() {
 
 	spConfigDestroy(config);
 
-	printf("all well\n");
-	fflush(NULL);
 	return true;
 }
 
@@ -88,7 +86,8 @@ bool testParseLine() {
 	char *varName, *value;
 	bool isCommentOrEmpty;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	ASSERT_TRUE(parseLine("a", 1, line = "a = b\n", &varName, &value,
+	strcpy(line, "a = b\n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
 			&isCommentOrEmpty, &msg) == true);
 	ASSERT_TRUE(!strcmp(varName, "a"));
 	ASSERT_TRUE(!strcmp(value, "b"));
