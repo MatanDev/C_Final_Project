@@ -6,18 +6,21 @@
 #include "SPPoint.h"
 #include "SPConfig.h"
 
+
+//TODO - logger !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+/** A type used for defining an ImageData item**/
 struct sp_image_data {
 	int index;
 	int numOfFeatures;
 	SPPoint* featuresArray;
 };
 
-
-//TODO - logger !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+/** A type used for defining an ImageData item as a pointer**/
 typedef struct sp_image_data* SPImageData;
 
+/** A type used to indicate errors in function calls **/
 typedef enum sp_data_parse_messages {
 	SP_DP_SUCCESS,
 	SP_DP_MEMORY_FAILURE,

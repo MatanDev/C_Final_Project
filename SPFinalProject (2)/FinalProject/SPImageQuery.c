@@ -10,7 +10,6 @@
 #include "SPConfig.h"
 #include "SPImageQuery.h"
 
-#define NUM_OF_BEST_DIST_IMGS 5
 
 static int numOfImages = 0;
 static int topImages = 0;
@@ -24,14 +23,14 @@ typedef struct distanceWithPoint {
 int* spIQ_getTopItems(int* counterArray)
 {
 	int i,j, tempMaxIndex;
-	int *topItems = (int*)calloc(NUM_OF_BEST_DIST_IMGS, sizeof(int));
+	int *topItems = (int*)calloc(topImages, sizeof(int));
 
 	if (topItems == NULL){
 		//TODO - report memory problem
 		return NULL;
 	}
 
-	for (j = 0; j < NUM_OF_BEST_DIST_IMGS; j++) {
+	for (j = 0; j < topImages; j++) {
 		tempMaxIndex = 0;
 		for (i = 0; i < numOfImages; i++) {
 			// the ">" is important (not >=) to keep the "internal sort" so that
@@ -87,13 +86,13 @@ distanceWithPoint* createAndSortDistancesArray(int totalNumberOfFeatures, SPPoin
 int* createOutputArray(distanceWithPoint* distancesArray)
 {
 	int feature;
-	int *outputArray = (int*)calloc(NUM_OF_BEST_DIST_IMGS, sizeof(int));
+	int *outputArray = (int*)calloc(topImages, sizeof(int));
 	if (outputArray == NULL)
 	{
 		return NULL; //TODO - report relevant error
 	}
 
-	for (feature = 0; feature < NUM_OF_BEST_DIST_IMGS; feature++)
+	for (feature = 0; feature < topImages; feature++)
 		outputArray[feature] = spPointGetIndex((distancesArray[feature]).point);
 
 	return outputArray;
@@ -157,7 +156,7 @@ int* spIQ_searchForSimmilarImages(SPImageData queryImage)
 			free(counterArray);
 			return NULL;
 		}
-		for (j = 0; j < NUM_OF_BEST_DIST_IMGS; j++) {
+		for (j = 0; j < topImages; j++) {
 			counterArray[resultsArray[j]]++;
 		}
 		if (resultsArray != NULL)

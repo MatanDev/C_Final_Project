@@ -123,15 +123,14 @@ void setFeaturesMatrix(SPImageData* features){
 }
 
 int getPointCSVSize(SPPoint point){
-	/*int rslt, digits, i;
+	int rslt, digits, i;
 	digits =  getNumOfDigits(spPointGetDimension(point));
-	rslt = digits + 3; // +4 stands for "," + "\r\n" + "\0"
+	rslt = digits + 4; // +4 stands for "," + "\r\n" + "\0"
 	for (i= 0; i<spPointGetDimension(point);i++){
-		rslt += DOUBLE_PRECISION + 2; // +2 stands for the "." and ","
+		rslt += DOUBLE_PRECISION + 3; // +2 stands for the ".", "," and possible "-"
 		rslt += getNumOfDigits((int)spPointGetAxisCoor(point,i));
 	}
-	return rslt;*/
-	return 2048;
+	return rslt;
 }
 
 char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
@@ -238,8 +237,7 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 	stringLen += getNumOfDigits(imageData->index);
 	stringLen += getNumOfDigits(imageData->numOfFeatures);
 
-	//rslt = (char*)calloc(sizeof(char),stringLen);
-	rslt = (char*)calloc(sizeof(char),2048);
+	rslt = (char*)calloc(sizeof(char),stringLen);
 
 	if (rslt == NULL){
 		*message = SP_DP_MEMORY_FAILURE;
