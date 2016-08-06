@@ -351,6 +351,35 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
+/*
+ * Returns the logger level as configured in the configuration file,
+ * i.e the SP_LOGGER_LEVEL represented by the value of spLoggerLevel.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return the SP_LOGGER_LEVEL represented by the value of spLoggerLevel in success,
+ * SP_LOGGER_INFO_WARNING_ERROR_LEVEL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+ * Returns the logger filename as configured in the configuration file
+ * i.e the value of spLoggerFilename.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return spLoggerFilename in success, NULL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg);
+
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
  * ith image if 'isFeats' is false, and the full path of the ith image with ".feats"

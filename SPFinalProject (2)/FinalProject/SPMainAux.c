@@ -44,21 +44,6 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 	return config;
 }
 
-SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename) {
-	assert(1 <= loggerLevel && loggerLevel <= 4);
-	switch (loggerLevel) {
-	case 1:
-		return spLoggerCreate(loggerFilename, SP_LOGGER_ERROR_LEVEL);
-	case 2:
-		return spLoggerCreate(loggerFilename, SP_LOGGER_WARNING_ERROR_LEVEL);
-	case 3:
-		return spLoggerCreate(loggerFilename, SP_LOGGER_INFO_WARNING_ERROR_LEVEL);
-	case 4:
-		return spLoggerCreate(loggerFilename, SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
-	}
-	return SP_LOGGER_SUCCESS; // TODO - decide what should be here
-}
-
 
 bool verifyPathAndAvailableFile(char* path) {
 	if (path == NULL){

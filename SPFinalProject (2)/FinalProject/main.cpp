@@ -23,11 +23,12 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define STDOUT	"stdout"
 
-/*
-int main(int argc, char** argv) {
+
+/*int main(int argc, char** argv) {
 	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config;
+	const char* loggerFilename;
 	SP_LOGGER_MSG loggerMsg;
 	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	int* similarImagesIndexes, countOfSimilar,i,numOfImages;
@@ -46,9 +47,13 @@ int main(int argc, char** argv) {
 	if (config == NULL || msg != SP_CONFIG_SUCCESS)
 		return -1; // TODO - maybe report relevant error (log still not initialized)
 
-	loggerMsg = initializeLogger(config->spLoggerLevel,
-			!strcmp(config->spLoggerFilename, STDOUT) ? NULL : config->spLoggerFilename);
-	if (loggerMsg != SP_LOGGER_SUCCESS)
+	loggerFilename = spConfigGetLoggerFilename(config, &msg);
+	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
+		return -1; // TODO - maybe report relevant error (log still not initialized)
+
+	loggerMsg = spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
+			spConfigGetLoggerLevel(config, &msg));
+	if (loggerMsg != SP_LOGGER_SUCCESS || msg != SP_CONFIG_SUCCESS)
 		return -1 ;// TODO - maybe report relevant error (log not initialized)
 
 	// call extract/non extract function according to Extraction Mode field in the config struct
@@ -129,18 +134,18 @@ int main(int argc, char** argv) {
 	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
 }
-
+*/
 int main() {
 	runConfigTests();
 	return 0;
 }
 
-*/
+/*
 int main(){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
 	RunImagesParserTests(config);
 	spConfigDestroy(config);
 	return 0;
-}
+}*/
 

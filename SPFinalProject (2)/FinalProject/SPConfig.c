@@ -42,7 +42,7 @@
 #define SP_KDTREE_SPLIT_METHOD	"spKDTreeSplitMethod"
 #define SP_KNN					"spKNN"
 #define SP_MINIMAL_GUI			"spMinimalGUI"
-#define SP_LOGGER_LEVEL			"spLoggerLevel"
+#define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
 #define MAX_LINE_LENGTH			1024
 //#define FIRST_LINE_INDEX		0
@@ -80,13 +80,6 @@
 	int spLoggerLevel;
 	char* spLoggerFilename;
 };*/
-
-/*char* mallocAndCopy(const char* str) {
-	char* ret = (char*)malloc(strlen(str) + 1);
-	if (ret != NULL)
-		strcpy(ret, str);
-	return ret;
-}*/
 
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
@@ -128,8 +121,6 @@ void printErrorMessage(const char* filename, int lineNum,
 		break;
 	case PARAMETER_NOT_SET:
 		printf(PARAM_NOT_SET_MSG, parameterName);
-		break;
-	default:
 		break;
 	}
 }
@@ -326,7 +317,7 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		return handleBoolField(&(config->spMinimalGUI), filename, lineNum,
 				value, msg);
 
-	if (!strcmp(varName, SP_LOGGER_LEVEL))
+	if (!strcmp(varName, SP_LOGGER_LVL))
 		return handleBoundedPosIntField(&(config->spLoggerLevel), filename,
 				lineNum, value, msg, 1, 4);
 
@@ -459,6 +450,29 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg) {
 
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg) ? config->spNumOfSimilarImages : -1;
+}
+
+// TODO - should we deal with this in the handler and keep spLoggerLevel as SP_LOGGER_LEVEL
+// and not as int?
+SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg) {
+	if (isValid(config, msg)) {
+		switch(config->spLoggerLevel) {
+		case 1:
+			return SP_LOGGER_ERROR_LEVEL;
+		case 2:
+			return SP_LOGGER_WARNING_ERROR_LEVEL;
+		case 3:
+			return SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
+		case 4:
+			return SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL;
+		}
+	}
+	// TODO - think of a message to indicate that logger level is not in 1,2,3,4
+	return SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
+}
+
+char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg) ? config->spLoggerFilename : NULL;
 }
 
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,

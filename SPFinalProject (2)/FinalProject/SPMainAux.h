@@ -4,10 +4,27 @@
 #include "SPConfig.h"
 #include "SPImagesParser.h"
 
+/*
+ * Extracts the configuration filename from the command line arguments of the program
+ *
+ * @param argc - the number of arguments the program received in the command line, including
+ * the name of the program
+ * @param argv - an array containing all the arguments the program received in the command
+ * line
+ * @return the configuration filename extracted from the command line arguments if they
+ * were given in a valid way, NULL otherwise.
+ */
 const char* getConfigFilename(int argc, char** argv);
-SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
 
-SP_LOGGER_MSG initializeLogger(int loggerLevel, const char* loggerFilename);
+/*
+ * Builds a configuration structure instance based on the given configuration filename
+ * and returns it
+ *
+ * @param configFilename - the filename of the given configuration file
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return a configuration structure instance based on the given configuration filename.
+ */
+SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
 
 /*
  * The method prints exiting string and free's all relevant allocated memory

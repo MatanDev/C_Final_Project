@@ -3,6 +3,7 @@
 #include "string.h"
 #include "stdbool.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 bool testGivenConfFile() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -119,6 +120,14 @@ bool testParseLine() {
 	ASSERT_TRUE(!isCommentOrEmpty);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
+	strcpy(line, "		 and now with spaces before var name = in the value also  \n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg));
+	ASSERT_TRUE(!strcmp(varName, "and now with spaces before var name"));
+	ASSERT_TRUE(!strcmp(value, "in the value also"));
+	ASSERT_TRUE(!isCommentOrEmpty);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
 	strcpy(line, "");
 	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
 			&isCommentOrEmpty, &msg));
@@ -150,8 +159,84 @@ bool testParseLine() {
 	return true;
 }
 
+bool testDefault() {
+	SPConfig config = malloc(sizeof(struct sp_config_t));
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	initConfigToDefault(config);
+	ASSERT_TRUE(config->spImagesDirectory == NULL);
+	ASSERT_TRUE(config->spImagesPrefix == NULL);
+	ASSERT_TRUE(config->spImagesSuffix == NULL);
+	ASSERT_TRUE(config->spNumOfImages == 0);
+
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_MISSING_DIR);
+	msg = SP_CONFIG_SUCCESS;
+
+	config = malloc(sizeof(struct sp_config_t));
+	initConfigToDefault(config);
+	config->spImagesDirectory = "./bla/bla/";
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_MISSING_PREFIX);
+	msg = SP_CONFIG_SUCCESS;
+
+	config = malloc(sizeof(struct sp_config_t));
+	initConfigToDefault(config);
+	config->spImagesDirectory = "./bla/bla/";
+	config->spImagesPrefix = "whatever";
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_MISSING_SUFFIX);
+	msg = SP_CONFIG_SUCCESS;
+
+	config = malloc(sizeof(struct sp_config_t));
+	initConfigToDefault(config);
+	config->spImagesDirectory = "./bla/bla/";
+	config->spImagesPrefix = "whatever";
+	config->spImagesSuffix = ".jpg";
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_MISSING_NUM_IMAGES);
+	msg = SP_CONFIG_SUCCESS;
+
+	config = malloc(sizeof(struct sp_config_t));
+	initConfigToDefault(config);
+	config->spImagesDirectory = "./bla/bla/";
+	config->spImagesPrefix = "whatever";
+	config->spImagesSuffix = ".jpg";
+	config->spNumOfImages = 9000;
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == config);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	char imagePath[100];
+	ASSERT_TRUE(spConfigGetImagePath(imagePath, config, 4444) == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(!strcmp(imagePath, "./bla/bla/whatever4444.jpg"));
+
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
+	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	config->spLoggerFilename = "/tmp/whatever";
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
+	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "/tmp/whatever"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
+	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	config->spPCAFilename = "/tmp/whatever2";
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
+	ASSERT_TRUE(!strcmp(config->spPCAFilename, "/tmp/whatever2"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	spConfigDestroy(config);
+	return true;
+}
+
+bool testHandler() {
+	return true;
+}
+
 void runConfigTests() {
 	RUN_TEST(testGivenConfFile);
 	RUN_TEST(testParseLine);
+	RUN_TEST(testDefault);
+	RUN_TEST(testHandler);
 }
 
