@@ -154,7 +154,16 @@ bool testParseLine() {
 			&isCommentOrEmpty, &msg));
 	ASSERT_TRUE(isCommentOrEmpty);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	isCommentOrEmpty = false;
+
+	strcpy(line, "		a ");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg) == false);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+
+	strcpy(line, "this is a text with spaces\n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg) == false);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
 
 	return true;
 }
@@ -230,6 +239,93 @@ bool testDefault() {
 }
 
 bool testHandler() {
+	SPConfig config = malloc(sizeof(struct sp_config_t));
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectori", "C:\\MyDocuments\\",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectory", "C:\\My Documents\\",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesPrefix", "my image", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesSuffix", ".jpj", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "-9000", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfSimilarImages", "0", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spKNN", "aaa", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spLoggerLevel", "5", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spPCADimension", "9", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spPCADimension", "30", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spKDTreeSplitMethod", "something", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spExtractionMode", "tru", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spMinimalGUI", "fal", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spImagesDirectory", "C:\\Documents\\",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(!strcmp(config->spImagesDirectory, "C:\\Documents\\"));
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spImagesSuffix", ".bmp",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(!strcmp(config->spImagesSuffix, ".bmp"));
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfFeatures", "80",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spNumOfFeatures == 80);
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spPCADimension", "19",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spPCADimension == 19);
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spExtractionMode", "true",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spExtractionMode);
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spKDTreeSplitMethod", "INCREMENTAL",
+			&msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spKDTreeSplitMethod == INCREMENTAL);
+
 	return true;
 }
 
