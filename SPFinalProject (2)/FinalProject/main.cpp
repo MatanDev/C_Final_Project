@@ -24,7 +24,7 @@ extern "C" {
 #define STDOUT	"stdout"
 
 
-/*int main(int argc, char** argv) {
+int main(int argc, char** argv) {
 	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config;
@@ -134,13 +134,13 @@ extern "C" {
 	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
 }
-*/
+/*
 int main() {
 	runConfigTests();
 	return 0;
 }
 
-/*
+
 int main(){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
