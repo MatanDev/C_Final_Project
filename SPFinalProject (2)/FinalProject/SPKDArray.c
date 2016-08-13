@@ -11,8 +11,9 @@ typedef struct index_with_coor_value* IndexWithCoorValue;
 int compareIndexWithCoorValue(const void* a, const void* b) {
 	IndexWithCoorValue* first = (IndexWithCoorValue *)a;
 	IndexWithCoorValue* second = (IndexWithCoorValue *)b;
-	//TODO - deal with problem with double...
-	return (*first)->coor_value - (*second)->coor_value;
+	//TODO - deal with epsilon issue
+	return ((*first)->coor_value == (*second)->coor_value) ? 0 :
+			((*first)->coor_value > (*second)->coor_value) ? 1 : -1;
 }
 
 void indexWithCoorValueArrDestroy(IndexWithCoorValue*
