@@ -8,10 +8,10 @@
  * contains indexes matrix, dim as 'd' and size as 'n'
  */
 struct sp_kd_array {
-	//SPPoint* pointsArray;
+	SPPoint* pointsArray;
 	int size;
 	int dim;
-	int** indexesMatrix;
+	int** indicesMatrix;
 };
 
 /*
@@ -65,7 +65,7 @@ SPKDArray Init(SPPoint* arr, int size);
  * @returns -
  * NULL if
  *  - kdArr is NULL or
- *  - coor <= 0 or
+ *  - coor < 0 or
  *  - memory allocation failed
  * otherwise returns SPKDArrayPair that contains
  * pointers to kdLeft and kdRight
@@ -74,5 +74,11 @@ SPKDArray Init(SPPoint* arr, int size);
  * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDArrayPair Split(SPKDArray kdArr, int coor);
+
+// TODO - doc
+void spKDArrayDestroy(SPKDArray kdArr);
+
+// TODO - doc
+void spKDArrayPairDestroy(SPKDArrayPair kdArrPair);
 
 #endif /* SPKDARRAY_H_ */
