@@ -19,9 +19,9 @@
 #define EDGE_CASE1_NUM_OF_POINTS 1
 #define EDGE_CASE1_DIM 1
 
-#define RANDOM_TESTS_SIZE_RANGE 7
-#define RANDOM_TESTS_DIM_RANGE 3
-#define RANDOM_TESTS_COUNT 15
+#define RANDOM_TESTS_SIZE_RANGE 20
+#define RANDOM_TESTS_DIM_RANGE 4
+#define RANDOM_TESTS_COUNT 2
 
 #define MSG_MAX_SIZE 2048
 
@@ -572,7 +572,7 @@ static bool testSplitCase2(){
 void logRandomTestSettings(int dim,int size,int splitting_dim){
 	char message[MSG_MAX_SIZE];
 	sprintf(message , DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS, dim,size,splitting_dim);
-	spLoggerPrintDebug(message, __FILE__,__FUNCTION__,__LINE__);
+	spLoggerPrintMsg(message);
 }
 
 char* pointsArrayToString(SPPoint* points,int size){
@@ -597,7 +597,7 @@ void logPointsArray(SPPoint* points, int size){
 	char message[MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE], *tempMsg;
 	tempMsg = pointsArrayToString(points,size);
 	sprintf(message, "Generated Points are : \%s",tempMsg);
-	spLoggerPrintDebug(message, __FILE__,__FUNCTION__,__LINE__);
+	spLoggerPrintMsg(message);
 	free(tempMsg);
 }
 
@@ -624,26 +624,26 @@ void logKDArray(SPKDArray kdArr) {
 	char* tempString;
 	if (kdArr != NULL) {
 		sprintf(buf, "kdArr pointer: %p", (void *)kdArr);
-		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		spLoggerPrintMsg(buf);
 		sprintf(buf, "dim: %d", kdArr->dim);
-		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		spLoggerPrintMsg(buf);
 		sprintf(buf, "size: %d", kdArr->size);
-		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		spLoggerPrintMsg(buf);
 		if (kdArr->pointsArray != NULL) {
 			tempString = pointsArrayToString(kdArr->pointsArray,kdArr->size);
 			sprintf(buf, "points array: %s",tempString);
-			spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg(buf);
 			free(tempString);
 		}
 		else
-			spLoggerPrintDebug("points array: NULL", __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg("points array: NULL");
 		if (kdArr->indicesMatrix != NULL) {
 			sprintf(buf, "indices matrix: %s",
 					indicesMatrixToString(kdArr));
-			spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg(buf);
 		}
 		else
-			spLoggerPrintDebug("indices matrix: NULL", __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg("indices matrix: NULL");
 	}
 }
 
@@ -651,15 +651,15 @@ void logKDPair(SPKDArrayPair kdArrPair) {
 	char buf[1024];
 	if (kdArrPair != NULL) {
 		sprintf(buf, "kdArrPair pointer: %p", (void *)kdArrPair);
-		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		spLoggerPrintMsg(buf);
 		if (kdArrPair->kdLeft != NULL)
 			logKDArray(kdArrPair->kdLeft);
 		else
-			spLoggerPrintDebug("kdArrPair->kdLeft: NULL", __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg("kdArrPair->kdLeft: NULL");
 		if (kdArrPair->kdRight != NULL)
 			logKDArray(kdArrPair->kdRight);
 		else
-			spLoggerPrintDebug("kdArrPair->kdRight: NULL", __FILE__,__FUNCTION__,__LINE__);
+			spLoggerPrintMsg("kdArrPair->kdRight: NULL");
 	}
 }
 
@@ -671,7 +671,7 @@ bool commitRandomTest(){
 	SPKDArrayPair rsltPair = NULL;
 
 	sprintf(startMessage, DEBUG_LOG_FORMAT_RANDOM_TEST_START, randomTestsIndex+1);
-	spLoggerPrintDebug(startMessage, __FILE__,__FUNCTION__,__LINE__);
+	spLoggerPrintMsg(startMessage);
 
 
 	dim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
@@ -718,7 +718,7 @@ bool commitRandomTest(){
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(rsltPair);
 
-	spLoggerPrintDebug("Success. End random test case ", __FILE__,__FUNCTION__,__LINE__);
+	spLoggerPrintMsg("Success. End random test case ");
 
 	return true;
 
