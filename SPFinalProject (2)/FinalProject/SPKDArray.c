@@ -31,9 +31,17 @@ SPKDArray Init(SPPoint* arr, int size) {
 	ret = (SPKDArray)malloc(sizeof(struct sp_kd_array));
 	if (!ret)
 		return NULL; //error
-	ret->pointsArray = arr; //TODO - maybe we should copy?
 	ret->dim = spPointGetDimension(arr[0]);
 	ret->size = size;
+	ret->pointsArray = (SPPoint*)calloc(ret->size, sizeof(SPPoint));
+	if (!(ret->pointsArray)) {
+		// TODO - cleanup
+		return NULL;
+	}
+	for (i = 0; i < ret->size; i++) {
+		// TODO - validate if copy does not return NULL
+		ret->pointsArray[i] = spPointCopy(arr[i]);
+	}
 	ret->indicesMatrix = (int**)calloc(ret->dim, sizeof(int *));
 	if (!(ret->indicesMatrix)) {
 		free(ret);
