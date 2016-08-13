@@ -1,12 +1,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "unit_test_util.h"
 #include "SPPoint.h"
 #include "SPKDArrayUnitTest.h"
 #include "SPKDArray.h"
 #include "SPLogger.h"
+#include "SPImagesParser.h"
 
 #define CASE1_NUM_OF_POINTS 2
 #define CASE1_DIM 3
@@ -16,6 +18,15 @@
 
 #define EDGE_CASE1_NUM_OF_POINTS 1
 #define EDGE_CASE1_DIM 1
+
+#define RANDOM_TESTS_SIZE_RANGE 7
+#define RANDOM_TESTS_DIM_RANGE 3
+#define RANDOM_TESTS_COUNT 15
+
+#define MSG_MAX_SIZE 2048
+
+#define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS "Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
+
 
 #define SPKDARRAY_TESTS_ALLOCATION_ERROR "Error allocating memory at kd-array test unit"
 #define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR "Error initializing point, at kd-array test unit"
@@ -124,6 +135,109 @@ void destroyPointsArray(SPPoint* array, int numOfItems){
 	}
 }
 
+SPPoint generateRandomPoint(int dim, int index) {
+	int i;
+	SPPoint p;
+	double* data = (double*)calloc(dim, sizeof(double));
+	if (data == NULL){
+		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	for (i = 0; i < dim; i++) {
+		data[i] = -20  + ((double)rand() / ((double)RAND_MAX / 100));
+	}
+	p = spPointCreate(data, dim, index);
+	free(data);
+	return p;
+}
+
+SPPoint* generateRandomPointsArray(int dim, int size){
+	SPPoint* arr = NULL;
+	int i,j;
+	arr = (SPPoint*)calloc(sizeof(SPPoint),size);
+
+	if (arr == NULL){
+		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	for (i = 0 ; i< size ; i++){
+		arr[i] = generateRandomPoint(dim, i);
+		if (arr[i] == NULL){
+			//allocation error - roll back
+			for (j=0;j<i;j++){
+				spPointDestroy(arr[j]);
+			}
+			free(arr);
+			spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+			return NULL;
+		}
+	}
+	return arr;
+}
+
+bool isIndexesMatrixSorted(SPKDArray kdArr){
+	int i,j;
+	if (kdArr == NULL) // when splitting size 1
+		return true;
+	for (i = 0;i<kdArr->dim; i++){
+		for (j = 0 ; j < kdArr->size - 1; j++){
+			if (spPointGetAxisCoor(kdArr->pointsArray[kdArr->indicesMatrix[i][j]], i)>
+						spPointGetAxisCoor(kdArr->pointsArray[kdArr->indicesMatrix[i][j+1]], i)){
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool isSimilarIndexes(SPPoint* array, int size){
+	int i,j;
+	for (i = 0;i<size;i++){
+		for ( j = i+1 ; j< size ; j++){
+			if (spPointGetIndex(array[i]) == spPointGetIndex(array[j])){
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool verifyArraySizes(int father_size, int left_size, int right_size){
+	if (father_size != left_size + right_size){
+		return false;
+	}
+	if (right_size > left_size){
+		return false;
+	}
+	if (right_size - left_size > 1){
+		return false;
+	}
+	return true;
+}
+
+bool searchIndex(SPPoint* array, int size, int index){
+	int i;
+	for (i=0;i<size;i++){
+		if (spPointGetIndex(array[i]) == index){
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isComplete(SPPoint* arr, SPPoint* left, SPPoint* right, int size, int left_size, int right_size){
+	int i, index;
+	bool foundItem;
+	for (i=0;i<size;i++){
+		index = spPointGetIndex(arr[i]);
+		foundItem = (searchIndex(left, left_size,index) || searchIndex(right, right_size,index));
+		if (!foundItem){
+			return false;
+		}
+	}
+	return true;
+}
+
 static bool testInitNullCases(){
 	SPKDArray rsltArray = NULL;
 
@@ -165,6 +279,7 @@ static bool testInitEdgeCase1(){
 	ASSERT_TRUE(spPointGetIndex((kdArr->pointsArray)[0]) == 1);
 	ASSERT_TRUE(isEqual(spPointGetAxisCoor((kdArr->pointsArray)[0] ,0), 2));
 
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
 
 	spKDArrayDestroy(kdArr);
 
@@ -205,7 +320,7 @@ static bool testInitCase1(){
 	ASSERT_TRUE((kdArr->indicesMatrix)[2][0] == 0);
 	ASSERT_TRUE((kdArr->indicesMatrix)[2][1] == 1);
 
-
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
 	spKDArrayDestroy(kdArr);
 
 	return true;
@@ -258,7 +373,7 @@ static bool testInitCase2(){
 	ASSERT_TRUE((kdArr->indicesMatrix)[1][3] == 3);
 	ASSERT_TRUE((kdArr->indicesMatrix)[1][4] == 1);
 
-
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
 	spKDArrayDestroy(kdArr);
 
 	return true;
@@ -314,6 +429,10 @@ static bool testSplitEdgeCase1(){
 	//right should be empty, thus null
 	ASSERT_TRUE(kdArrPair->kdRight == NULL);
 
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdLeft));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdRight));
+
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(kdArrPair);
 	return true;
@@ -362,6 +481,9 @@ static bool testSplitCase1(){
 	ASSERT_TRUE(isEqual(spPointGetAxisCoor(((kdArrPair->kdRight)->pointsArray)[0] ,1), 2));
 	ASSERT_TRUE(isEqual(spPointGetAxisCoor(((kdArrPair->kdRight)->pointsArray)[0] ,2), 3));
 
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdLeft));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdRight));
 
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(kdArrPair);
@@ -436,16 +558,108 @@ static bool testSplitCase2(){
 	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[1][0] == 1);
 	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[1][1] == 0);
 
-
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdLeft));
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArrPair->kdRight));
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(kdArrPair);
 	return true;
 }
 
+void logRandomTestSettings(int dim,int size,int splitting_dim){
+	char message[MSG_MAX_SIZE];
+	sprintf(message , DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS, dim,size,splitting_dim);
+	spLoggerPrintDebug(message, __FILE__,__FUNCTION__,__LINE__);
+}
+
+char* pointsArrayToString(SPPoint* points,int size){
+	int i;
+	SP_DP_MESSAGES msg;
+	char* message;
+	char tempMsg[MSG_MAX_SIZE*RANDOM_TESTS_DIM_RANGE] ;
+	char* tempPointString;
+
+	message = (char*)calloc(sizeof(char),MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE);
+
+	for (i=0;i<size;i++){
+		tempPointString = pointToString(points[i], &msg);
+		sprintf(tempMsg,"[%d] : %s",spPointGetIndex(points[i]),tempPointString);
+		strcat(message,tempMsg);
+	}
+
+	return message;
+}
+
+void logPointsArray(SPPoint* points, int size){
+	char message[MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE], *tempMsg;
+	tempMsg = pointsArrayToString(points,size);
+	sprintf(message, "Generated Points are : \%s",tempMsg);
+	spLoggerPrintDebug(message, __FILE__,__FUNCTION__,__LINE__);
+	free(tempMsg);
+}
 
 
+
+bool commitRandomTest(){
+	int dim, size, splitting_dim;
+	SPPoint* points = NULL;
+	SPKDArray kdArr = NULL;
+	SPKDArrayPair rsltPair = NULL;
+	spLoggerPrintDebug("Start random test case ", __FILE__,__FUNCTION__,__LINE__);
+
+
+	dim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
+	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
+	splitting_dim = (int)(rand() % dim);
+
+	logRandomTestSettings(dim,size,splitting_dim);
+
+	points = generateRandomPointsArray(dim,size);
+
+	logPointsArray(points, size);
+
+	ASSERT_TRUE(points != NULL);
+	if (points == NULL)
+		return false;
+
+	kdArr = Init(points,size);
+	ASSERT_TRUE(kdArr != NULL);
+	if (kdArr == NULL){
+		destroyPointsArray(points, size);
+		return false;
+	}
+
+	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
+
+	logKDArray(kdArr);
+
+	rsltPair = Split(kdArr, splitting_dim);
+	if (rsltPair == NULL){
+		destroyPointsArray(points, size);
+		spKDArrayDestroy(kdArr);
+		return false;
+	}
+
+	logKDPair(rsltPair);
+
+	ASSERT_TRUE(verifyArraySizes(kdArr->size, rsltPair->kdLeft->size, rsltPair->kdRight->size));
+	ASSERT_TRUE(isComplete(kdArr->pointsArray, rsltPair->kdLeft->pointsArray, rsltPair->kdRight->pointsArray,
+			kdArr->size, rsltPair->kdLeft->size, rsltPair->kdRight->size));
+	ASSERT_TRUE(isIndexesMatrixSorted(rsltPair->kdLeft));
+	ASSERT_TRUE(isIndexesMatrixSorted(rsltPair->kdRight));
+
+	destroyPointsArray(points, size);
+	spKDArrayDestroy(kdArr);
+	spKDArrayPairDestroy(rsltPair);
+
+	spLoggerPrintDebug("Success. End random test case ", __FILE__,__FUNCTION__,__LINE__);
+
+	return true;
+
+}
 
 void runKDArrayTests(){
+	int i;
 
 	//CASE 1 + NULL CASES
 	initializePointsArrayCase1();
@@ -459,7 +673,6 @@ void runKDArrayTests(){
 
 	destroyPointsArray(case1PointsArray, CASE1_NUM_OF_POINTS);
 	case1PointsArray = NULL;
-
 
 	//EDGE CASE 1
 	initializePointsArrayEdgeCase1();
@@ -482,4 +695,9 @@ void runKDArrayTests(){
 
 	destroyPointsArray(case2PointsArray, CASE2_NUM_OF_POINTS);
 	case2PointsArray = NULL;
+
+	//Random tests
+	for (i = 0 ; i<RANDOM_TESTS_COUNT;i++){
+		RUN_TEST(commitRandomTest);
+	}
 }
