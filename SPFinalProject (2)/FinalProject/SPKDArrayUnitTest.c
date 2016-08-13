@@ -19,9 +19,9 @@
 #define EDGE_CASE1_NUM_OF_POINTS 1
 #define EDGE_CASE1_DIM 1
 
-#define RANDOM_TESTS_SIZE_RANGE 20
+#define RANDOM_TESTS_SIZE_RANGE 10
 #define RANDOM_TESTS_DIM_RANGE 4
-#define RANDOM_TESTS_COUNT 2
+#define RANDOM_TESTS_COUNT 1
 
 #define MSG_MAX_SIZE 2048
 
@@ -596,7 +596,7 @@ char* pointsArrayToString(SPPoint* points,int size){
 void logPointsArray(SPPoint* points, int size){
 	char message[MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE], *tempMsg;
 	tempMsg = pointsArrayToString(points,size);
-	sprintf(message, "Generated Points are : \%s",tempMsg);
+	sprintf(message, "Generated Points are :\n \%s",tempMsg);
 	spLoggerPrintMsg(message);
 	free(tempMsg);
 }
@@ -631,19 +631,22 @@ void logKDArray(SPKDArray kdArr) {
 		spLoggerPrintMsg(buf);
 		if (kdArr->pointsArray != NULL) {
 			tempString = pointsArrayToString(kdArr->pointsArray,kdArr->size);
-			sprintf(buf, "points array: %s",tempString);
+			sprintf(buf, "points array:\n %s",tempString);
 			spLoggerPrintMsg(buf);
 			free(tempString);
 		}
 		else
 			spLoggerPrintMsg("points array: NULL");
 		if (kdArr->indicesMatrix != NULL) {
-			sprintf(buf, "indices matrix: %s",
+			sprintf(buf, "indices matrix:\n %s",
 					indicesMatrixToString(kdArr));
 			spLoggerPrintMsg(buf);
 		}
 		else
 			spLoggerPrintMsg("indices matrix: NULL");
+	}
+	else {
+		spLoggerPrintMsg("kd array is null");
 	}
 }
 
@@ -652,14 +655,21 @@ void logKDPair(SPKDArrayPair kdArrPair) {
 	if (kdArrPair != NULL) {
 		sprintf(buf, "kdArrPair pointer: %p", (void *)kdArrPair);
 		spLoggerPrintMsg(buf);
-		if (kdArrPair->kdLeft != NULL)
+		if (kdArrPair->kdLeft != NULL){
+			spLoggerPrintMsg("Left kd array : \n");
 			logKDArray(kdArrPair->kdLeft);
+		}
 		else
 			spLoggerPrintMsg("kdArrPair->kdLeft: NULL");
-		if (kdArrPair->kdRight != NULL)
+		if (kdArrPair->kdRight != NULL){
+			spLoggerPrintMsg("Right kd array : \n");
 			logKDArray(kdArrPair->kdRight);
+		}
 		else
 			spLoggerPrintMsg("kdArrPair->kdRight: NULL");
+	}
+	else {
+		spLoggerPrintMsg("kd pair is null");
 	}
 }
 
@@ -695,9 +705,9 @@ bool commitRandomTest(){
 		return false;
 	}
 
+	logKDArray(kdArr);
 	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
 
-	logKDArray(kdArr);
 
 	rsltPair = Split(kdArr, splitting_dim);
 	if (rsltPair == NULL){
@@ -725,6 +735,9 @@ bool commitRandomTest(){
 }
 
 void runKDArrayTests(){
+	int seed = time(NULL);
+	srand(seed);
+
 	//CASE 1 + NULL CASES
 	initializePointsArrayCase1();
 	if (case1PointsArray == NULL)
