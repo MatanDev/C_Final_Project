@@ -151,6 +151,9 @@ int main(){
 }*/
 
 int main() {
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	SPConfig config = spConfigCreate("spcbir.config", &msg);
 	runKDArrayTests();
+	spConfigDestroy(config);
 	return 0;
 }

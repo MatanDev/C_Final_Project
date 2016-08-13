@@ -26,11 +26,14 @@
 #define MSG_MAX_SIZE 2048
 
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS "Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
+#define DEBUG_LOG_FORMAT_RANDOM_TEST_START "Start random case #%d"
 
 
 #define SPKDARRAY_TESTS_ALLOCATION_ERROR "Error allocating memory at kd-array test unit"
 #define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR "Error initializing point, at kd-array test unit"
 
+
+int randomTestsIndex = 0;
 SPPoint* case1PointsArray = NULL; //also used in NULL cases tests
 SPPoint* case2PointsArray = NULL;
 SPPoint* edgeCase1PointsArray = NULL;
@@ -598,14 +601,77 @@ void logPointsArray(SPPoint* points, int size){
 	free(tempMsg);
 }
 
+char* indicesMatrixToString(SPKDArray kdArr) {
+	char* ret = (char *)malloc(4096);
+	char* curr = ret;
+	char buf[4096];
+	int j, i;
+	for (j = 0; j < kdArr->dim; j++) {
+		for (i = 0; i < kdArr->size; i++) {
+			sprintf(buf, "%d ", kdArr->indicesMatrix[j][i]);
+			memcpy(curr, buf, strlen(buf));
+			curr += strlen(buf);
+		}
+		curr[0] = '\n';
+		curr++;
+	}
+	curr[0] = '\0';
+	return ret;
+}
 
+void logKDArray(SPKDArray kdArr) {
+	char buf[4096];
+	char* tempString;
+	if (kdArr != NULL) {
+		sprintf(buf, "kdArr pointer: %p", (void *)kdArr);
+		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		sprintf(buf, "dim: %d", kdArr->dim);
+		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		sprintf(buf, "size: %d", kdArr->size);
+		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		if (kdArr->pointsArray != NULL) {
+			tempString = pointsArrayToString(kdArr->pointsArray,kdArr->size);
+			sprintf(buf, "points array: %s",tempString);
+			spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+			free(tempString);
+		}
+		else
+			spLoggerPrintDebug("points array: NULL", __FILE__,__FUNCTION__,__LINE__);
+		if (kdArr->indicesMatrix != NULL) {
+			sprintf(buf, "indices matrix: %s",
+					indicesMatrixToString(kdArr));
+			spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		}
+		else
+			spLoggerPrintDebug("indices matrix: NULL", __FILE__,__FUNCTION__,__LINE__);
+	}
+}
+
+void logKDPair(SPKDArrayPair kdArrPair) {
+	char buf[1024];
+	if (kdArrPair != NULL) {
+		sprintf(buf, "kdArrPair pointer: %p", (void *)kdArrPair);
+		spLoggerPrintDebug(buf, __FILE__,__FUNCTION__,__LINE__);
+		if (kdArrPair->kdLeft != NULL)
+			logKDArray(kdArrPair->kdLeft);
+		else
+			spLoggerPrintDebug("kdArrPair->kdLeft: NULL", __FILE__,__FUNCTION__,__LINE__);
+		if (kdArrPair->kdRight != NULL)
+			logKDArray(kdArrPair->kdRight);
+		else
+			spLoggerPrintDebug("kdArrPair->kdRight: NULL", __FILE__,__FUNCTION__,__LINE__);
+	}
+}
 
 bool commitRandomTest(){
 	int dim, size, splitting_dim;
+	char startMessage[MSG_MAX_SIZE];
 	SPPoint* points = NULL;
 	SPKDArray kdArr = NULL;
 	SPKDArrayPair rsltPair = NULL;
-	spLoggerPrintDebug("Start random test case ", __FILE__,__FUNCTION__,__LINE__);
+
+	sprintf(startMessage, DEBUG_LOG_FORMAT_RANDOM_TEST_START, randomTestsIndex+1);
+	spLoggerPrintDebug(startMessage, __FILE__,__FUNCTION__,__LINE__);
 
 
 	dim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
@@ -659,8 +725,6 @@ bool commitRandomTest(){
 }
 
 void runKDArrayTests(){
-	int i;
-
 	//CASE 1 + NULL CASES
 	initializePointsArrayCase1();
 	if (case1PointsArray == NULL)
@@ -697,7 +761,7 @@ void runKDArrayTests(){
 	case2PointsArray = NULL;
 
 	//Random tests
-	for (i = 0 ; i<RANDOM_TESTS_COUNT;i++){
+	for (randomTestsIndex = 0 ; randomTestsIndex<RANDOM_TESTS_COUNT;randomTestsIndex++){
 		RUN_TEST(commitRandomTest);
 	}
 }
