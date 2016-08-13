@@ -67,8 +67,12 @@ SPKDArray Init(SPPoint* arr, int size);
  *  - kdArr is NULL or
  *  - coor < 0 or
  *  - memory allocation failed
- * otherwise returns SPKDArrayPair that contains
+ * otherwise:
+ * if kdArr->size == 1 returns SPKDArrayPair that contains
+ * pointer to kdLeft and sets kdRight to NULL
+ * else returns SPKDArrayPair that contains
  * pointers to kdLeft and kdRight
+ *
  *
  * @logger -
  * in case of any type of failure the relevant error is logged to the logger
