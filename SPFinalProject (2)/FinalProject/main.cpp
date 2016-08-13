@@ -153,6 +153,12 @@ int main(){
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
+	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
+	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
+		return -1; // TODO - maybe report relevant error (log still not initialized)
+
+	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
+			spConfigGetLoggerLevel(config, &msg));
 	runKDArrayTests();
 	spConfigDestroy(config);
 	return 0;

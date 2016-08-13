@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "SPKDArray.h"
-//#include "SPPoint.h"
 
 struct index_with_coor_value {
 	int index;
@@ -14,6 +13,18 @@ int compareIndexWithCoorValue(const void* a, const void* b) {
 	IndexWithCoorValue* second = (IndexWithCoorValue *)b;
 	//TODO - deal with problem with double...
 	return (*first)->coor_value - (*second)->coor_value;
+}
+
+void indexWithCoorValueArrDestroy(IndexWithCoorValue*
+		indexWithCoorValueArr, int size) {
+	int i;
+	if (indexWithCoorValueArr != NULL) {
+		for (i = 0; i < size; i++) {
+			free(indexWithCoorValueArr[i]);
+			indexWithCoorValueArr[i] = NULL;
+		}
+		free(indexWithCoorValueArr);
+	}
 }
 
 SPKDArray Init(SPPoint* arr, int size) {
@@ -35,36 +46,33 @@ SPKDArray Init(SPPoint* arr, int size) {
 	ret->size = size;
 	ret->pointsArray = (SPPoint*)calloc(ret->size, sizeof(SPPoint));
 	if (!(ret->pointsArray)) {
-		// TODO - cleanup
+		spKDArrayDestroy(ret);
 		return NULL;
 	}
 	for (i = 0; i < ret->size; i++) {
-		// TODO - validate if copy does not return NULL
-		ret->pointsArray[i] = spPointCopy(arr[i]);
+		if (!(ret->pointsArray[i] = spPointCopy(arr[i]))) {
+			spKDArrayDestroy(ret);
+			return NULL;
+		}
 	}
 	ret->indicesMatrix = (int**)calloc(ret->dim, sizeof(int *));
 	if (!(ret->indicesMatrix)) {
-		free(ret);
+		spKDArrayDestroy(ret);
 		return NULL; //error
 	}
 	for (j = 0; j < ret->dim; j++) {
 		ret->indicesMatrix[j] = (int*)calloc(ret->size, sizeof(int));
 		if (!(ret->indicesMatrix[j])) {
-			// need to free all previous arrays - export to function
-			free(ret->indicesMatrix);
-			free(ret);
+			spKDArrayDestroy(ret);
 			return NULL; //error
 		}
-		// TODO - validate
+
 		IndexWithCoorValue* indexWithCoorValueArr =
 				(IndexWithCoorValue*)calloc(ret->size,
 						sizeof(IndexWithCoorValue));
 
 		if (!indexWithCoorValueArr) {
-			// need to free all previous arrays (including this one)
-			// - export to function
-			free(ret->indicesMatrix);
-			free(ret);
+			spKDArrayDestroy(ret);
 			return NULL; //error
 		}
 
@@ -74,7 +82,8 @@ SPKDArray Init(SPPoint* arr, int size) {
 					(IndexWithCoorValue)
 					malloc(sizeof(struct index_with_coor_value));
 			if (!indexWithCoorValueArr[i]) {
-				//TODO - cleanup
+				indexWithCoorValueArrDestroy(indexWithCoorValueArr, i);
+				spKDArrayDestroy(ret);
 				return NULL;
 			}
 			indexWithCoorValueArr[i]->index = i;
@@ -88,8 +97,7 @@ SPKDArray Init(SPPoint* arr, int size) {
 		for (i = 0; i < ret->size; i++)
 			ret->indicesMatrix[j][i] = indexWithCoorValueArr[i]->index;
 
-		free(indexWithCoorValueArr);
-		//TODO - cleanup indexWithCoorValueArr[i] for all i
+		indexWithCoorValueArrDestroy(indexWithCoorValueArr, ret->size);
 	}
 	return ret;
 }
@@ -106,29 +114,30 @@ SPKDArray Copy(SPKDArray kdArr) {
 	ret->size = kdArr->size;
 	ret->pointsArray = (SPPoint*)calloc(ret->size, sizeof(SPPoint));
 	if (!(ret->pointsArray)) {
-		// TODO - cleanup
+		spKDArrayDestroy(ret);
 		return NULL;
 	}
 	for (i = 0; i < ret->size; i++) {
-		// TODO - validate if copy does not return NULL
-		ret->pointsArray[i] = spPointCopy(kdArr->pointsArray[i]);
+		if (!(ret->pointsArray[i] = spPointCopy(kdArr->pointsArray[i])))
+		{
+			spKDArrayDestroy(ret);
+			return NULL;
+		}
 	}
 	ret->indicesMatrix = (int**)calloc(ret->dim, sizeof(int *));
 	if (!(ret->indicesMatrix)) {
-		free(ret);
+		spKDArrayDestroy(ret);
 		return NULL; //error
 	}
 	for (j = 0; j < ret->dim; j++) {
 		ret->indicesMatrix[j] = (int*)calloc(ret->size, sizeof(int));
 		if (!(ret->indicesMatrix[j])) {
-			// need to free all previous arrays - export to function
-			free(ret->indicesMatrix);
-			free(ret);
+			spKDArrayDestroy(ret);
 			return NULL; //error
 		}
-		for (i = 0; i < ret->size; i++) {
+
+		for (i = 0; i < ret->size; i++)
 			ret->indicesMatrix[j][i] = kdArr->indicesMatrix[j][i];
-		}
 	}
 	return ret;
 }
@@ -142,20 +151,23 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return NULL; //error
 	if (coor < 0)
 		return NULL; //error
+
 	ret = (SPKDArrayPair)malloc(sizeof(struct sp_kd_array_pair));
 	if (!ret)
 		return NULL; //error
+
 	ret->kdLeft = (SPKDArray)malloc(sizeof(struct sp_kd_array));
 	if (!(ret->kdLeft)) {
-		free(ret);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
+
 	ret->kdRight = (SPKDArray)malloc(sizeof(struct sp_kd_array));
 	if (!(ret->kdRight)) {
-		free(ret->kdLeft);
-		free(ret);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
+
 	if (kdArr->size == 1) {
 		ret->kdLeft = Copy(kdArr);
 		ret->kdRight = NULL;
@@ -167,7 +179,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 
 	xArr = (int*)calloc(kdArr->size, sizeof(int));
 	if (!xArr) {
-		free(ret);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
@@ -180,16 +192,15 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 			sizeof(SPPoint));
 	if (!ret->kdLeft->pointsArray) {
 		free(xArr);
-		free(ret);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
 	ret->kdRight->pointsArray = (SPPoint*)calloc(ret->kdRight->size,
 			sizeof(SPPoint));
 	if (!ret->kdRight->pointsArray) {
-		free(ret->kdLeft->pointsArray);
 		free(xArr);
-		free(ret);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
@@ -201,30 +212,37 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 
 	for (i = 0; i < kdArr->size; i++) {
 		if (xArr[i] == 0) {
-			// TODO - check the ret value is not null and clean everything
-			// if it is
-			ret->kdLeft->pointsArray[kdLeftIndex] =
-					spPointCopy(kdArr->pointsArray[i]);
+			if (!(ret->kdLeft->pointsArray[kdLeftIndex] =
+					spPointCopy(kdArr->pointsArray[i]))) {
+				free(xArr);
+				spKDArrayPairDestroy(ret);
+				return NULL; //error
+			}
 			kdLeftIndex++;
 		}
 		else {
-			// TODO - check the ret value is not null and clean everything
-			// if it is
-			ret->kdRight->pointsArray[kdRightIndex] =
-					spPointCopy(kdArr->pointsArray[i]);
+			if (!(ret->kdRight->pointsArray[kdRightIndex] =
+					spPointCopy(kdArr->pointsArray[i]))) {
+				free(xArr);
+				spKDArrayPairDestroy(ret);
+				return NULL; //error
+			}
 			kdRightIndex++;
 		}
 	}
 
 	map1 = (int*)calloc(kdArr->size, sizeof(int));
 	if (!map1) {
-		//TODO - cleanup
+		free(xArr);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
 	map2 = (int*)calloc(kdArr->size, sizeof(int));
 	if (!map2) {
-		//TODO - cleanup
+		free(map1);
+		free(xArr);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
@@ -245,14 +263,20 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	ret->kdLeft->indicesMatrix = (int**)calloc(ret->kdLeft->dim,
 			sizeof(int *));
 	if (!(ret->kdLeft->indicesMatrix)) {
-		// TODO - clean everything
+		free(map1);
+		free(map2);
+		free(xArr);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
 	ret->kdRight->indicesMatrix = (int**)calloc(ret->kdRight->dim,
 			sizeof(int *));
 	if (!(ret->kdRight->indicesMatrix)) {
-		// TODO - clean everything
+		free(map1);
+		free(map2);
+		free(xArr);
+		spKDArrayPairDestroy(ret);
 		return NULL; //error
 	}
 
@@ -260,14 +284,20 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		ret->kdLeft->indicesMatrix[j] = (int*)calloc(ret->kdLeft->size,
 					sizeof(int));
 		if (!(ret->kdLeft->indicesMatrix[j])) {
-			// TODO - clean everything
+			free(map1);
+			free(map2);
+			free(xArr);
+			spKDArrayPairDestroy(ret);
 			return NULL; //error
 		}
 
 		ret->kdRight->indicesMatrix[j] = (int*)calloc(ret->kdRight->size,
 					sizeof(int));
 		if (!(ret->kdRight->indicesMatrix[j])) {
-			// TODO - clean everything
+			free(map1);
+			free(map2);
+			free(xArr);
+			spKDArrayPairDestroy(ret);
 			return NULL; //error
 		}
 
@@ -327,3 +357,4 @@ void spKDArrayPairDestroy(SPKDArrayPair kdArrPair) {
 		free(kdArrPair);
 	}
 }
+
