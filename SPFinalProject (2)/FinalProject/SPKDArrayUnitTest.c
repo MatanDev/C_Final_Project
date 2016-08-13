@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 
 #include "unit_test_util.h"
@@ -19,15 +20,15 @@
 #define EDGE_CASE1_NUM_OF_POINTS 1
 #define EDGE_CASE1_DIM 1
 
-#define RANDOM_TESTS_SIZE_RANGE 10
-#define RANDOM_TESTS_DIM_RANGE 4
-#define RANDOM_TESTS_COUNT 1
+#define RANDOM_TESTS_SIZE_RANGE 200
+#define RANDOM_TESTS_DIM_RANGE 50
+#define RANDOM_TESTS_COUNT 20
 
 #define MSG_MAX_SIZE 2048
 
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS "Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_START "Start random case #%d"
-
+#define enableLoggingOnRandomTests false
 
 #define SPKDARRAY_TESTS_ALLOCATION_ERROR "Error allocating memory at kd-array test unit"
 #define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR "Error initializing point, at kd-array test unit"
@@ -679,20 +680,21 @@ bool commitRandomTest(){
 	SPPoint* points = NULL;
 	SPKDArray kdArr = NULL;
 	SPKDArrayPair rsltPair = NULL;
-
-	sprintf(startMessage, DEBUG_LOG_FORMAT_RANDOM_TEST_START, randomTestsIndex+1);
-	spLoggerPrintMsg(startMessage);
+	if (enableLoggingOnRandomTests){
+		sprintf(startMessage, DEBUG_LOG_FORMAT_RANDOM_TEST_START, randomTestsIndex+1);
+		spLoggerPrintMsg(startMessage);
+	}
 
 
 	dim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
 	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
 	splitting_dim = (int)(rand() % dim);
-
-	logRandomTestSettings(dim,size,splitting_dim);
+	if (enableLoggingOnRandomTests)
+		logRandomTestSettings(dim,size,splitting_dim);
 
 	points = generateRandomPointsArray(dim,size);
-
-	logPointsArray(points, size);
+	if (enableLoggingOnRandomTests)
+		logPointsArray(points, size);
 
 	ASSERT_TRUE(points != NULL);
 	if (points == NULL)
@@ -705,7 +707,8 @@ bool commitRandomTest(){
 		return false;
 	}
 
-	logKDArray(kdArr);
+	if (enableLoggingOnRandomTests)
+		logKDArray(kdArr);
 	ASSERT_TRUE(isIndexesMatrixSorted(kdArr));
 
 
@@ -715,8 +718,8 @@ bool commitRandomTest(){
 		spKDArrayDestroy(kdArr);
 		return false;
 	}
-
-	logKDPair(rsltPair);
+	if (enableLoggingOnRandomTests)
+		logKDPair(rsltPair);
 
 	ASSERT_TRUE(verifyArraySizes(kdArr->size, rsltPair->kdLeft->size, rsltPair->kdRight->size));
 	ASSERT_TRUE(isComplete(kdArr->pointsArray, rsltPair->kdLeft->pointsArray, rsltPair->kdRight->pointsArray,
@@ -727,8 +730,8 @@ bool commitRandomTest(){
 	destroyPointsArray(points, size);
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(rsltPair);
-
-	spLoggerPrintMsg("Success. End random test case ");
+	if (enableLoggingOnRandomTests)
+		spLoggerPrintMsg("Success. End random test case ");
 
 	return true;
 
