@@ -11,27 +11,34 @@
 #include "SPLogger.h"
 #include "SPImagesParser.h"
 
+#define SPKDARRAY_TESTS_ALLOCATION_ERROR 				"Error allocating memory at kd-array test unit"
+#define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR 		"Error initializing point, at kd-array test unit"
+
+//test case 1 macros
 #define CASE1_NUM_OF_POINTS                             2
 #define CASE1_DIM                                       3
 
+//test case 2 macros
 #define CASE2_NUM_OF_POINTS                             5
 #define CASE2_DIM                                       2
 
+//edge case 1 macros
 #define EDGE_CASE1_NUM_OF_POINTS                        1
 #define EDGE_CASE1_DIM                                  1
 
+//random test case macros
 #define RANDOM_TESTS_SIZE_RANGE  						200
 #define RANDOM_TESTS_DIM_RANGE 							50
 #define RANDOM_TESTS_COUNT 								20
 
+//random test case logging macros
+#define enableLoggingOnRandomTests 						false
 #define MSG_MAX_SIZE 									2048
-
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS 			"Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_START 				"Start random case #%d"
-#define enableLoggingOnRandomTests 						false
+#define DEBUG_LOG_FORMAT_RANDOM_TEST_END 				"Success. end random test case."
 
-#define SPKDARRAY_TESTS_ALLOCATION_ERROR 				"Error allocating memory at kd-array test unit"
-#define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR 		"Error initializing point, at kd-array test unit"
+
 
 
 //global variables
@@ -732,7 +739,7 @@ bool commitRandomTest(){
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(rsltPair);
 	if (enableLoggingOnRandomTests)
-		spLoggerPrintMsg("Success. End random test case ");
+		spLoggerPrintMsg(DEBUG_LOG_FORMAT_RANDOM_TEST_END);
 
 	return true;
 
