@@ -257,14 +257,14 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	}
 
 	for (j = 0; j < kdArr->dim; j++) {
-		ret->kdLeft->indicesMatrix[j] = (int*)calloc(ret->kdLeft->dim,
+		ret->kdLeft->indicesMatrix[j] = (int*)calloc(ret->kdLeft->size,
 					sizeof(int));
 		if (!(ret->kdLeft->indicesMatrix[j])) {
 			// TODO - clean everything
 			return NULL; //error
 		}
 
-		ret->kdRight->indicesMatrix[j] = (int*)calloc(ret->kdRight->dim,
+		ret->kdRight->indicesMatrix[j] = (int*)calloc(ret->kdRight->size,
 					sizeof(int));
 		if (!(ret->kdRight->indicesMatrix[j])) {
 			// TODO - clean everything
