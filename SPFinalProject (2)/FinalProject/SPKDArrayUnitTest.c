@@ -11,29 +11,30 @@
 #include "SPLogger.h"
 #include "SPImagesParser.h"
 
-#define CASE1_NUM_OF_POINTS 2
-#define CASE1_DIM 3
+#define CASE1_NUM_OF_POINTS                             2
+#define CASE1_DIM                                       3
 
-#define CASE2_NUM_OF_POINTS 5
-#define CASE2_DIM 2
+#define CASE2_NUM_OF_POINTS                             5
+#define CASE2_DIM                                       2
 
-#define EDGE_CASE1_NUM_OF_POINTS 1
-#define EDGE_CASE1_DIM 1
+#define EDGE_CASE1_NUM_OF_POINTS                        1
+#define EDGE_CASE1_DIM                                  1
 
-#define RANDOM_TESTS_SIZE_RANGE 200
-#define RANDOM_TESTS_DIM_RANGE 50
-#define RANDOM_TESTS_COUNT 20
+#define RANDOM_TESTS_SIZE_RANGE  						200
+#define RANDOM_TESTS_DIM_RANGE 							50
+#define RANDOM_TESTS_COUNT 								20
 
-#define MSG_MAX_SIZE 2048
+#define MSG_MAX_SIZE 									2048
 
-#define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS "Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
-#define DEBUG_LOG_FORMAT_RANDOM_TEST_START "Start random case #%d"
-#define enableLoggingOnRandomTests false
+#define DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS 			"Settings :\n dim %d\n size %d\n selected splitting dim %d\n"
+#define DEBUG_LOG_FORMAT_RANDOM_TEST_START 				"Start random case #%d"
+#define enableLoggingOnRandomTests 						false
 
-#define SPKDARRAY_TESTS_ALLOCATION_ERROR "Error allocating memory at kd-array test unit"
-#define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR "Error initializing point, at kd-array test unit"
+#define SPKDARRAY_TESTS_ALLOCATION_ERROR 				"Error allocating memory at kd-array test unit"
+#define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR 		"Error initializing point, at kd-array test unit"
 
 
+//global variables
 int randomTestsIndex = 0;
 SPPoint* case1PointsArray = NULL; //also used in NULL cases tests
 SPPoint* case2PointsArray = NULL;
