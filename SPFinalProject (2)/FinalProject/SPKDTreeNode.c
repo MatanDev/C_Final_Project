@@ -31,7 +31,7 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
 			maxPtrCoor =
 				spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
 			minPtrCoor =
-				spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
+				spPointGetAxisCoor(array->pointsArray[minPtrIndex], j);
 			if (maxSpread < maxPtrCoor - minPtrCoor) {
 				maxSpread = maxPtrCoor - minPtrCoor;
 				splitDim = j;
