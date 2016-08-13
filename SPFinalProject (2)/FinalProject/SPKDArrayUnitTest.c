@@ -277,16 +277,6 @@ static bool testSplitNullCases(){
 	kdArr = Init(case1PointsArray, CASE1_NUM_OF_POINTS);
 	ASSERT_TRUE(kdArr != NULL);
 
-	rsltPair = Split(kdArr,0);
-	ASSERT_TRUE(rsltPair == NULL);
-
-	if (rsltPair != NULL){
-		spKDArrayPairDestroy(rsltPair);
-		spKDArrayDestroy(kdArr);
-		return false;
-	}
-
-
 	rsltPair = Split(kdArr,-1);
 	ASSERT_TRUE(rsltPair == NULL);
 
@@ -339,12 +329,15 @@ static bool testSplitCase1(){
 	kdArrPair = Split(kdArr,1);
 	ASSERT_TRUE(kdArrPair != NULL);
 
-	//left is 1x1 with point {5,-7,13} and index 2
+	//left is 1x3 with point {5,-7,13} and index 2
 	ASSERT_TRUE((kdArrPair->kdLeft)!=NULL);
 	ASSERT_TRUE((kdArrPair->kdLeft)->dim == CASE1_DIM);
 	ASSERT_TRUE((kdArrPair->kdLeft)->size == 1);
 	ASSERT_TRUE((kdArrPair->kdLeft)->indicesMatrix != NULL);
 	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][0] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][1] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][2] == 0);
+
 	ASSERT_TRUE((kdArrPair->kdLeft)->pointsArray != NULL);
 	ASSERT_TRUE(spPointGetDimension(((kdArrPair->kdLeft)->pointsArray)[0]) == CASE1_DIM);
 	ASSERT_TRUE(spPointGetIndex(((kdArrPair->kdLeft)->pointsArray)[0]) == 2);
@@ -352,12 +345,16 @@ static bool testSplitCase1(){
 	ASSERT_TRUE(isEqual(spPointGetAxisCoor(((kdArrPair->kdLeft)->pointsArray)[0] ,1), -7));
 	ASSERT_TRUE(isEqual(spPointGetAxisCoor(((kdArrPair->kdLeft)->pointsArray)[0] ,2), 13));
 
-	//left is 1x1 with point {1,2,3} and index 1
+	//left is 1x3 with point {1,2,3} and index 1
 	ASSERT_TRUE((kdArrPair->kdLeft)!=NULL);
 	ASSERT_TRUE((kdArrPair->kdLeft)->dim == CASE1_DIM);
 	ASSERT_TRUE((kdArrPair->kdLeft)->size == 1);
 	ASSERT_TRUE((kdArrPair->kdLeft)->indicesMatrix != NULL);
+
 	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][0] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][1] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][2] == 0);
+
 	ASSERT_TRUE((kdArrPair->kdLeft)->pointsArray != NULL);
 	ASSERT_TRUE(spPointGetDimension(((kdArrPair->kdLeft)->pointsArray)[0]) == CASE1_DIM);
 	ASSERT_TRUE(spPointGetIndex(((kdArrPair->kdLeft)->pointsArray)[0]) == 1);
