@@ -94,6 +94,45 @@ SPKDArray Init(SPPoint* arr, int size) {
 	return ret;
 }
 
+SPKDArray Copy(SPKDArray kdArr) {
+	SPKDArray ret;
+	int i, j;
+	if (kdArr == NULL)
+		return NULL;
+	ret = (SPKDArray)malloc(sizeof(struct sp_kd_array));
+	if (!ret)
+		return NULL;
+	ret->dim = kdArr->dim;
+	ret->size = kdArr->size;
+	ret->pointsArray = (SPPoint*)calloc(ret->size, sizeof(SPPoint));
+	if (!(ret->pointsArray)) {
+		// TODO - cleanup
+		return NULL;
+	}
+	for (i = 0; i < ret->size; i++) {
+		// TODO - validate if copy does not return NULL
+		ret->pointsArray[i] = spPointCopy(kdArr->pointsArray[i]);
+	}
+	ret->indicesMatrix = (int**)calloc(ret->dim, sizeof(int *));
+	if (!(ret->indicesMatrix)) {
+		free(ret);
+		return NULL; //error
+	}
+	for (j = 0; j < ret->dim; j++) {
+		ret->indicesMatrix[j] = (int*)calloc(ret->size, sizeof(int));
+		if (!(ret->indicesMatrix[j])) {
+			// need to free all previous arrays - export to function
+			free(ret->indicesMatrix);
+			free(ret);
+			return NULL; //error
+		}
+		for (i = 0; i < ret->size; i++) {
+			ret->indicesMatrix[j][i] = kdArr->indicesMatrix[j][i];
+		}
+	}
+	return ret;
+}
+
 SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	SPKDArrayPair ret;
 	int median, i, indexInOrigArr, j, kdLeftIndex = 0, kdRightIndex = 0;
@@ -118,7 +157,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return NULL; //error
 	}
 	if (kdArr->size == 1) {
-		ret->kdLeft = kdArr;
+		ret->kdLeft = Copy(kdArr);
 		ret->kdRight = NULL;
 		return ret;
 	}
