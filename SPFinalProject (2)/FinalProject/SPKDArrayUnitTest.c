@@ -335,8 +335,8 @@ static bool testSplitCase1(){
 	ASSERT_TRUE((kdArrPair->kdLeft)->size == 1);
 	ASSERT_TRUE((kdArrPair->kdLeft)->indicesMatrix != NULL);
 	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][0] == 0);
-	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][1] == 0);
-	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[0][2] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[1][0] == 0);
+	ASSERT_TRUE(((kdArrPair->kdLeft)->indicesMatrix)[2][0] == 0);
 
 	ASSERT_TRUE((kdArrPair->kdLeft)->pointsArray != NULL);
 	ASSERT_TRUE(spPointGetDimension(((kdArrPair->kdLeft)->pointsArray)[0]) == CASE1_DIM);
@@ -352,8 +352,8 @@ static bool testSplitCase1(){
 	ASSERT_TRUE((kdArrPair->kdRight)->indicesMatrix != NULL);
 
 	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[0][0] == 0);
-	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[0][1] == 0);
-	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[0][2] == 0);
+	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[1][0] == 0);
+	ASSERT_TRUE(((kdArrPair->kdRight)->indicesMatrix)[2][0] == 0);
 
 	ASSERT_TRUE((kdArrPair->kdRight)->pointsArray != NULL);
 	ASSERT_TRUE(spPointGetDimension(((kdArrPair->kdRight)->pointsArray)[0]) == CASE1_DIM);
@@ -446,7 +446,7 @@ static bool testSplitCase2(){
 
 
 void runKDArrayTests(){
-	/*
+
 	//CASE 1 + NULL CASES
 	initializePointsArrayCase1();
 	if (case1PointsArray == NULL)
@@ -471,7 +471,7 @@ void runKDArrayTests(){
 
 	destroyPointsArray(edgeCase1PointsArray, EDGE_CASE1_NUM_OF_POINTS);
 	edgeCase1PointsArray = NULL;
-*/
+
 	//CASE 2
 	initializePointsArrayCase2();
 	if (case2PointsArray == NULL)
