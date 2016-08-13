@@ -114,7 +114,7 @@ double spPointL2SquaredDistance(SPPoint p, SPPoint q);
  *
  * @return true iff both points are not NULL and contains the same values
  */
-bool spPointCompare(SPPoint p1, SPPoint p2);
+bool spPointCompare(SPPoint p1, SPPoint p2); //TODO - verify that we can add methods to this
 bool isEqual(double x,double y);//TODO - comment this or handle
 
 #endif /* SPPOINT_H_ */
