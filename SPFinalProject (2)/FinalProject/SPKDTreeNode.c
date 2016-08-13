@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define INVALID_DIM -1
+#define INVALID_VAL -1 // TODO: if int
+
 SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
 	return internalInitKDTree(array, splitMethod, 0);
 }
@@ -19,8 +22,8 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
 		return NULL;
 
 	if (array->size == 1) {
-		ret->dim = -1; //invalid
-		ret->val = -1; //invalid
+		ret->dim = INVALID_DIM;
+		ret->val = INVALID_VAL;
 		ret->kdtLeft = NULL;
 		ret->kdtRight = NULL;
 		if (!(ret->data = spPointCopy(array->pointsArray[0]))) {
