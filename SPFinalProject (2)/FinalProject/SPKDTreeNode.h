@@ -18,8 +18,8 @@
 struct sp_kd_tree_node {
 	int dim;
 	int val;
-	SPKDTreeNode kdtLeft;
-	SPKDTreeNode kdtRight;
+	struct sp_kd_tree_node* kdtLeft;
+	struct sp_kd_tree_node* kdtRight;
 	SPPoint data;
 };
 

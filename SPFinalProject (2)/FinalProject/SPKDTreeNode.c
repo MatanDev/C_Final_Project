@@ -13,7 +13,7 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
 	SPKDArrayPair splitResPair;
 	if (!array)
 		return NULL; //error
-	SPKDTreeNode ret = (SPKDTreeNode)malloc(sizeof(struct sp_tree_node));
+	ret = (SPKDTreeNode)malloc(sizeof(struct sp_kd_tree_node));
 	if (array->size == 1) {
 		ret->dim = -1; //invalid
 		ret->val = -1; //invalid

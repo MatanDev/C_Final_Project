@@ -14,6 +14,7 @@ extern "C" {
 #include "SPImagesParserUnitTest.h"
 #include "SPImageQuery.h"
 #include "SPMainAux.h"
+#include "SPKDArrayUnitTest.h"
 }
 
 #define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
@@ -23,7 +24,7 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define STDOUT	"stdout"
 
-
+/*
 int main(int argc, char** argv) {
 	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -133,7 +134,7 @@ int main(int argc, char** argv) {
 	// end control flow
 	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
-}
+}*/
 /*
 int main() {
 	runConfigTests();
@@ -149,3 +150,7 @@ int main(){
 	return 0;
 }*/
 
+int main() {
+	runKDArrayTests();
+	return 0;
+}
