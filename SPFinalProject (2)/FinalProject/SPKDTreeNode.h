@@ -74,5 +74,8 @@ SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod);
  */
 SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth);
 
+// TODO - documentation
+void spKDTreeDestroy(SPKDTreeNode kdTreeNode);
+
 
 #endif /* SPKDTREENODE_H_ */
