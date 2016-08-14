@@ -2,12 +2,15 @@
 #include <stdbool.h>
 #include "SPKDArray.h"
 
+/*
+ * A structure used to represent the index of a point in a given points
+ * array and one of its coordinates value,
+ * used to fill one row in a KDArray indices matrix
+ */
 struct index_with_coor_value {
 	int index;
 	double coor_value;
 };
-
-typedef struct index_with_coor_value* IndexWithCoorValue;
 
 int compareIndexWithCoorValue(const void* a, const void* b) {
 	IndexWithCoorValue* first = (IndexWithCoorValue *)a;
@@ -57,7 +60,7 @@ bool copyPointsArr(SPPoint** dst, SPPoint* src, int size) {
 	return true;
 }
 
-bool initializeKDArrayIndicesMatrix(SPKDArray arr) {
+bool allocateKDArrayIndicesMatrix(SPKDArray arr) {
 	int j;
 
 	if (!(arr->indicesMatrix = (int**)calloc(arr->dim, sizeof(int *))))
@@ -132,36 +135,36 @@ SPKDArray Init(SPPoint* arr, int size) {
 	if (!copyPointsArr(&(ret->pointsArray), arr, ret->size))
 		return onErrorInInitOrCopy(ret);
 
-	if (!initializeKDArrayIndicesMatrix(ret))
+	if (!allocateKDArrayIndicesMatrix(ret))
 		return onErrorInInitOrCopy(ret);
 
 	return fillIndicesMatrix(ret);
 }
 
-SPKDArray Copy(SPKDArray kdArr) {
+SPKDArray spKDArrayCopy(SPKDArray source) {
 	SPKDArray ret;
 	int i, j;
 
-	if (kdArr == NULL)
+	if (source == NULL)
 		return NULL;
 
 	if (!(ret = (SPKDArray)calloc(1, sizeof(struct sp_kd_array))))
 		return NULL;
 
-	ret->dim = kdArr->dim;
-	ret->size = kdArr->size;
+	ret->dim = source->dim;
+	ret->size = source->size;
 
-	if (!copyPointsArr(&(ret->pointsArray), kdArr->pointsArray,
+	if (!copyPointsArr(&(ret->pointsArray), source->pointsArray,
 			ret->size))
 		onErrorInInitOrCopy(ret);
 
-	if (!initializeKDArrayIndicesMatrix(ret))
+	if (!allocateKDArrayIndicesMatrix(ret))
 		onErrorInInitOrCopy(ret);
 
 	// copy all indicesMatrix elements from kdArr to ret
 	for (j = 0; j < ret->dim; j++) {
 		for (i = 0; i < ret->size; i++)
-			ret->indicesMatrix[j][i] = kdArr->indicesMatrix[j][i];
+			ret->indicesMatrix[j][i] = source->indicesMatrix[j][i];
 	}
 
 	return ret;
@@ -180,7 +183,7 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
 }
 
 bool initXArr(int** xArr, SPKDArray kdArr, int median, int coor) {
-	int i = 0;
+	int i;
 	if (!(*xArr = (int*)calloc(kdArr->size, sizeof(int))))
 		return false;
 
@@ -241,8 +244,8 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 		SPKDArray kdArr, int* xArr, int* map1, int* map2) {
 	int i, j, indexInOrig, kdLeftIndex, kdRightIndex;
 
-	if (!initializeKDArrayIndicesMatrix(kdArrPair->kdLeft) ||
-			!initializeKDArrayIndicesMatrix(kdArrPair->kdRight))
+	if (!allocateKDArrayIndicesMatrix(kdArrPair->kdLeft) ||
+			!allocateKDArrayIndicesMatrix(kdArrPair->kdRight))
 		return onErrorInSplit(kdArrPair, xArr, map1, map2);
 
 	for (j = 0; j < kdArr->dim; j++) {
@@ -280,7 +283,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return onErrorInSplit(ret, xArr, map1, map2);
 
 	if (kdArr->size == 1) {
-		ret->kdLeft = Copy(kdArr);
+		ret->kdLeft = spKDArrayCopy(kdArr);
 		ret->kdRight = NULL;
 		return ret;
 	}
@@ -300,10 +303,6 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return onErrorInSplit(ret, xArr, map1, map2);
 
 	if (!createMap1AndMap2(&map1, &map2, kdArr, xArr))
-		return onErrorInSplit(ret, xArr, map1, map2);
-
-	if (!initializeKDArrayIndicesMatrix(ret->kdLeft) ||
-			!initializeKDArrayIndicesMatrix(ret->kdRight))
 		return onErrorInSplit(ret, xArr, map1, map2);
 
 	return fillKDArrayPairIndicesMatrices(ret, kdArr, xArr, map1, map2);
