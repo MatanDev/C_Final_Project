@@ -1,5 +1,9 @@
 //TODO - verify the name SPKDTreeNode is OK (and not KDTreeNode)
 //TODO - talk about logger
+//TODO - check params in inner functions (convention)
+//TODO - logger documentation in inner functions (convention)
+//TODO - add more logs
+//TODO - check documentation where spPointCopy takes place
 
 #ifndef SPKDTREENODE_H_
 #define SPKDTREENODE_H_
@@ -47,7 +51,8 @@ typedef struct sp_kd_tree_node* SPKDTreeNode;
  *   kd-tree that is built by the given array and split method.
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod);
 
@@ -70,6 +75,10 @@ SPKDTreeNode onErrorInInitKDTree(SPKDTreeNode node);
  *
  * @returns NULL if memory allocation failed otherwise returns a leaf
  * whose data is the single point in 'array' points-array
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array);
 
@@ -127,7 +136,8 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
  *   kd-tree that is built by the given array and split method.
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth);
 
