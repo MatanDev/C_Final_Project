@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "SPKDArray.h"
+#include "SPLogger.h"
+
+#define ERROR_INVALID_ARGUMENT	"Error Invalid argument"
+#define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
+#define ERROR_POINT_COPY		"Error in copying point"
 
 /*
  * A structure used to represent the index of a point in a given points
@@ -36,13 +41,19 @@ void indexWithCoorValueArrDestroy(IndexWithCoorValue*
 bool checkInitArgs(SPPoint* arr, int size) {
 	int i;
 
-	if (!arr || size <= 0)
+	if (!arr || size <= 0) {
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
+				__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (i = 0; i < size - 1; i++) {
 		if (spPointGetDimension(arr[i]) !=
-				spPointGetDimension(arr[i + 1]))
+				spPointGetDimension(arr[i + 1])) {
+			spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
+					__FUNCTION__, __LINE__);
 			return false;
+		}
 	}
 
 	return true;
@@ -50,12 +61,18 @@ bool checkInitArgs(SPPoint* arr, int size) {
 
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size) {
 	int i;
-	if (!(*dst = (SPPoint*)calloc(size, sizeof(SPPoint))))
+	if (!(*dst = (SPPoint*)calloc(size, sizeof(SPPoint)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+				__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (i = 0; i < size; i++) {
-		if (!((*dst)[i] = spPointCopy(src[i])))
+		if (!((*dst)[i] = spPointCopy(src[i]))) {
+			spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
+							__FUNCTION__, __LINE__);
 			return false;
+		}
 	}
 	return true;
 }
@@ -63,13 +80,19 @@ bool copyPointsArr(SPPoint** dst, SPPoint* src, int size) {
 bool allocateKDArrayIndicesMatrix(SPKDArray arr) {
 	int j;
 
-	if (!(arr->indicesMatrix = (int**)calloc(arr->dim, sizeof(int *))))
+	if (!(arr->indicesMatrix = (int**)calloc(arr->dim, sizeof(int *)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (j = 0; j < arr->dim; j++) {
 		if (!(arr->indicesMatrix[j] =
-				(int*)calloc(arr->size, sizeof(int))))
+				(int*)calloc(arr->size, sizeof(int)))) {
+			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+							__FUNCTION__, __LINE__);
 			return false;
+		}
 	}
 
 	return true;
@@ -88,8 +111,11 @@ SPKDArray fillIndicesMatrix(SPKDArray arr) {
 		// allocate memory for indexWithCoorValueArr
 		if (!(indexWithCoorValueArr =
 				(IndexWithCoorValue*)calloc(arr->size,
-						sizeof(IndexWithCoorValue))))
+						sizeof(IndexWithCoorValue)))) {
+			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+							__FUNCTION__, __LINE__);
 			return onErrorInInitOrCopy(arr);
+		}
 
 		// initialize indexWithCoorValueArr before sorting
 		for (i = 0; i < arr->size; i++) {
@@ -97,6 +123,8 @@ SPKDArray fillIndicesMatrix(SPKDArray arr) {
 					(IndexWithCoorValue)
 					calloc(1, sizeof(struct index_with_coor_value)))) {
 				indexWithCoorValueArrDestroy(indexWithCoorValueArr, i);
+				spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+								__FUNCTION__, __LINE__);
 				return onErrorInInitOrCopy(arr);
 			}
 			indexWithCoorValueArr[i]->index = i;
@@ -126,8 +154,11 @@ SPKDArray Init(SPPoint* arr, int size) {
 	if (!checkInitArgs(arr, size))
 		return NULL;
 
-	if (!(ret = (SPKDArray)calloc(1, sizeof(struct sp_kd_array))))
+	if (!(ret = (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
 	ret->dim = spPointGetDimension(arr[0]);
 	ret->size = size;
@@ -145,11 +176,17 @@ SPKDArray spKDArrayCopy(SPKDArray source) {
 	SPKDArray ret;
 	int i, j;
 
-	if (source == NULL)
+	if (!source) {
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
+				__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
-	if (!(ret = (SPKDArray)calloc(1, sizeof(struct sp_kd_array))))
+	if (!(ret = (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
 	ret->dim = source->dim;
 	ret->size = source->size;
@@ -184,8 +221,11 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
 
 bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor) {
 	int i;
-	if (!(*xArr = (int*)calloc(kdArr->size, sizeof(int))))
+	if (!(*xArr = (int*)calloc(kdArr->size, sizeof(int)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (i = 0; i < medianIndex; i++)
 		(*xArr)[kdArr->indicesMatrix[coor][i]] = 0;
@@ -201,21 +241,30 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
 	int i, kdLeftIndex = 0, kdRightIndex = 0;
 
 	if (!(kdArrPair->kdLeft->pointsArray =
-			(SPPoint*)calloc(kdArrPair->kdLeft->size, sizeof(SPPoint)))
-			|| !(kdArrPair->kdRight->pointsArray =
-			(SPPoint*)calloc(kdArrPair->kdRight->size, sizeof(SPPoint))))
+		(SPPoint*)calloc(kdArrPair->kdLeft->size, sizeof(SPPoint)))
+		|| !(kdArrPair->kdRight->pointsArray =
+		(SPPoint*)calloc(kdArrPair->kdRight->size, sizeof(SPPoint)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (i = 0; i < kdArr->size; i++) {
 		if (xArr[i] == 0) {
 			if (!(kdArrPair->kdLeft->pointsArray[kdLeftIndex++] =
-					spPointCopy(kdArr->pointsArray[i])))
+					spPointCopy(kdArr->pointsArray[i]))) {
+				spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
+								__FUNCTION__, __LINE__);
 				return false;
+			}
 		}
 		else {
 			if (!(kdArrPair->kdRight->pointsArray[kdRightIndex++] =
-					spPointCopy(kdArr->pointsArray[i])))
+					spPointCopy(kdArr->pointsArray[i]))) {
+				spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
+								__FUNCTION__, __LINE__);
 				return false;
+			}
 		}
 	}
 
@@ -228,8 +277,11 @@ bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
 	bool isFirstArrayindex;
 
 	if (!(*map1 = (int*)calloc(kdArr->size, sizeof(int))) ||
-			!(*map2 = (int*)calloc(kdArr->size, sizeof(int))))
+			!(*map2 = (int*)calloc(kdArr->size, sizeof(int)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return false;
+	}
 
 	for (i = 0; i < kdArr->size; i++) {
 		isFirstArrayindex = (xArr[i] == 0);
@@ -275,19 +327,26 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	int medianIndex;
 	int *xArr = NULL, *map1 = NULL, *map2 = NULL;
 
-	if (!kdArr || coor < 0)
+	if (!kdArr || coor < 0) {
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
+				__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
 	if (  !(ret =
 			   (SPKDArrayPair)calloc(1, sizeof(struct sp_kd_array_pair)))
 	   || !(ret->kdLeft =
 			   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))
 	   || !(ret->kdRight =
-			   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))  )
+			   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))  ) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
 		return onErrorInSplit(ret, xArr, map1, map2);
+	}
 
 	if (kdArr->size == 1) {
-		ret->kdLeft = spKDArrayCopy(kdArr);
+		if (!(ret->kdLeft = spKDArrayCopy(kdArr)))
+			return onErrorInSplit(ret, xArr, map1, map2);
 		ret->kdRight = NULL;
 		return ret;
 	}

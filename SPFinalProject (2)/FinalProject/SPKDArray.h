@@ -76,6 +76,10 @@ void indexWithCoorValueArrDestroy(IndexWithCoorValue*
  *  - size <= 0 or
  *  - not all points in arr have the same dimension
  * otherwise returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool checkInitArgs(SPPoint* arr, int size);
 
@@ -89,6 +93,10 @@ bool checkInitArgs(SPPoint* arr, int size);
  *
  * @returns false in case of memory allocation failure, otherwise
  * returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
 
@@ -100,6 +108,10 @@ bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
  *
  * @returns false in case of memory allocation failure, otherwise
  * returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool allocateKDArrayIndicesMatrix(SPKDArray arr);
 
@@ -119,6 +131,10 @@ SPKDArray onErrorInInitOrCopy(SPKDArray arr);
  *
  * @returns NULL in case of memory allocation failure, otherwise
  * returns arr after its indices matrix was filled
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDArray fillIndicesMatrix(SPKDArray arr);
 
@@ -134,10 +150,12 @@ SPKDArray fillIndicesMatrix(SPKDArray arr);
  *  - size <= 0 or
  *  - not all points in arr have the same dimension or
  *  - memory allocation failed
- * otherwise returns a new SPKDArray initialized according to the given data
+ * otherwise returns a new SPKDArray initialized according to the given
+ * data
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDArray Init(SPPoint* arr, int size);
 
@@ -158,6 +176,10 @@ SPKDArray Init(SPPoint* arr, int size);
  * @returns
  * NULL in case source is null of memory allocation failure occurs
  * Otherwise a copy of source is returned.
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDArray spKDArrayCopy(SPKDArray source);
 
@@ -190,6 +212,10 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
  *
  * @returns false in case of memory allocation failure, otherwise
  * returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor);
 
@@ -204,6 +230,10 @@ bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor);
  *
  * @returns false in case of memory allocation failure, otherwise
  * returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
 		SPKDArray kdArr, int* xArr);
@@ -223,6 +253,10 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
  *
  * @returns false in case of memory allocation failure, otherwise
  * returns true
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
 		int* xArr);
@@ -243,6 +277,7 @@ bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
  *
  * @returns NULL in case of memory allocation failure, otherwise
  * returns kdArrPair after its kd-arrays indices matrices were filled
+ *
  */
 SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 		SPKDArray kdArr, int* xArr, int* map1, int* map2);
@@ -277,7 +312,8 @@ int getMedianIndex(int size);
  *
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * in case of any type of failure the relevant error is logged to the
+ * logger
  */
 SPKDArrayPair Split(SPKDArray kdArr, int coor);
 

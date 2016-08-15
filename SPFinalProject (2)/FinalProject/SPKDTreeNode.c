@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define INVALID_DIM -1
+#define INVALID_DIM 			-1
+#define ERROR_INVALID_ARGUMENT	"Error Invalid argument"
+#define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
+#define ERROR_POINT_COPY		"Error in copying point"
 
 SPKDTreeNode InitKDTree(SPKDArray array,
 		SP_KDTREE_SPLIT_METHOD splitMethod) {
@@ -19,8 +22,11 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
-	if (!(node->data = spPointCopy(array->pointsArray[0])))
+	if (!(node->data = spPointCopy(array->pointsArray[0]))) {
+		spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
+				__FUNCTION__, __LINE__);
 		return onErrorInInitKDTree(node);
+	}
 
 	return node;
 }
@@ -78,11 +84,18 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 	SPKDTreeNode ret;
 	int splitDim;
 
-	if (!array)
+	if (!array) {
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
+				__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
 	if (!(ret = (SPKDTreeNode)calloc(1, sizeof(struct sp_kd_tree_node))))
+	{
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+				__FUNCTION__, __LINE__);
 		return NULL;
+	}
 
 	if (array->size == 1)
 		return createLeaf(ret, array);
