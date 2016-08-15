@@ -182,15 +182,15 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
 	return NULL;
 }
 
-bool initXArr(int** xArr, SPKDArray kdArr, int median, int coor) {
+bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor) {
 	int i;
 	if (!(*xArr = (int*)calloc(kdArr->size, sizeof(int))))
 		return false;
 
-	for (i = 0; i < median; i++)
+	for (i = 0; i < medianIndex; i++)
 		(*xArr)[kdArr->indicesMatrix[coor][i]] = 0;
 
-	for (i = median; i < kdArr->size; i++)
+	for (i = medianIndex; i < kdArr->size; i++)
 		(*xArr)[kdArr->indicesMatrix[coor][i]] = 1;
 
 	return true;
@@ -266,9 +266,13 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 	return kdArrPair;
 }
 
+int getMedianIndex(int size) {
+	return (size % 2 == 0) ? (size / 2) : (size / 2) + 1;
+}
+
 SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	SPKDArrayPair ret = NULL;
-	int median;
+	int medianIndex;
 	int *xArr = NULL, *map1 = NULL, *map2 = NULL;
 
 	if (!kdArr || coor < 0)
@@ -288,15 +292,14 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return ret;
 	}
 
-	median = (kdArr->size % 2 == 0) ?
-			(kdArr->size / 2) : (kdArr->size / 2) + 1;
+	medianIndex = getMedianIndex(kdArr->size);
 
 	ret->kdLeft->dim = kdArr->dim;
 	ret->kdRight->dim = kdArr->dim;
-	ret->kdLeft->size = median;
-	ret->kdRight->size = kdArr->size - median;
+	ret->kdLeft->size = medianIndex;
+	ret->kdRight->size = kdArr->size - medianIndex;
 
-	if (!initXArr(&xArr, kdArr, median, coor))
+	if (!initXArr(&xArr, kdArr, medianIndex, coor))
 		return onErrorInSplit(ret, xArr, map1, map2);
 
 	if (!createKDArrayPairPointsArrays(ret, kdArr, xArr))

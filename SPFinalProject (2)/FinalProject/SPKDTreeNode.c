@@ -3,17 +3,80 @@
 #include <time.h>
 
 #define INVALID_DIM -1
-#define INVALID_VAL -1 // TODO: if int
 
-SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
+SPKDTreeNode InitKDTree(SPKDArray array,
+		SP_KDTREE_SPLIT_METHOD splitMethod) {
 	return internalInitKDTree(array, splitMethod, 0);
 }
 
-SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth) {
-	SPKDTreeNode ret;
+SPKDTreeNode onErrorInInitKDTree(SPKDTreeNode node) {
+	spKDTreeDestroy(node);
+	return NULL;
+}
+
+SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
+	node->dim = INVALID_DIM;
+	node->val = NULL;
+	node->kdtLeft = NULL;
+	node->kdtRight = NULL;
+	if (!(node->data = spPointCopy(array->pointsArray[0])))
+		return onErrorInInitKDTree(node);
+
+	return node;
+}
+
+//TODO - validate that its okay that default is 0
+int getSplitDimInMaxSpreadMethod(SPKDArray array) {
 	int splitDim = 0, j, maxPtrIndex, minPtrIndex;
 	double maxPtrCoor, minPtrCoor, maxSpread = 0.0;
-	SPKDArrayPair splitResPair;
+	for (j = 0; j < array->dim; j++) {
+		maxPtrIndex = array->indicesMatrix[j][array->size - 1];
+		minPtrIndex = array->indicesMatrix[j][0];
+		maxPtrCoor =
+			spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
+		minPtrCoor =
+			spPointGetAxisCoor(array->pointsArray[minPtrIndex], j);
+		if (maxSpread < maxPtrCoor - minPtrCoor) {
+			maxSpread = maxPtrCoor - minPtrCoor;
+			splitDim = j;
+		}
+	}
+	return splitDim;
+}
+
+SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
+		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth, int splitDim) {
+	SPKDArrayPair splitResPair = Split(array, splitDim);
+
+	if (!splitResPair)
+		return onErrorInInitKDTree(node);
+
+	node->dim = splitDim;
+
+	// TODO - validate that val should be kind of median value
+	*(node->val) = spPointGetAxisCoor(array->pointsArray[
+			array->indicesMatrix[splitDim][getMedianIndex(array->size)]],
+			splitDim);
+
+	if (	!(node->kdtLeft =
+			internalInitKDTree(splitResPair->kdLeft, splitMethod,
+					(recDepth + 1) % array->dim)) ||
+
+	// valid cause we get here only if array->size > 1
+			!(node->kdtRight =
+			internalInitKDTree(splitResPair->kdRight, splitMethod,
+					(recDepth + 1) % array->dim))	)
+		return onErrorInInitKDTree(node);
+
+	node->data = NULL;
+
+	return node;
+}
+
+SPKDTreeNode internalInitKDTree(SPKDArray array,
+		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth) {
+	SPKDTreeNode ret;
+	int splitDim;
 
 	if (!array)
 		return NULL;
@@ -21,32 +84,12 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
 	if (!(ret = (SPKDTreeNode)calloc(1, sizeof(struct sp_kd_tree_node))))
 		return NULL;
 
-	if (array->size == 1) {
-		ret->dim = INVALID_DIM;
-		ret->val = INVALID_VAL;
-		ret->kdtLeft = NULL;
-		ret->kdtRight = NULL;
-		if (!(ret->data = spPointCopy(array->pointsArray[0]))) {
-			free(ret);
-			return NULL;
-		}
-		return ret;
-	}
+	if (array->size == 1)
+		return createLeaf(ret, array);
 
 	switch (splitMethod) {
 	case MAX_SPREAD:
-		for (j = 0; j < array->dim; j++) {
-			maxPtrIndex = array->indicesMatrix[j][array->size - 1];
-			minPtrIndex = array->indicesMatrix[j][0];
-			maxPtrCoor =
-				spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
-			minPtrCoor =
-				spPointGetAxisCoor(array->pointsArray[minPtrIndex], j);
-			if (maxSpread < maxPtrCoor - minPtrCoor) {
-				maxSpread = maxPtrCoor - minPtrCoor;
-				splitDim = j;
-			}
-		}
+		splitDim = getSplitDimInMaxSpreadMethod(array);
 		break;
 	case RANDOM:
 		srand(time(NULL));
@@ -57,32 +100,7 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
 		break;
 	}
 
-	splitResPair = Split(array, splitDim);
-	if (!splitResPair) {
-		free(ret);
-		return NULL;
-	}
-
-	ret->dim = splitDim;
-	// TODO 1 - understand what does val mean
-	// TODO 2 - export to function find median in KDArray and use here
-	// (or should it be median value and not median index??)
-	ret->val = (array->size % 2 == 0) ?
-			array->indicesMatrix[splitDim][(array->size / 2)] :
-			array->indicesMatrix[splitDim][(array->size / 2) + 1];
-
-	ret->kdtLeft =
-			internalInitKDTree(splitResPair->kdLeft, splitMethod,
-					(recDepth + 1) % array->dim);
-
-	// valid cause we get here only if array->size > 1
-	ret->kdtRight =
-				internalInitKDTree(splitResPair->kdRight, splitMethod,
-						(recDepth + 1) % array->dim);
-
-	ret->data = NULL;
-
-	return ret;
+	return createInnerNode(ret, array, splitMethod, recDepth, splitDim);
 }
 
 void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
