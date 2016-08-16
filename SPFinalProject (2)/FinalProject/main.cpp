@@ -15,6 +15,7 @@ extern "C" {
 #include "SPImageQuery.h"
 #include "SPMainAux.h"
 #include "SPKDArrayUnitTest.h"
+#include "SPKDTreeNodeUnitTest.h"
 }
 
 #define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
@@ -159,7 +160,8 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	runKDArrayTests();
+	//runKDArrayTests();
+	runKDTreeNodeTests();
 	spConfigDestroy(config);
 	return 0;
 }

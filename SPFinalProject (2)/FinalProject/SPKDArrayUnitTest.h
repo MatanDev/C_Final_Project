@@ -5,4 +5,6 @@
 
 void runKDArrayTests();
 
+SPPoint* generateRandomPointsArray(int dim, int size);
+
 #endif /* SPKDARRAYUNITTEST_H_ */

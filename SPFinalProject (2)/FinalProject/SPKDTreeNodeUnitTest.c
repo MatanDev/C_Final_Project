@@ -11,12 +11,23 @@
 #include "SPLogger.h"
 #include "SPKDTreeNodeUnitTest.h"
 #include "SPKDTreeNode.h"
+#include "SPKDArrayUnitTest.h"
 
 #define ERROR_AT_TREE_SIZE 									"Error at tree size"
 #define ERROR_AT_NODES_STRUCTURE 							"Error at nodes structure"
 #define ERROR_AT_TREE_MEDIAN_INVARIANT 						"Error at tree median invariant"
 #define ERROR_AT_TREE_ORDER_INVARIANT 						"Error at tree order invariant"
 #define ERROR_AT_TREE_DIMENSION_SELECTION_METHOD 			"Error at tree dimension selection method"
+
+
+#define COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST 		"Could not create points array for random test"
+#define COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST 		"Could not initialize kd-array for random test"
+#define COULD_NOT_INITIALIZE_TREE 							"Could not initialize tree for random test - InitKDTree returned null"
+
+//random test case macros
+#define RANDOM_TESTS_SIZE_RANGE  							200
+#define RANDOM_TESTS_DIM_RANGE 								50
+#define RANDOM_TESTS_COUNT 									20
 
 //verify correct data
 bool isNodeDataCorrect(SPKDTreeNode node){
@@ -194,7 +205,51 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,SP_KDTREE_SPLIT_METHOD splitMe
 	return true;
 }
 
+bool runRandomKDTreeTest(){
+	int maxDim, size;
+	SPPoint* pointsArray = NULL;
+	SPKDArray kdArr = NULL;
+	SPKDTreeNode tree = NULL;
+	SP_KDTREE_SPLIT_METHOD splitMethod;
+
+	maxDim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
+	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
+	splitMethod = 1+(int)(rand()%3);
+
+	pointsArray = generateRandomPointsArray(maxDim,size);
+
+	ASSERT_TRUE(pointsArray != NULL);
+	if (pointsArray == NULL){
+		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST,
+				__FILE__, __FUNCTION__,
+						__LINE__);
+		FAIL(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST);
+		return false;
+	}
+
+	kdArr = Init(pointsArray,size);
+	if (pointsArray == NULL){
+		spLoggerPrintError(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST,
+				__FILE__, __FUNCTION__,
+						__LINE__);
+		FAIL(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST);
+		return false;
+	}
+
+	tree = InitKDTree(kdArr, splitMethod);
+
+	if (pointsArray == NULL){
+		spLoggerPrintError(
+				COULD_NOT_INITIALIZE_TREE,
+				__FILE__, __FUNCTION__,
+						__LINE__);
+		FAIL(COULD_NOT_INITIALIZE_TREE);
+		return false;
+	}
+
+	return testKDTree( tree,  maxDim, splitMethod,  pointsArray,  size);
+}
 
 void runKDTreeNodeTests(){
-
+	RUN_TEST(runRandomKDTreeTest);
 }
