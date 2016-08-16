@@ -96,18 +96,24 @@ void initializePointsArrayCase2(){
 	p3 = spPointCreate(data3,CASE2_DIM,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
 		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p4 = spPointCreate(data4,CASE2_DIM,4);
 	if (p4 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
+		spPointDestroy(p3);
 		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p5 = spPointCreate(data5,CASE2_DIM,5);
 	if (p5 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
+		spPointDestroy(p3);
+		spPointDestroy(p4);
 		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}

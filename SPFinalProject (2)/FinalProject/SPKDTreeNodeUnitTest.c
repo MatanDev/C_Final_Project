@@ -237,7 +237,8 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 	for (i=0;i<size;i++){
 		for (j = 0 ; j < size ; j++){
 			//check points i,j by dim dimIndex
-			tempValue = spPointGetAxisCoor(relevantPoints[i],treeNode->dim) - spPointGetAxisCoor(relevantPoints[j],treeNode->dim);
+			tempValue = spPointGetAxisCoor(relevantPoints[i],treeNode->dim) -
+					spPointGetAxisCoor(relevantPoints[j],treeNode->dim);
 			if (tempValue < 0)
 				tempValue = -tempValue;
 			if (tempValue > suspectedMaxValue){
@@ -251,7 +252,8 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 		for (i=0;i<size;i++){
 			for (j = 0 ; j < size ; j++){
 				//check points i,j by dim dimIndex
-				tempValue = spPointGetAxisCoor(relevantPoints[i],dimIndex) - spPointGetAxisCoor(relevantPoints[j],dimIndex);
+				tempValue = spPointGetAxisCoor(relevantPoints[i],dimIndex) -
+						spPointGetAxisCoor(relevantPoints[j],dimIndex);
 				if (tempValue < 0)
 					tempValue = -tempValue;
 				if (dimIndex != treeNode->dim && tempValue > suspectedMaxValue){
@@ -263,7 +265,8 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 	return true;
 }
 
-bool verifyDimSelection(SPKDTreeNode treeNode, int maxDim,SP_KDTREE_SPLIT_METHOD splitMethod, SPPoint* pointsArray){
+bool verifyDimSelection(SPKDTreeNode treeNode, int maxDim,
+		SP_KDTREE_SPLIT_METHOD splitMethod, SPPoint* pointsArray){
 	switch (splitMethod)
 	{
 		case RANDOM:
@@ -281,7 +284,8 @@ bool verifyDimSelection(SPKDTreeNode treeNode, int maxDim,SP_KDTREE_SPLIT_METHOD
 	return false;
 }
 
-bool testKDTree(SPKDTreeNode treeNode, int maxDim,SP_KDTREE_SPLIT_METHOD splitMethod, SPPoint* pointsArray, int size){
+bool testKDTree(SPKDTreeNode treeNode, int maxDim,
+		SP_KDTREE_SPLIT_METHOD splitMethod, SPPoint* pointsArray, int size){
 	if (treeNode == NULL && size == 0)
 		return true;
 	if (treeNode == NULL)
@@ -442,7 +446,8 @@ bool runTestCase1(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(testCase1Tree,testCase1MaxDim,testCase1SplitMethod,testCase1Points,testCase1Size));
+	ASSERT_TRUE(testKDTree(testCase1Tree,testCase1MaxDim,
+			testCase1SplitMethod,testCase1Points,testCase1Size));
 
 	//root node - not a leaf and split dim should be 2
 	ASSERT_TRUE(verifyNotLeafAndData(testCase1Tree,2,3));
@@ -471,7 +476,8 @@ void destroyTestCase1(){
 
 //test case 2
 void initializeTestCase2(){
-	double data1[2] = {1,2},data2[2] = {123,70},data3[2] = {2,7},data4[2] = {9,11}, data5[2] = {3,4};
+	double data1[2] = {1,2},data2[2] = {123,70},data3[2] = {2,7},data4[2] = {9,11},
+			data5[2] = {3,4};
 	SPPoint p1,p2,p3,p4,p5;
 	SPKDArray kdArr = NULL;
 	testCase2Points = (SPPoint*)calloc(sizeof(SPPoint),testCase2Size);
@@ -494,18 +500,24 @@ void initializeTestCase2(){
 	p3 = spPointCreate(data3,testCase2MaxDim,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p4 = spPointCreate(data4,testCase2MaxDim,4);
 	if (p4 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
+		spPointDestroy(p3);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p5 = spPointCreate(data5,testCase2MaxDim,5);
 	if (p5 == NULL){
 		spPointDestroy(p1);
+		spPointDestroy(p2);
+		spPointDestroy(p3);
+		spPointDestroy(p4);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
@@ -520,7 +532,9 @@ void initializeTestCase2(){
 }
 
 bool runTestCase2(){
-	SPKDTreeNode l,r,ll,lr,rl,rr,lll,llr; //l stands for left branch of the tree and r for right branch
+	//l stands for left branch of the tree and r for right branch
+	SPKDTreeNode l,r,ll,lr,rl,rr,lll,llr;
+
 	if (testCase2Tree == NULL){
 		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
@@ -536,7 +550,8 @@ bool runTestCase2(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(testCase2Tree,testCase2MaxDim,testCase2SplitMethod,testCase2Points,testCase2Size));
+	ASSERT_TRUE(testKDTree(testCase2Tree,testCase2MaxDim,
+			testCase2SplitMethod,testCase2Points,testCase2Size));
 
 	//handle root
 	ASSERT_TRUE(verifyNotLeafAndData(testCase2Tree,0,3));
@@ -628,7 +643,8 @@ bool runEdgeTestCase1(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(edgeTestCase1Tree,edgeTestCase1MaxDim,edgeTestCase1SplitMethod,edgeTestCase1Points,edgeTestCase1Size));
+	ASSERT_TRUE(testKDTree(edgeTestCase1Tree,edgeTestCase1MaxDim,
+			edgeTestCase1SplitMethod,edgeTestCase1Points,edgeTestCase1Size));
 
 	//root node - leaf with value {2}
 	ASSERT_TRUE(verifyLeaf(edgeTestCase1Tree));
