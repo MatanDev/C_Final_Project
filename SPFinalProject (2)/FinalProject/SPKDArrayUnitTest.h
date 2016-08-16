@@ -7,4 +7,6 @@ void runKDArrayTests();
 
 SPPoint* generateRandomPointsArray(int dim, int size);
 
+void destroyPointsArray(SPPoint* array, int numOfItems);
+
 #endif /* SPKDARRAYUNITTEST_H_ */
