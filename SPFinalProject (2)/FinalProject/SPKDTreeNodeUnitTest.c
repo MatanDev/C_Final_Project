@@ -233,7 +233,7 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 
 	allocatePointsArray(treeNode,relevantPoints,&i);
 
-	//get the max spread that the tree seleced
+	//get the max spread that the tree selected
 	for (i=0;i<size;i++){
 		for (j = 0 ; j < size ; j++){
 			//check points i,j by dim dimIndex
@@ -254,13 +254,12 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 				tempValue = spPointGetAxisCoor(relevantPoints[i],dimIndex) - spPointGetAxisCoor(relevantPoints[j],dimIndex);
 				if (tempValue < 0)
 					tempValue = -tempValue;
-				if (tempValue > suspectedMaxValue){
+				if (dimIndex != treeNode->dim && tempValue > suspectedMaxValue){
 					return false;
 				}
 			}
 		}
 	}
-
 	return true;
 }
 
@@ -268,7 +267,7 @@ bool verifyDimSelection(SPKDTreeNode treeNode, int maxDim,SP_KDTREE_SPLIT_METHOD
 	switch (splitMethod)
 	{
 		case RANDOM:
-			return true;
+			return treeNode->dim >= 0;
 			break;
 		case MAX_SPREAD:
 			return verifyDimMaxSpread(treeNode,pointsArray, maxDim);
