@@ -41,21 +41,21 @@ SPKDTreeNode testCase1Tree 									= NULL;
 SPPoint* testCase1Points 									= NULL;
 #define testCase1MaxDim           							3
 #define testCase1Size 										2
-#define testCase1SplitMethod 								2 //MAX_SPREAD
+#define testCase1SplitMethod 								MAX_SPREAD
 
 //test case 2 data
 SPKDTreeNode testCase2Tree 									= NULL;
 SPPoint* testCase2Points 									= NULL;
 #define testCase2MaxDim 									2
 #define testCase2Size 										5
-#define testCase2SplitMethod 								3 //INCREMENTAL
+#define testCase2SplitMethod 								INCREMENTAL
 
 //edge case 1 data
 SPKDTreeNode edgeTestCase1Tree 								= NULL;
 SPPoint* edgeTestCase1Points 								= NULL;
 #define edgeTestCase1MaxDim 								1
 #define edgeTestCase1Size 									1
-#define edgeTestCase1SplitMethod 							3 //INCREMENTAL
+#define edgeTestCase1SplitMethod 							INCREMENTAL
 
 
 
@@ -120,12 +120,12 @@ bool isLeaf(SPKDTreeNode treeNode){
 	return (treeNode->data != NULL);
 }
 
-int getTreeSize(SPKDTreeNode treeNode){
+int getTreeNumOfLeaves(SPKDTreeNode treeNode){
 	if (treeNode == NULL)
 		return 0;
 	if (isLeaf(treeNode))
 		return 1;
-	return 1 + getTreeSize(treeNode->kdtLeft) + getTreeSize(treeNode->kdtRight);
+	return getTreeNumOfLeaves(treeNode->kdtLeft) + getTreeNumOfLeaves(treeNode->kdtRight);
 }
 
 //search value on leafs
@@ -169,8 +169,8 @@ bool verifyMedianNode(SPKDTreeNode treeNode){
 	if (treeNode == NULL || isLeaf(treeNode))
 			return true;
 	return safeSearchValueInTree(treeNode->kdtLeft,treeNode->dim, *(treeNode->val)) &&
-			getTreeSize(treeNode->kdtLeft) >= getTreeSize(treeNode->kdtRight) &&
-			getTreeSize(treeNode->kdtLeft) - getTreeSize(treeNode->kdtRight) <= 1;
+			getTreeNumOfLeaves(treeNode->kdtLeft) >= getTreeNumOfLeaves(treeNode->kdtRight) &&
+			getTreeNumOfLeaves(treeNode->kdtLeft) - getTreeNumOfLeaves(treeNode->kdtRight) <= 1;
 }
 
 bool verifyMedianTreeNode(SPKDTreeNode treeNode){
@@ -223,7 +223,7 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 	if (treeNode == NULL || isLeaf(treeNode))
 			return true;
 
-	size = getTreeSize(treeNode);
+	size = getTreeNumOfLeaves(treeNode);
 	relevantPoints = (SPPoint*)calloc(sizeof(SPPoint),size);
 
 	if (relevantPoints == NULL){
@@ -292,7 +292,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 		return false;
 
 	//test tree size
-	if (getTreeSize(treeNode) != size){
+	if (getTreeNumOfLeaves(treeNode) != size){
 		spLoggerPrintError(ERROR_AT_TREE_SIZE, __FILE__, __FUNCTION__,
 				__LINE__);
 		FAIL(ERROR_AT_TREE_SIZE);
@@ -343,7 +343,7 @@ bool runRandomKDTreeTest(){
 
 	maxDim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
 	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
-	splitMethod = 1+(int)(rand()%3);
+	splitMethod = (int)(rand()%3);
 
 	pointsArray = generateRandomPointsArray(maxDim,size);
 
