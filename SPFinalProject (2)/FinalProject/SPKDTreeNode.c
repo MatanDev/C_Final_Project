@@ -59,9 +59,17 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 
 	node->dim = splitDim;
 
-	// TODO - validate that val should be kind of median value
+
+	if (!(node->val = (double*)calloc(1, sizeof(double)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
+						__FUNCTION__, __LINE__);
+		return onErrorInInitKDTree(node);
+	}
+
+	//TODO 1 - validate that val should be kind of median value
+	//TODO 2 - maybe change getMedianIndex function
 	*(node->val) = spPointGetAxisCoor(array->pointsArray[
-			array->indicesMatrix[splitDim][getMedianIndex(array->size)]],
+		array->indicesMatrix[splitDim][getMedianIndex(array->size) - 1]],
 			splitDim);
 
 	if (	!(node->kdtLeft =
@@ -118,6 +126,11 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 
 void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 	if (!kdTreeNode) {
+		if (!(kdTreeNode->val)) {
+			free(kdTreeNode->val);
+			kdTreeNode->val = NULL;
+		}
+
 		if (!(kdTreeNode->kdtLeft)) {
 			spKDTreeDestroy(kdTreeNode->kdtLeft);
 			kdTreeNode->kdtLeft = NULL;
