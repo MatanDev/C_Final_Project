@@ -32,9 +32,9 @@
 
 
 //random test case macros
-#define RANDOM_TESTS_SIZE_RANGE  							200
+#define RANDOM_TESTS_SIZE_RANGE  							500
 #define RANDOM_TESTS_DIM_RANGE 								50
-#define RANDOM_TESTS_COUNT 									20
+#define RANDOM_TESTS_COUNT 									50
 
 //test case 1 data
 SPKDTreeNode testCase1Tree 									= NULL;
@@ -143,8 +143,8 @@ bool safeIsTreeGreaterEqualThan(SPKDTreeNode treeNode, int dim, double value){
 		return true;
 	if (isLeaf(treeNode))
 		return spPointGetAxisCoor(treeNode->data,dim) >= value;
-	return safeSearchValueInTree(treeNode->kdtLeft,dim,value) &&
-			safeSearchValueInTree(treeNode->kdtRight,dim,value);
+	return safeIsTreeGreaterEqualThan(treeNode->kdtLeft,dim,value) &&
+			safeIsTreeGreaterEqualThan(treeNode->kdtRight,dim,value);
 }
 
 bool safeIsTreeLessEqualThan(SPKDTreeNode treeNode, int dim, double value){
@@ -152,8 +152,8 @@ bool safeIsTreeLessEqualThan(SPKDTreeNode treeNode, int dim, double value){
 		return true;
 	if (isLeaf(treeNode))
 		return spPointGetAxisCoor(treeNode->data,dim) <= value;
-	return safeSearchValueInTree(treeNode->kdtLeft,dim,value) &&
-			safeSearchValueInTree(treeNode->kdtRight,dim,value);
+	return safeIsTreeLessEqualThan(treeNode->kdtLeft,dim,value) &&
+			safeIsTreeLessEqualThan(treeNode->kdtRight,dim,value);
 }
 
 bool verifyOrderedTree(SPKDTreeNode treeNode){
@@ -181,15 +181,19 @@ bool verifyMedianTreeNode(SPKDTreeNode treeNode){
 			verifyMedianTreeNode(treeNode->kdtLeft);
 }
 
+int getPositiveModulo(int num, int mod){
+	return (num % mod + mod)%mod;
+}
+
 bool internalVerifyDimIncremental(SPKDTreeNode treeNode, int depth, int maxDim){
 	if (treeNode == NULL || isLeaf(treeNode))
 			return true;
 	if (treeNode->kdtLeft != NULL && !isLeaf(treeNode->kdtLeft)){
-		if (treeNode->dim % maxDim - treeNode->kdtLeft->dim % maxDim != 1)
+		if (getPositiveModulo(treeNode->kdtLeft->dim  - treeNode->dim, maxDim ) != 1)
 			return false;
 	}
 	if (treeNode->kdtRight != NULL && !isLeaf(treeNode->kdtRight)){
-			if (treeNode->dim % maxDim - treeNode->kdtRight->dim % maxDim != 1)
+		if (getPositiveModulo(treeNode->kdtRight->dim  - treeNode->dim, maxDim ) != 1)
 				return false;
 	}
 	return internalVerifyDimIncremental(treeNode->kdtLeft,depth + 1,maxDim) &&
@@ -257,11 +261,13 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 				if (tempValue < 0)
 					tempValue = -tempValue;
 				if (dimIndex != treeNode->dim && tempValue > suspectedMaxValue){
+					free(relevantPoints);
 					return false;
 				}
 			}
 		}
 	}
+	free(relevantPoints);
 	return true;
 }
 
@@ -344,7 +350,7 @@ bool runRandomKDTreeTest(){
 	maxDim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
 	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
 	splitMethod = (int)(rand()%3);
-
+	//splitMethod = 2;
 	pointsArray = generateRandomPointsArray(maxDim,size);
 
 	ASSERT_TRUE(pointsArray != NULL);
@@ -561,7 +567,7 @@ bool runTestCase2(){
 	r = testCase2Tree->kdtRight;
 
 	ASSERT_TRUE(verifyNotLeafAndData(l,1,4));
-	ASSERT_TRUE(verifyNotLeafAndData(l,1,11));
+	ASSERT_TRUE(verifyNotLeafAndData(r,1,11));
 
 	//handle second level
 	ll = l->kdtLeft;
