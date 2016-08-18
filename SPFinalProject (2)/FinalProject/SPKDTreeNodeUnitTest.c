@@ -13,6 +13,7 @@
 #include "SPKDTreeNodeUnitTest.h"
 #include "SPKDTreeNode.h"
 #include "SPKDArrayUnitTest.h"
+#include "SPImagesParser.h"
 
 #define ERROR_AT_TREE_SIZE 									"Error at tree size"
 #define ERROR_AT_NODES_STRUCTURE 							"Error at nodes structure"
@@ -57,7 +58,9 @@ SPPoint* edgeTestCase1Points 								= NULL;
 #define edgeTestCase1Size 									1
 #define edgeTestCase1SplitMethod 							INCREMENTAL
 
-
+bool isLeaf(SPKDTreeNode treeNode){
+	return (treeNode->data != NULL);
+}
 
 //verify correct data
 bool isNodeDataCorrect(SPKDTreeNode node){
@@ -116,9 +119,7 @@ bool verifyPointData(SPPoint point, int index, int dim, ...){
 	return true;
 }
 
-bool isLeaf(SPKDTreeNode treeNode){
-	return (treeNode->data != NULL);
-}
+
 
 int getTreeNumOfLeaves(SPKDTreeNode treeNode){
 	if (treeNode == NULL)
@@ -189,11 +190,11 @@ bool internalVerifyDimIncremental(SPKDTreeNode treeNode, int depth, int maxDim){
 	if (treeNode == NULL || isLeaf(treeNode))
 			return true;
 	if (treeNode->kdtLeft != NULL && !isLeaf(treeNode->kdtLeft)){
-		if (getPositiveModulo(treeNode->kdtLeft->dim  - treeNode->dim, maxDim ) != 1)
+		if (getPositiveModulo(treeNode->kdtLeft->dim  - treeNode->dim, maxDim ) != 1 % maxDim )
 			return false;
 	}
 	if (treeNode->kdtRight != NULL && !isLeaf(treeNode->kdtRight)){
-		if (getPositiveModulo(treeNode->kdtRight->dim  - treeNode->dim, maxDim ) != 1)
+		if (getPositiveModulo(treeNode->kdtRight->dim  - treeNode->dim, maxDim ) != 1 % maxDim)
 				return false;
 	}
 	return internalVerifyDimIncremental(treeNode->kdtLeft,depth + 1,maxDim) &&
@@ -350,7 +351,7 @@ bool runRandomKDTreeTest(){
 	maxDim = 1 + (int)(rand() % RANDOM_TESTS_DIM_RANGE);
 	size = 2 + (int)(rand() % RANDOM_TESTS_SIZE_RANGE); //size = 1 is tested at a the edge cases
 	splitMethod = (int)(rand()%3);
-	//splitMethod = 2;
+
 	pointsArray = generateRandomPointsArray(maxDim,size);
 
 	ASSERT_TRUE(pointsArray != NULL);
