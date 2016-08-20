@@ -6,6 +6,7 @@
 #include "SPMainAux.h"
 #include "SPImageQuery.h"
 #include "SPLogger.h"
+#include "SPKDTreeNode.h"
 
 //TODO - remove fflush(NULL) at production
 
@@ -98,14 +99,39 @@ void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
 	}
 }
 
+int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfImages){
+	int i, sum = 0;
+	for (i = 0; i < numOfImages ; i++){
+		sum += workingImagesDatabase[i]->numOfFeatures;
+	}
+	return sum;
+}
 
-int* searchSimilarImages(SPImageData* imagesDatabase,
-		SPImageData workingImage, int simmilarCount,int numOfImages, int knn) {
-	return spIQ_getSimilarImages(imagesDatabase, workingImage, simmilarCount, numOfImages, knn);
+SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages, int totalNumOfFeatures){
+	SPPoint* featuresArray;
+	int i,j,k = 0;
+	featuresArray = (SPPoint*)calloc(sizeof(SPPoint), totalNumOfFeatures);
+	if (featuresArray == NULL){
+		//handle error (memory)
+		return NULL;
+	}
+	for (i=0;i<numOfImages;i++){
+		for (j = 0 ;j< workingImagesDatabase[i]->numOfFeatures ; j++){
+			featuresArray[k] = (workingImagesDatabase[i]->featuresArray)[j];
+			k++;
+		}
+	}
+	return featuresArray;
+}
+
+int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
+		int numOfSimilarImages, SPBPQueue bpq) {
+	return spIQ_getSimilarImages(workingImage, kdTree, numOfImages, numOfSimilarImages, bpq);
 }
 
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
-		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn) {
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn,
+		SP_KDTREE_SPLIT_METHOD* splitMethod) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
 	assert( config != NULL);
 
@@ -134,6 +160,12 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 	}
 
 	*knn = spConfigGetKNN(config, &rslt);
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		return rslt;
+	}
+
+	*splitMethod = spConfigGetSplitMethod(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
 		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;

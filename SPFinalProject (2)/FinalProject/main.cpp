@@ -16,6 +16,9 @@ extern "C" {
 #include "SPMainAux.h"
 #include "SPKDArrayUnitTest.h"
 #include "SPKDTreeNodeUnitTest.h"
+#include "SPBPriorityQueue.h"
+#include "SPKDTreeNodeKNNUnitTest.h"
+#include "SPKDTreeNode.h"
 }
 
 #define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
@@ -33,11 +36,16 @@ int main(int argc, char** argv) {
 	const char* loggerFilename;
 	SP_LOGGER_MSG loggerMsg;
 	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
-	int* similarImagesIndexes, countOfSimilar,i,numOfImages, knn;
+	int* similarImagesIndexes, numOfSimilarImages,i,numOfImages, knn;
 	SPImageData currentImageData;
 	SPImageData* imagesDataList = NULL;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
 	bool extractFlag, GUIFlag,oneImageWasSet = false;
+	SPBPQueue bpq = NULL;
+	SP_KDTREE_SPLIT_METHOD splitMethod;
+	int totalNumOfFeatures;
+	SPPoint* allFeaturesArray;
+	SPKDTreeNode kdTree;
 
 	configFilename = getConfigFilename(argc, argv);
 	if (!configFilename) {
@@ -61,9 +69,9 @@ int main(int argc, char** argv) {
 	// call extract/non extract function according to Extraction Mode field in the config struct
 
 	//load relevant data from settings
-	msg = loadRelevantSettingsData(config, &numOfImages,&countOfSimilar,&extractFlag, &GUIFlag, &knn);
+	msg = loadRelevantSettingsData(config, &numOfImages, &numOfSimilarImages, &extractFlag, &GUIFlag, &knn, &splitMethod);
 	if (msg != SP_CONFIG_SUCCESS) {
-			return -1;
+		return -1;
 	}
 
 	//build features database
@@ -99,6 +107,21 @@ int main(int argc, char** argv) {
 	// first run must always happen
 	getQuery(workingImagePath);
 
+	totalNumOfFeatures = calculateTotalNumOfFeatures(imagesDataList, numOfImages);
+
+	allFeaturesArray = initializeAllFeaturesArray(imagesDataList, numOfImages,
+			totalNumOfFeatures);
+	if (allFeaturesArray == NULL)
+		return -1;
+
+	kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures, splitMethod);
+	if (kdTree == NULL)
+		return -1;
+
+	bpq = spBPQueueCreate(knn);
+	if (bpq == NULL)
+		return -1;
+
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT))
 	{
@@ -111,10 +134,11 @@ int main(int argc, char** argv) {
 			free(currentImageData->featuresArray);
 		}
 		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
-		similarImagesIndexes = searchSimilarImages(imagesDataList, currentImageData, countOfSimilar, numOfImages, knn);
+		similarImagesIndexes = searchSimilarImages(currentImageData, kdTree, numOfImages,
+				numOfSimilarImages, bpq);
 
 		if (GUIFlag){
-			for (i=0;i<countOfSimilar;i++){
+			for (i=0;i<numOfSimilarImages;i++){
 				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
 
 				if (msg != SP_CONFIG_SUCCESS){
@@ -126,7 +150,7 @@ int main(int argc, char** argv) {
 			}
 		}
 		else{
-			presentSimilarImagesNoGUI(similarImagesIndexes, countOfSimilar);
+			presentSimilarImagesNoGUI(similarImagesIndexes, numOfSimilarImages);
 		}
 
 		getQuery(workingImagePath);
@@ -161,8 +185,9 @@ int main() {
 	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
 	//runKDArrayTests();
-	runKDTreeNodeTests();
+	//runKDTreeNodeTests();
+	runKDTreeNodeKNNTests();
 	spConfigDestroy(config);
 	return 0;
-}
-*/
+}*/
+

@@ -366,6 +366,8 @@ int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
 
+SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg);
+
 
 /*
  * Returns the logger level as configured in the configuration file,

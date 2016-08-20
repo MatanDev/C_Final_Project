@@ -39,7 +39,7 @@
 #define SP_NUM_OF_FEATURES		"spNumOfFeatures"
 #define SP_EXTRACION_MODE		"spExtractionMode"
 #define SP_NUM_OF_SIM_IMAGES	"spNumOfSimilarImages"
-#define SP_KDTREE_SPLIT_METHOD	"spKDTreeSplitMethod"
+#define SP_KDTREE_SPLIT_MTD		"spKDTreeSplitMethod"
 #define SP_KNN					"spKNN"
 #define SP_MINIMAL_GUI			"spMinimalGUI"
 #define SP_LOGGER_LVL			"spLoggerLevel"
@@ -306,7 +306,7 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		return handlePositiveIntField(&(config->spNumOfSimilarImages),
 				filename, lineNum, value, msg);
 
-	if (!strcmp(varName, SP_KDTREE_SPLIT_METHOD))
+	if (!strcmp(varName, SP_KDTREE_SPLIT_MTD))
 		return handleKDTreeSplitMethod(config, filename, lineNum, value, msg);
 
 	if (!strcmp(varName, SP_KNN))
@@ -454,6 +454,10 @@ int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg) {
 
 int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg) ? config->spKNN : -1;
+}
+
+SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg) ? config->spKDTreeSplitMethod : MAX_SPREAD;
 }
 
 // TODO - should we deal with this in the handler and keep spLoggerLevel as SP_LOGGER_LEVEL

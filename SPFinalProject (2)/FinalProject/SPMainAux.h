@@ -3,6 +3,8 @@
 
 #include "SPConfig.h"
 #include "SPImagesParser.h"
+#include "SPBPriorityQueue.h"
+#include "SPKDTreeNode.h"
 
 /*
  * Extracts the configuration filename from the command line arguments of the program
@@ -69,7 +71,10 @@ void getQuery(char* destination);
  * NULL on memory allocation error, SP CONFIG error, logs the error to the logger
  * otherwise returns an integer array with "simmilarCount" size that contains the indexes of the matched images
  */
-int* searchSimilarImages(SPImageData* imagesDatabase,SPImageData workingImage, int simmilarCount, int numOfImages, int knn);
+//int* searchSimilarImages(SPImageData* imagesDatabase,SPImageData workingImage, int simmilarCount, int numOfImages, int knn);
+//TODO - change doc
+int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
+		int numOfSimilarImages, SPBPQueue bpq);
 
 /*
  * The method gets indexes list and prints them to the user
@@ -93,7 +98,9 @@ void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount);
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
  */
-SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages, int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn);
+SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn,
+		SP_KDTREE_SPLIT_METHOD* splitMethod);
 
 /*
  * The method gets a pointer to images data array and initialize it, allocated memory and indexes values.
@@ -121,4 +128,8 @@ SPImageData initializeWorkingImage();
  * @returns true iff 'path' is a correct path to an available file
  */
 bool verifyPathAndAvailableFile(char* path);
+
+int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfImages);
+
+SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages, int totalNumOfFeatures);
 #endif /* SPMAINAUX_H_ */
