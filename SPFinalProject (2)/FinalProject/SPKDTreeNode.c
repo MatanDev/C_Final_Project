@@ -148,3 +148,8 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 		free(kdTreeNode);
 	}
 }
+
+
+bool isLeaf(SPKDTreeNode treeNode){
+	return (treeNode->data != NULL);
+}

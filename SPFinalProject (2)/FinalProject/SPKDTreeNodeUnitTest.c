@@ -58,10 +58,6 @@ SPPoint* edgeTestCase1Points 								= NULL;
 #define edgeTestCase1Size 									1
 #define edgeTestCase1SplitMethod 							INCREMENTAL
 
-bool isLeaf(SPKDTreeNode treeNode){
-	return (treeNode->data != NULL);
-}
-
 //verify correct data
 bool isNodeDataCorrect(SPKDTreeNode node){
 	if (node == NULL)

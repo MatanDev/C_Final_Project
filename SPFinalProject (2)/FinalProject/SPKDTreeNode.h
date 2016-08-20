@@ -149,5 +149,10 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
  */
 void spKDTreeDestroy(SPKDTreeNode kdTreeNode);
 
-
+/*
+ * Returns true iff the given node is a leaf in a kd-tree
+ * @param treeNode - the given node
+ * @returns - true iff the given node is a leaf
+ */
+bool isLeaf(SPKDTreeNode treeNode);
 #endif /* SPKDTREENODE_H_ */
