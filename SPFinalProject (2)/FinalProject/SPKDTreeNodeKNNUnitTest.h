@@ -3,6 +3,6 @@
 
 
 
-
+void runKDTreeNodeKNNTests();
 
 #endif /* SPKDTREENODEKNNUNITTEST_H_ */

@@ -337,6 +337,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 
 bool runRandomKDTreeTest(){
 	int maxDim, size;
+	bool successFlag = true;
 	SPPoint* pointsArray = NULL;
 	SPKDArray kdArr = NULL;
 	SPKDTreeNode tree = NULL;
@@ -348,8 +349,10 @@ bool runRandomKDTreeTest(){
 
 	pointsArray = generateRandomPointsArray(maxDim,size);
 
-	ASSERT_TRUE(pointsArray != NULL);
+
 	if (pointsArray == NULL){
+		spKDTreeDestroy(tree);
+		spKDArrayDestroy(kdArr);
 		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
 						__LINE__);
@@ -358,8 +361,10 @@ bool runRandomKDTreeTest(){
 	}
 
 	kdArr = Init(pointsArray,size);
-	ASSERT_TRUE(kdArr != NULL);
+
 	if (kdArr == NULL){
+		spKDTreeDestroy(tree);
+		destroyPointsArray(pointsArray,size);
 		spLoggerPrintError(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
 						__LINE__);
@@ -368,8 +373,10 @@ bool runRandomKDTreeTest(){
 	}
 
 	tree = InitKDTree(kdArr, splitMethod);
-	ASSERT_TRUE(tree != NULL);
+
 	if (tree == NULL){
+		spKDArrayDestroy(kdArr);
+		destroyPointsArray(pointsArray,size);
 		spLoggerPrintError(
 				COULD_NOT_INITIALIZE_TREE_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
@@ -378,7 +385,13 @@ bool runRandomKDTreeTest(){
 		return false;
 	}
 
-	return testKDTree( tree,  maxDim, splitMethod,  pointsArray,  size);
+	successFlag = testKDTree( tree,  maxDim, splitMethod,  pointsArray,  size);
+
+	spKDTreeDestroy(tree);
+	spKDArrayDestroy(kdArr);
+	destroyPointsArray(pointsArray,size);
+
+	return successFlag;
 }
 
 
@@ -458,11 +471,11 @@ bool runTestCase1(){
 
 	//left should be a point with value {1,2,3}
 	ASSERT_TRUE(verifyLeaf(left));
-	verifyPointData(left->data, 1, testCase1MaxDim,1,2,3);
+	ASSERT_TRUE(verifyPointData(left->data, 1, testCase1MaxDim,1.0,2.0,3.0));
 
 	//right should be a point with value {5,-7,13}
 	ASSERT_TRUE(verifyLeaf(right));
-	verifyPointData(right->data, 2, testCase1MaxDim,5,-7,13);
+	ASSERT_TRUE(verifyPointData(right->data, 2, testCase1MaxDim,5.0,-7.0,13.0));
 
 	return true;
 }
@@ -573,13 +586,13 @@ bool runTestCase2(){
 	ASSERT_TRUE(verifyNotLeafAndData(ll,0,1));
 
 	ASSERT_TRUE(verifyLeaf(lr));
-	verifyPointData(lr->data, 3, testCase2MaxDim,2,7);
+	ASSERT_TRUE(verifyPointData(lr->data, 3, testCase2MaxDim,2.0,7.0));
 
 	ASSERT_TRUE(verifyLeaf(rl));
-	verifyPointData(rl->data, 4, testCase2MaxDim,9,11);
+	ASSERT_TRUE(verifyPointData(rl->data, 4, testCase2MaxDim,9.0,11.0));
 
 	ASSERT_TRUE(verifyLeaf(rr));
-	verifyPointData(rr->data, 2, testCase2MaxDim,123,70);
+	ASSERT_TRUE(verifyPointData(rr->data, 2, testCase2MaxDim,123.0,70.0));
 
 
 	//handle 3rd level
@@ -587,10 +600,10 @@ bool runTestCase2(){
 	llr = ll->kdtRight;
 
 	ASSERT_TRUE(verifyLeaf(lll));
-	verifyPointData(lll->data, 1, testCase2MaxDim,1,2);
+	ASSERT_TRUE(verifyPointData(lll->data, 1, testCase2MaxDim,1.0,2.0));
 
 	ASSERT_TRUE(verifyLeaf(llr));
-	verifyPointData(llr->data, 5, testCase2MaxDim,3,4);
+	ASSERT_TRUE(verifyPointData(llr->data, 5, testCase2MaxDim,3.0,4.0));
 
 	return true;
 }
@@ -649,7 +662,7 @@ bool runEdgeTestCase1(){
 
 	//root node - leaf with value {2}
 	ASSERT_TRUE(verifyLeaf(edgeTestCase1Tree));
-	verifyPointData(edgeTestCase1Tree->data, 1, edgeTestCase1MaxDim,2);
+	ASSERT_TRUE(verifyPointData(edgeTestCase1Tree->data, 1, edgeTestCase1MaxDim,2.0));
 
 	return true;
 }
