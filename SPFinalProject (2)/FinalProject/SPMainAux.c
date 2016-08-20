@@ -99,13 +99,13 @@ void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
 }
 
 
-int* searchSimilarImages(const SPConfig config,SPImageData* imagesDatabase,
-		SPImageData workingImage, int simmilarCount) {
-	return spIQ_getSimilarImages(config, imagesDatabase, workingImage, simmilarCount);
+int* searchSimilarImages(SPImageData* imagesDatabase,
+		SPImageData workingImage, int simmilarCount,int numOfImages, int knn) {
+	return spIQ_getSimilarImages(imagesDatabase, workingImage, simmilarCount, numOfImages, knn);
 }
 
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
-		int* numOfSimilar, bool* extractFlag, bool* GUIFlag) {
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
 	assert( config != NULL);
 
@@ -128,6 +128,12 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 	}
 
 	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
+	if (rslt != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		return rslt;
+	}
+
+	*knn = spConfigGetKNN(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
 		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;

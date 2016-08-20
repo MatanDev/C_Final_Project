@@ -16,7 +16,7 @@ SPKDTreeNode getSecondChild(SPKDTreeNode tree, SPKDTreeNode firstChild){
 bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
 	SPListElement elem;
 	SP_BPQUEUE_MSG queueMessage;
-	elem = spListElementCreate(spPointGetIndex(currPoint)), spPointL2SquaredDistance(currPoint, queryPoint);
+	elem = spListElementCreate(spPointGetIndex(currPoint), spPointL2SquaredDistance(currPoint, queryPoint));
 
 	if (elem == NULL){
 		spLoggerPrintError(ERROR_CREATING_LIST_ELEMENT, __FILE__,
@@ -27,8 +27,10 @@ bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
 	queueMessage = spBPQueueEnqueue(bpq, elem);
 	spListElementDestroy(elem);
 
-	if (queueMessage != SP_BPQUEUE_FULL || queueMessage != SP_BPQUEUE_SUCCESS)
+	if (queueMessage != SP_BPQUEUE_FULL && queueMessage != SP_BPQUEUE_SUCCESS)
+	//since we pre assume the arguments are not null, this case is only when queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY
 	{
+		assert(queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY);
 		spLoggerPrintError(ERROR_PUSHING_LIST_ELEMENT, __FILE__,
 							__FUNCTION__, __LINE__);
 		return false;
@@ -72,3 +74,4 @@ bool kNearestNeighbors(SPKDTreeNode curr, SPBPQueue bpq, SPPoint queryPoint){
 
 	return true;
 }
+

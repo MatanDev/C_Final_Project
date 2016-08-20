@@ -351,6 +351,22 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
+
+/*
+ * Returns the KNN set in the configuration file, i.e the value
+ * of spKNN.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return positive integer in success, negative integer otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
+
+
 /*
  * Returns the logger level as configured in the configuration file,
  * i.e the SP_LOGGER_LEVEL represented by the value of spLoggerLevel.
@@ -426,6 +442,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
  */
 SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
 		int index);
+
 
 /**
  * The function stores in pcaPath the full path of the pca file.

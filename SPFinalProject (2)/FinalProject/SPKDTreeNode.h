@@ -33,6 +33,9 @@ struct sp_kd_tree_node {
  */
 typedef struct sp_kd_tree_node* SPKDTreeNode;
 
+//TODO - doc this
+SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size, SP_KDTREE_SPLIT_METHOD splitMethod);
+
 /*
  * The method initializes a new kd-tree recursively according to the given
  * kd-array and split method.

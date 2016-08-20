@@ -12,7 +12,7 @@
 #include "SPConfig.h"
 #include "SPImagesParser.h"
 
-int* spIQ_getSimilarImages(SPConfig config,SPImageData* imagesDatabase,SPImageData workingImage,int countOfSimilar);
+int* spIQ_getSimilarImages(SPImageData* imagesDatabase,SPImageData workingImage,int countOfSimilar, int numOfImages, int knn);
 
 
 #endif /* SPIMAGEQUERY_H_ */

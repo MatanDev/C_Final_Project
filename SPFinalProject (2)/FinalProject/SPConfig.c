@@ -452,6 +452,10 @@ int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg) ? config->spNumOfSimilarImages : -1;
 }
 
+int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg) ? config->spKNN : -1;
+}
+
 // TODO - should we deal with this in the handler and keep spLoggerLevel as SP_LOGGER_LEVEL
 // and not as int?
 SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg) {

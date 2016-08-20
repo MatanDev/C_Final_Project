@@ -7,6 +7,12 @@
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
 #define ERROR_POINT_COPY		"Error in copying point"
 
+SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size, SP_KDTREE_SPLIT_METHOD splitMethod){
+	SPKDArray kdArray = NULL;
+	kdArray = Init(pointsArray, size);
+	return InitKDTree(kdArray, splitMethod);
+}
+
 SPKDTreeNode InitKDTree(SPKDArray array,
 		SP_KDTREE_SPLIT_METHOD splitMethod) {
 	return internalInitKDTree(array, splitMethod, 0);

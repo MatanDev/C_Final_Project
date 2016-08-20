@@ -25,7 +25,7 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define STDOUT	"stdout"
 //TODO - verify calloc args order
-/*
+
 int main(int argc, char** argv) {
 	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	const char* loggerFilename;
 	SP_LOGGER_MSG loggerMsg;
 	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
-	int* similarImagesIndexes, countOfSimilar,i,numOfImages;
+	int* similarImagesIndexes, countOfSimilar,i,numOfImages, knn;
 	SPImageData currentImageData;
 	SPImageData* imagesDataList = NULL;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 	// call extract/non extract function according to Extraction Mode field in the config struct
 
 	//load relevant data from settings
-	msg = loadRelevantSettingsData(config, &numOfImages,&countOfSimilar,&extractFlag, &GUIFlag);
+	msg = loadRelevantSettingsData(config, &numOfImages,&countOfSimilar,&extractFlag, &GUIFlag, &knn);
 	if (msg != SP_CONFIG_SUCCESS) {
 			return -1;
 	}
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 	// first run must always happen
 	getQuery(workingImagePath);
 
-	// iterating until the user inputs "#"
+	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT))
 	{
 		oneImageWasSet = true;
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 			free(currentImageData->featuresArray);
 		}
 		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
-		similarImagesIndexes = searchSimilarImages(config, imagesDataList, currentImageData, countOfSimilar);
+		similarImagesIndexes = searchSimilarImages(imagesDataList, currentImageData, countOfSimilar, numOfImages, knn);
 
 		if (GUIFlag){
 			for (i=0;i<countOfSimilar;i++){
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 	// end control flow
 	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
 	return 0;
-}*/
+}
 /*
 int main() {
 	runConfigTests();
@@ -150,7 +150,7 @@ int main(){
 	spConfigDestroy(config);
 	return 0;
 }*/
-
+/*
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
@@ -165,3 +165,4 @@ int main() {
 	spConfigDestroy(config);
 	return 0;
 }
+*/
