@@ -11,8 +11,8 @@
 
 #define DEFAULT_CONFIG_FILE	"spcbir.config"
 #define CANNOT_OPEN_MSG "The configuration file %s couldn’t be open\n"
-#define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Enter a query image or # to terminate:\n"
-#define CLOSEST_IMAGES "The closest images are: "
+#define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Please enter image path:\n"
+#define CLOSEST_IMAGES "The closest images are: " //TODO - dont forget to print output as requested
 #define EXITING "Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 0
 #define QUERY_STRING_ERROR 	"Query is not in the correct format, or file is not available\n"

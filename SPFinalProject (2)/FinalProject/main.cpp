@@ -20,11 +20,11 @@ extern "C" {
 
 #define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
-#define QUERY_EXIT_INPUT "#"
+#define QUERY_EXIT_INPUT "<>"
 
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define STDOUT	"stdout"
-
+//TODO - verify calloc args order
 /*
 int main(int argc, char** argv) {
 	const char* configFilename;
