@@ -119,8 +119,6 @@ bool verifyPointData(SPPoint point, int index, int dim, ...){
 	return true;
 }
 
-
-
 int getTreeNumOfLeaves(SPKDTreeNode treeNode){
 	if (treeNode == NULL)
 		return 0;
