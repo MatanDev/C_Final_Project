@@ -32,7 +32,7 @@ int* spIQ_getTopItems(int* counterArray, int numOfImages, int numOfSimilarImages
 }
 
 
-int* createOutputArray(SPBPQueue bpq)
+int* createOutputArray(SPBPQueue bpq, int originalQueueSize)
 {
 	int imageIndex;
 	SP_BPQUEUE_MSG queueMessage;
@@ -45,7 +45,7 @@ int* createOutputArray(SPBPQueue bpq)
 
 	//what if queue size is less than top images???
 
-	for (imageIndex = 0; imageIndex < spBPQueueSize(bpq); imageIndex++){
+	for (imageIndex = 0; imageIndex < originalQueueSize; imageIndex++){
 		elem = spBPQueuePeek(bpq);
 		outputArray[imageIndex] = spListElementGetIndex(elem);
 		spListElementDestroy(elem);
@@ -87,7 +87,7 @@ int* spIQ_BestSIFTL2SquaredDistance(SPPoint relevantFeature, SPKDTreeNode kdTree
 	*finalQueueSize = spBPQueueSize(bpq);
 
 	// allocate output array and fill it
-	outputArray = createOutputArray(bpq);
+	outputArray = createOutputArray(bpq, *finalQueueSize);
 
 	return outputArray;
 }
