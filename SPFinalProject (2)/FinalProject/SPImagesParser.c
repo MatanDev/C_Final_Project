@@ -357,7 +357,9 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 		return SP_DP_INVALID_ARGUMENT;
 	}
 
+	//TODO - this is not a good limit and need to change to get line with dynamoc realloc
 	line = (char*)calloc(sizeof(char),MAXLINE_LEN);
+
 	if (line == NULL){
 		spLoggerPrintError(ERROR_AT_READING_FEATURES_FROM_FILE, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
