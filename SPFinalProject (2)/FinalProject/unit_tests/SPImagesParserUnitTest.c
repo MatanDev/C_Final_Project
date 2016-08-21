@@ -5,10 +5,10 @@
 #include <string.h>
 #include <assert.h>
 
-#include "SPImagesParser.h"
+#include "../SPImagesParser.h"
 #include "unit_test_util.h"
-#include "SPPoint.h"
-#include "SPConfig.h"
+#include "../SPPoint.h"
+#include "../SPConfig.h"
 #include "SPImagesParserUnitTest.h"
 
 SPConfig internalConfig = NULL;

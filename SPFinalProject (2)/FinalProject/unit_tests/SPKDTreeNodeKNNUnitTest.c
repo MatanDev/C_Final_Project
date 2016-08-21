@@ -5,11 +5,11 @@
 
 #include "unit_test_util.h"
 #include "SPKDTreeNodeKNNUnitTest.h"
-#include "SPKDTreeNode.h"
-#include "SPKDTreeNodeKNN.h"
+#include "../SPKDTreeNode.h"
+#include "../SPKDTreeNodeKNN.h"
 #include "SPKDArrayUnitTest.h"
-#include "SPBPriorityQueue.h"
-#include "SPPoint.h"
+#include "../SPBPriorityQueue.h"
+#include "../SPPoint.h"
 
 #define ERROR_ALLOCATING_MEMORY 							"Error allocating memory"
 #define COULD_NOT_CREATE_POINTS_ARRAY 						"Could not create points array"

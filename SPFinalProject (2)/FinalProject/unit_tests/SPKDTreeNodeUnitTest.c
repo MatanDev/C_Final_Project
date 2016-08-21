@@ -6,14 +6,14 @@
 #include <stdarg.h>
 
 #include "unit_test_util.h"
-#include "SPPoint.h"
-#include "SPConfig.h"
-#include "SPKDArray.h"
-#include "SPLogger.h"
+#include "../SPPoint.h"
+#include "../SPConfig.h"
+#include "../SPKDArray.h"
+#include "../SPLogger.h"
 #include "SPKDTreeNodeUnitTest.h"
-#include "SPKDTreeNode.h"
+#include "../SPKDTreeNode.h"
 #include "SPKDArrayUnitTest.h"
-#include "SPImagesParser.h"
+#include "../SPImagesParser.h"
 
 #define ERROR_AT_TREE_SIZE 									"Error at tree size"
 #define ERROR_AT_NODES_STRUCTURE 							"Error at nodes structure"

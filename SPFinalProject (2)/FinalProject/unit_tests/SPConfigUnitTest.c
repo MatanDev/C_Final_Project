@@ -1,5 +1,5 @@
 #include "unit_test_util.h"
-#include "SPConfig.h"
+#include "../SPConfig.h"
 #include "string.h"
 #include "stdbool.h"
 #include "stdio.h"
