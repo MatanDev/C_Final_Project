@@ -1,7 +1,7 @@
 CC = gcc
 CPP = g++
 #put your object files here
-OBJS = main.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPBPriorityQueue.o SPKDArray.o SPKDTreeNode.o SPKDTreeNodeKNN.o SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o SPConfigUnitTest.o SPImagesParserUnitTest.o SPKDArrayUnitTest.o SPKDTreeNodeKNNUnitTest.o SPKDTreeNodeUnitTest.o
+OBJS = main.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPKDArray.o SPKDTreeNode.o SPKDTreeNodeKNN.o SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o SPConfigUnitTest.o SPImagesParserUnitTest.o SPKDArrayUnitTest.o SPKDTreeNodeKNNUnitTest.o SPKDTreeNodeUnitTest.o
 #The executabel filename
 EXEC = SPCBIR
 TESTS_DIR = ./unit_tests
