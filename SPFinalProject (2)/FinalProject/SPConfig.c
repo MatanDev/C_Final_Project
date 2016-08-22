@@ -83,7 +83,7 @@
 
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
-		if ((*field = strdup(def)) == NULL) {
+		if ((*field = duplicateString(def)) == NULL) {
 			*msg = SP_CONFIG_ALLOC_FAIL;
 			return false;
 		}
@@ -132,7 +132,7 @@ void printErrorMessage(const char* filename, int lineNum,
 bool parseLine(const char* filename, int lineNum, char* line,
 		char** varName, char** value, bool* isCommentOrEmpty,
 		SP_CONFIG_MSG* msg) {
-	int startIndex, i;
+	unsigned int startIndex, i;
 	char *tmpPtr;
 
 	// run while space
@@ -174,7 +174,7 @@ bool parseLine(const char* filename, int lineNum, char* line,
 
 bool handleStringField(char** strField, const char* filename, int lineNum,
 		const char* value, SP_CONFIG_MSG* msg, bool isImagesSuffix) {
-	int i;
+	unsigned int i;
 
 	if (*strField != NULL) {
 		free(*strField);
@@ -198,7 +198,7 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		return false;
 	}
 
-	if ((*strField = strdup(value)) == NULL)
+	if ((*strField = duplicateString(value)) == NULL)
 		*msg = SP_CONFIG_ALLOC_FAIL;
 
 	return *strField != NULL;
@@ -537,28 +537,39 @@ void spConfigDestroy(SPConfig config) {
 char* configMsgToStr(SP_CONFIG_MSG msg) {
 	switch(msg) {
 	case SP_CONFIG_MISSING_DIR:
-		return strdup(MISSING_DIR_MSG);
+		return duplicateString(MISSING_DIR_MSG);
 	case SP_CONFIG_MISSING_PREFIX:
-		return strdup(MISSING_PREFIX_MSG);
+		return duplicateString(MISSING_PREFIX_MSG);
 	case SP_CONFIG_MISSING_SUFFIX:
-		return strdup(MISSING_SUFFIX_MSG);
+		return duplicateString(MISSING_SUFFIX_MSG);
 	case SP_CONFIG_MISSING_NUM_IMAGES:
-		return strdup(MISSING_IMAGES_NUM_MSG);
+		return duplicateString(MISSING_IMAGES_NUM_MSG);
 	case SP_CONFIG_CANNOT_OPEN_FILE:
-		return strdup(CANNOT_OPEN_FILE_MSG);
+		return duplicateString(CANNOT_OPEN_FILE_MSG);
 	case SP_CONFIG_ALLOC_FAIL:
-		return strdup(ALLOCATION_FAILED_MSG);
+		return duplicateString(ALLOCATION_FAILED_MSG);
 	case SP_CONFIG_INVALID_INTEGER:
-		return strdup(INVALID_INT_MSG);
+		return duplicateString(INVALID_INT_MSG);
 	case SP_CONFIG_INVALID_STRING:
-		return strdup(INVALID_STR_MSG);
+		return duplicateString(INVALID_STR_MSG);
 	case SP_CONFIG_INVALID_ARGUMENT:
-		return strdup(INVALID_ARG_MSG);
+		return duplicateString(INVALID_ARG_MSG);
 	case SP_CONFIG_INDEX_OUT_OF_RANGE:
-		return strdup(INDEX_OUT_OF_RANGE_MSG);
+		return duplicateString(INDEX_OUT_OF_RANGE_MSG);
 	case SP_CONFIG_SUCCESS:
-		return strdup(SUCCESS_MSG);
+		return duplicateString(SUCCESS_MSG);
 	}
 	return NULL;
 }
 
+char* duplicateString(const char *str)
+{
+	char* duplicated;
+    int len = 1; //for '\0\'
+    len += strlen(str);
+    duplicated = (char*)malloc(len);
+    if(duplicated != NULL){
+        strcpy(duplicated, str);
+    }
+    return duplicated;
+}

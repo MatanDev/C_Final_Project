@@ -611,7 +611,7 @@ char* pointsArrayToString(SPPoint* points,int size){
 void logPointsArray(SPPoint* points, int size){
 	char message[MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE], *tempMsg;
 	tempMsg = pointsArrayToString(points,size);
-	sprintf(message, "Generated Points are :\n \%s",tempMsg);
+	sprintf(message, "Generated Points are :\n %s",tempMsg);
 	spLoggerPrintMsg(message);
 	free(tempMsg);
 }

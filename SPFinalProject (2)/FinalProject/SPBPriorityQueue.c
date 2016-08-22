@@ -18,18 +18,7 @@ struct sp_bp_queue_t {
 };
 
 
-/**
- * Allocates a new queue.
- * This function creates a new empty queue,
- * Using a flag regarding the creation of the internal data list, if the flag is on
- * the method will create a new list, otherwise it will use a copy of the given source queue
- * @param maxSize - a limit for the size of the queue
- * @param source_queue - the given queue, this parameter should be NULL if the createNewList flag is on
- * @param createNewList - a flag used to indicate whether to create the internal list
- * @return
- * 	NULL - If allocations failed or maxSize < 0 or createNewList flag is off and source_queue is NULL
- * 	A new queue in case of success, with respect to the createNewList flag
- */
+
 SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool createNewList) {
 	SPBPQueue newQueue;
 
@@ -107,16 +96,7 @@ int spBPQueueGetMaxSize(SPBPQueue source) {
 	return source->capacity;
 }
 
-/*
- * The method gets a queue and an element and inserts the element to the queue
- * Pre assumptions:
- *  source is empty, source != NULL , newElement != NULL
- * @param source - the given queue to work on
- * @param newElement - the given element to insert
- * @return
- * SP_BPQUEUE_OUT_OF_MEMORY - in case of allocation error
- * SP_BPQUEUE_SUCCESS - in case the new is inserted correctly
- */
+
 SP_BPQUEUE_MSG spBPQueueInsertIfEmpty(SPBPQueue source, SPListElement newElement) {
 	SP_LIST_MSG retVal;
 	retVal = spListInsertFirst(source->queue, newElement);
@@ -131,17 +111,7 @@ SP_BPQUEUE_MSG spBPQueueInsertIfEmpty(SPBPQueue source, SPListElement newElement
 	return SP_BPQUEUE_SUCCESS;
 }
 
-/*
- * The method removes the last element in the queue (to prevent capacity overflow)
- * The method is given a queue
- * it iterate over the list items, removes the last one (the maximum) and update the current maximum
- * Pre-assumptions
- *  	source != NULL, list is at full capacity
- * @param source - the given queue from which we should remove the last item
- * @return
- * 	SP_BPQUEUE_OUT_OF_MEMORY - in case of memory error
- *  SP_BPQUEUE_SUCCESS - in case the item was successfully inserted to the queue
- */
+
 SP_BPQUEUE_MSG spBPQueueHandleFullCapacity(SPBPQueue source) {
 	int i;
 	SPListElement currElemInQueue, prevElemInQueue;
@@ -168,18 +138,7 @@ SP_BPQUEUE_MSG spBPQueueHandleFullCapacity(SPBPQueue source) {
 
 
 
-/*
- * The method inserts an item to the queue before a given item,
- * assuming the insertion is not at the end of the queue and the queue is not empty
- * Pre-assumptions:
- * source != NULL and source->list not empty and element != NULL
- * and the current iterator of the internal list in the queue is not null
- *  @param source - the given queue from which we should insert the item
- *  @param element - the element we should insert to the queue
- *  @return
- *  SP_BPQUEUE_OUT_OF_MEMORY - in case of memory error
- *  SP_BPQUEUE_SUCCESS - in case the item was successfully inserted to the queue
- */
+
 SP_BPQUEUE_MSG spBPQueueInsertNotEmptyNotLast(SPBPQueue source,
 		SPListElement element) {
 	SP_LIST_MSG retVal;
@@ -194,17 +153,7 @@ SP_BPQUEUE_MSG spBPQueueInsertNotEmptyNotLast(SPBPQueue source,
 	return SP_BPQUEUE_SUCCESS;
 }
 
-/*
- * The method inserts an item to the queue at its end,
- * assuming the queue is not empty
- * Pre-assumptions:
- * - source != NULL and source->list not empty and not at (full capacity - 1) and element != NULL
- *  @param source - the given queue to which we should insert the item
- *  @param element - the element we should insert to the queue
- *  @return
- *  SP_BPQUEUE_OUT_OF_MEMORY - in case of memory error
- *  SP_BPQUEUE_SUCCESS - in case the item was successfully inserted to the queue
- */
+
 SP_BPQUEUE_MSG spBPQueueInsertNotEmptyButLast(SPBPQueue source, SPListElement element) {
 	SP_LIST_MSG retVal;
 	retVal = spListInsertLast(source->queue, element);
@@ -221,17 +170,7 @@ SP_BPQUEUE_MSG spBPQueueInsertNotEmptyButLast(SPBPQueue source, SPListElement el
 	return SP_BPQUEUE_SUCCESS;
 }
 
-/*
- * The method inserts an item to the queue,
- * assuming the queue is not empty
- * Pre-assumptions:
- * - source != NULL and source->list not empty and newElement != NULL
- *  @param source - the given queue to which we should insert the item
- *  @param newElement - the element we should insert to the queue
- *  @return
- *  SP_BPQUEUE_OUT_OF_MEMORY - in case of memory error
- *  SP_BPQUEUE_SUCCESS - in case the item was successfully inserted to the queue
- */
+
 SP_BPQUEUE_MSG spBPQueueInsertNotEmpty(SPBPQueue source, SPListElement newElement) {
 	SPListElement currElemInQueue = spListGetFirst(source->queue);
 
@@ -314,15 +253,7 @@ SPListElement spBPQueuePeekLast(SPBPQueue source) {
 	return spListElementCopy(source->maxElement);
 }
 
-/*
- * The method returns an element value, given a queue and a
- * function pointer that extract some element from it
- * Pre Assumptions - if the source is not NULL than func(source) != NULL
- * @param source - the given queue to extract the data from
- * @param func - a function pointer that given a queue, extract some element from it
- * @return
- * DEFAULT_INVALID_DOUBLE if source is NULL, otherwise the func(source) value.
- */
+
 double returnValueFrom(SPBPQueue source, SPListElement (*func)(SPBPQueue)) {
 	SPListElement item;
 	double returnValue;

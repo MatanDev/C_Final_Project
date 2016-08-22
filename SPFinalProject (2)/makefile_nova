@@ -1,0 +1,89 @@
+CC = gcc
+CPP = g++
+#put your object files here
+OBJS = main.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPBPriorityQueue.o SPKDArray.o SPKDTreeNode.o SPKDTreeNodeKNN.o SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o SPConfigUnitTest.o SPImagesParserUnitTest.o SPKDArrayUnitTest.o SPKDTreeNodeKNNUnitTest.o SPKDTreeNodeUnitTest.o
+#The executabel filename
+EXEC = SPCBIR
+TESTS_DIR = ./unit_tests
+INCLUDEPATH=/usr/local/lib/opencv-3.1.0/include/
+LIBPATH=/usr/local/lib/opencv-3.1.0/lib/
+LIBS=-lopencv_xfeatures2d -lopencv_features2d \
+-lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
+
+
+CPP_COMP_FLAG = -std=c++11 -Wall -Wextra \
+-Werror -pedantic-errors -DNDEBUG
+
+C_COMP_FLAG = -std=c99 -Wall -Wextra \
+-Werror -pedantic-errors -DNDEBUG
+
+$(EXEC): $(OBJS)
+	$(CPP) $(OBJS) -L$(LIBPATH) $(LIBS) -o $@
+main.o: main.cpp SPConfig.h SPLogger.h SPImageProc.h SPBPriorityQueue.h SPImagesParser.h SPPoint.h SPKDTreeNode.h SPImageQuery.h SPMainAux.h $(TESTS_DIR)/SPConfigUnitTest.h $(TESTS_DIR)/SPImagesParserUnitTest.h $(TESTS_DIR)/SPKDArrayUnitTest.h $(TESTS_DIR)/SPKDTreeNodeKNNUnitTest.h $(TESTS_DIR)/SPKDTreeNodeUnitTest.h
+	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $*.cpp
+SPImageProc.o: SPImageProc.cpp SPImageProc.h SPConfig.h SPPoint.h SPLogger.h
+	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $*.cpp
+#a rule for building a simple c souorce file
+#use gcc -MM SPPoint.c to see the dependencies
+
+#priority queue
+SPListElement.o: SPListElement.c SPListElement.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+SPList.o: SPList.c SPList.h SPListElement.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+		
+SPBPriorityQueue.o: SPBPriorityQueue.c SPBPriorityQueue.h SPList.h SPListElement.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+
+#kd data structure
+SPKDArray.o: SPKDArray.c SPKDArray.h SPLogger.h SPPoint.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+
+SPKDTreeNode.o: SPKDTreeNode.c SPKDTreeNode.h SPLogger.h SPKDArray.h SPConfig.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+SPKDTreeNodeKNN.o: SPKDTreeNodeKNN.c SPKDTreeNodeKNN.h SPLogger.h SPKDTreeNode.h SPBPriorityQueue.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+SPPoint.o: SPPoint.c SPPoint.h  SPLogger.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+
+#config and logger
+SPConfig.o: SPConfig.c SPConfig.h  SPLogger.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+SPLogger.o: SPLogger.c SPLogger.h 
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+#image parser
+SPImagesParser.o: SPImagesParser.c SPImagesParser.h  SPPoint.h SPConfig.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+
+#main aux and image query
+
+SPMainAux.o: SPMainAux.c SPMainAux.h  SPImageQuery.h SPLogger.h SPKDTreeNode.h SPBPriorityQueue.h SPImagesParser.h SPConfig.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+	
+SPImageQuery.o: SPImageQuery.c SPImageQuery.h  SPConfig.h SPImagesParser.h SPBPriorityQueue.h SPKDTreeNode.h SPKDTreeNodeKNN.h
+	$(CC) $(C_COMP_FLAG) -c $*.c
+		
+#test units
+SPConfigUnitTest.o: $(TESTS_DIR)/SPConfigUnitTest.c $(TESTS_DIR)/SPConfigUnitTest.h $(TESTS_DIR)/unit_test_util.h SPConfig.h
+	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
+
+SPImagesParserUnitTest.o: $(TESTS_DIR)/SPImagesParserUnitTest.c $(TESTS_DIR)/SPImagesParserUnitTest.h $(TESTS_DIR)/unit_test_util.h SPImagesParser.h SPPoint.h SPConfig.h
+	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
+
+SPKDArrayUnitTest.o: $(TESTS_DIR)/SPKDArrayUnitTest.c $(TESTS_DIR)/SPKDArrayUnitTest.h $(TESTS_DIR)/unit_test_util.h SPPoint.h SPKDArray.h SPLogger.h SPImagesParser.h
+	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
+
+SPKDTreeNodeKNNUnitTest.o: $(TESTS_DIR)/SPKDTreeNodeKNNUnitTest.c $(TESTS_DIR)/SPKDTreeNodeKNNUnitTest.h $(TESTS_DIR)/unit_test_util.h SPKDTreeNode.h SPKDTreeNodeKNN.h SPBPriorityQueue.h SPPoint.h  $(TESTS_DIR)/SPKDArrayUnitTest.h
+	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
+
+SPKDTreeNodeUnitTest.o: $(TESTS_DIR)/SPKDTreeNodeUnitTest.c $(TESTS_DIR)/SPKDTreeNodeUnitTest.h $(TESTS_DIR)/unit_test_util.h  SPPoint.h SPConfig.h SPKDArray.h SPLogger.h SPKDTreeNode.h SPImagesParser.h $(TESTS_DIR)/SPKDArrayUnitTest.h
+	$(CC) $(COMP_FLAG) -c $(TESTS_DIR)/$*.c
+
+	
+clean:
+	rm -f $(OBJS) $(EXEC)

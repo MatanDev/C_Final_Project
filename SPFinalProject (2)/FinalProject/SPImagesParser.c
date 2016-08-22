@@ -396,13 +396,13 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 }
 
 
-SP_DP_MESSAGES createImageDataByPath(char* imagePath, SPImageData imageData){
+SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData){
 	if (imageData->index < 0 || featuresMatrix[imageData->index] == NULL)
 	{
 		spLoggerPrintError(ERROR_ANALYZING_FEATURES, __FILE__,__FUNCTION__, __LINE__);
 		return SP_DP_FEATURE_EXTRACTION_ERROR;
 	}
-	imageData->featuresArray = featuresMatrix[imageData->index]->featuresArray;//getImageFeatures(getImageFeatures, imageData->index, &(imageData->numOfFeatures));
+	imageData->featuresArray = featuresMatrix[imageData->index]->featuresArray;
 	imageData->numOfFeatures = featuresMatrix[imageData->index]->numOfFeatures;
 
 	return SP_DP_SUCCESS;
@@ -489,7 +489,7 @@ SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createF
 	resultImage->index = imageIndex;
 
 	if (createFlag){
-		*message = createImageDataByPath(imageDataPath, resultImage);
+		*message = createImageDataByPreloadedPath(resultImage);
 	}
 	else{
 		*message = loadKnownImageData(imageDataPath, resultImage);

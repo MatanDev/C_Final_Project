@@ -212,7 +212,7 @@ void allocatePointsArray(SPKDTreeNode treeNode,SPPoint* relevantPoints,int* i){
 	allocatePointsArray(treeNode->kdtRight, relevantPoints, i);
 }
 
-bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim ){
+bool verifyDimMaxSpread(SPKDTreeNode treeNode, int maxDim ){
 	SPPoint* relevantPoints;
 	int size;
 	int i = 0 ,j , dimIndex;
@@ -267,14 +267,14 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode,SPPoint* pointsArray, int maxDim )
 }
 
 bool verifyDimSelection(SPKDTreeNode treeNode, int maxDim,
-		SP_KDTREE_SPLIT_METHOD splitMethod, SPPoint* pointsArray){
+		SP_KDTREE_SPLIT_METHOD splitMethod){
 	switch (splitMethod)
 	{
 		case RANDOM:
 			return treeNode->dim >= 0;
 			break;
 		case MAX_SPREAD:
-			return verifyDimMaxSpread(treeNode,pointsArray, maxDim);
+			return verifyDimMaxSpread(treeNode, maxDim);
 			break;
 		case INCREMENTAL:
 			return verifyDimIncremental(treeNode, maxDim);
@@ -291,7 +291,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 		return true;
 	if (treeNode == NULL)
 		return false;
-
+	ASSERT_TRUE(pointsArray != NULL);
 	//test tree size
 	if (getTreeNumOfLeaves(treeNode) != size){
 		spLoggerPrintError(ERROR_AT_TREE_SIZE, __FILE__, __FUNCTION__,
@@ -325,7 +325,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 	}
 
 	//test dim
-	if (!verifyDimSelection(treeNode,maxDim,splitMethod,pointsArray)){
+	if (!verifyDimSelection(treeNode,maxDim,splitMethod)){
 		spLoggerPrintError(ERROR_AT_TREE_DIMENSION_SELECTION_METHOD, __FILE__,
 				__FUNCTION__, __LINE__);
 		FAIL(ERROR_AT_TREE_DIMENSION_SELECTION_METHOD);

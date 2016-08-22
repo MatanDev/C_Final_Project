@@ -194,10 +194,10 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData);
 
 /*
- * The method loads image data given the image path
+ * The method loads image data given the image index, the data is pre-loaded
+ * from the image path at the main method and at this method
  * into an allocated SPImageData structure -  processing the data
  *
- * @param imageDataPath - the file path
  * @param imageData - an allocated SPImageData item to which the data will be written
  *
  * @return -
@@ -206,7 +206,7 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData);
  * SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
  * SP_DP_SUCCESS - image data created successfully
  */
-SP_DP_MESSAGES createImageDataByPath(char* imagePath, SPImageData imageData);
+SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData);
 
 /*
  * The method loads image data given the image path

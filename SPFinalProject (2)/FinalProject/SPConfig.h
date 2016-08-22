@@ -484,4 +484,17 @@ void spConfigDestroy(SPConfig config);
  */
 char* configMsgToStr(SP_CONFIG_MSG msg);
 
+/*
+ * Returns a hard copy of a given string
+ * returns null in case of memory allocation failure
+ * (not logging the failure)
+ *
+ * @param str - the given string to duplicate
+ *
+ * @returns -
+ * NULL in case of memory failure
+ * otherwise a hard copy of the given string (char array)
+ */
+char* duplicateString(const char* str);
+
 #endif /* SPCONFIG_H_ */
