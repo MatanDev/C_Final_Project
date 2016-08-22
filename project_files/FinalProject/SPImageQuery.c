@@ -1,151 +1,151 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <stdbool.h>
 
-#include "SPConfig.h"
 #include "SPImageQuery.h"
 #include "SPKDTreeNodeKNN.h"
+#include "SPLogger.h"
 
-int* spIQ_getTopItems(int* counterArray, int numOfImages, int numOfSimilarImages)
-{
-	int i,j, tempMaxIndex;
-	int *topItems = (int*)calloc(numOfSimilarImages, sizeof(int));
+#define ERROR_ALLOCATING_MEMORY 					"Could not allocate memory"
+#define ERROR_EMPTY_QUEUE 							"Queue is empty"
+#define ERROR_K_NEAREST_NEIGHBORS 					"Error in kNearestNeighbors func"
+#define ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE 	\
+	"Error in getSimilarImagesIndicesToFeature func"
+#define ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE 		\
+	"Error in updateCounterArrayPerFeature func"
 
-	if (topItems == NULL){
-		//TODO - report memory problem
+int* initializeCounterArray(int size) {
+	int i, *counterArray;
+
+	if (!(counterArray = (int*)calloc(size, sizeof(int)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
-	// TODO - is best way?
-	for (j = 0; j < numOfSimilarImages; j++) {
-		tempMaxIndex = 0;
-		for (i = 0; i < numOfImages; i++) {
-			// the ">" is important (not >=) to keep the "internal sort" so that
-			// if 2 indexes has the same value we will have the smaller one first
-			if (counterArray[i] > counterArray[tempMaxIndex]) {
-				tempMaxIndex = i;
-			}
-		}
-		topItems[j] = tempMaxIndex;
-		counterArray[tempMaxIndex] = -1;
-	}
-	return topItems;
+	// set up the counter array
+	for (i = 0; i < size; i++)
+		counterArray[i] = 0;
+
+	return counterArray;
 }
 
+SP_BPQUEUE_MSG popFromQueueToIndicesArray(SPBPQueue bpq, int* indicesArray,
+		int arrayIndex) {
+	SPListElement elem = spBPQueuePeek(bpq);
+	indicesArray[arrayIndex] = spListElementGetIndex(elem);
+	spListElementDestroy(elem);
+	return spBPQueueDequeue(bpq);
+}
 
-int* createOutputArray(SPBPQueue bpq, int originalQueueSize)
-{
-	int imageIndex;
-	SP_BPQUEUE_MSG queueMessage;
-	SPListElement elem;
-	int *outputArray = (int*)calloc(spBPQueueSize(bpq), sizeof(int));
-	if (outputArray == NULL)
-	{
-		return NULL; //TODO - report relevant error
+int* createSimImagesToFeatureIndicesArray(SPBPQueue bpq, int originalQueueSize) {
+	int arrayIndex, *indicesArray;
+
+	if (!(indicesArray = (int*)calloc(originalQueueSize, sizeof(int)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
+		return NULL;
 	}
 
-	//what if queue size is less than top images???
-
-	for (imageIndex = 0; imageIndex < originalQueueSize; imageIndex++){
-		elem = spBPQueuePeek(bpq);
-		outputArray[imageIndex] = spListElementGetIndex(elem);
-		spListElementDestroy(elem);
-		queueMessage = spBPQueueDequeue(bpq);
-		if (queueMessage != SP_BPQUEUE_SUCCESS){
-			//report error
-			free(outputArray);
+	for (arrayIndex = 0; arrayIndex < originalQueueSize; arrayIndex++) {
+		if (popFromQueueToIndicesArray(bpq, indicesArray, arrayIndex)
+				!= SP_BPQUEUE_SUCCESS) {
+			// we assume bpq is not NULL
+			spLoggerPrintError(ERROR_EMPTY_QUEUE, __FILE__, __FUNCTION__, __LINE__);
+			free(indicesArray);
 			return NULL;
 		}
 	}
 
-	return outputArray;
+	assert(spBPQueueIsEmpty(bpq));
+
+	return indicesArray;
 }
 
-int* spIQ_BestSIFTL2SquaredDistance(SPPoint relevantFeature, SPKDTreeNode kdTree,
-		SPBPQueue bpq, int* finalQueueSize){
-	int* outputArray = NULL;
-
-	bool successFlag = true;
-
-	if (bpq == NULL){
-		//log error and return null
-		return NULL;
-	}
-
-	if (kdTree == NULL){
-		//handle error
-		return NULL;
-	}
-
-	successFlag = kNearestNeighbors(kdTree, bpq, relevantFeature);
-
-	if (successFlag == false){
-		spBPQueueDestroy(bpq); // TODO - validate if needed or handle in main
-		//free memory?
+int* getSimilarImagesIndicesToFeature(SPPoint relevantFeature, SPKDTreeNode kdTree,
+		SPBPQueue bpq, int* finalQueueSize) {
+	if (!kNearestNeighbors(kdTree, bpq, relevantFeature)){
+		spLoggerPrintError(ERROR_K_NEAREST_NEIGHBORS, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
 	*finalQueueSize = spBPQueueSize(bpq);
 
-	// allocate output array and fill it
-	outputArray = createOutputArray(bpq, *finalQueueSize);
-
-	return outputArray;
+	return createSimImagesToFeatureIndicesArray(bpq, *finalQueueSize);
 }
 
-int* initializeCounterArray(int numOfImages) {
-	int i, *counterArray;
-	counterArray = (int*)calloc(numOfImages, sizeof(int));
+bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
+		SPKDTreeNode kdTree, SPBPQueue bpq) {
+	int j, finalQueueSize, *similarImagesIndices;
 
-	if (counterArray == NULL){
-		//TODO - report memory problem
+	if (!(similarImagesIndices = getSimilarImagesIndicesToFeature(relevantFeature, kdTree,
+			bpq, &finalQueueSize))) {
+		spLoggerPrintError(ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE, __FILE__,
+				__FUNCTION__, __LINE__);
+		return false;
+	}
+
+	for (j = 0; j < finalQueueSize; j++)
+		counterArray[similarImagesIndices[j]]++;
+
+	// if we get here closestImagesIndices is not null
+	free(similarImagesIndices);
+
+	return true;
+}
+
+int* getTopItems(int* counterArray, int counterArraySize, int retArraySize) {
+	int i, j, tempMaxIndex, *topItems;
+
+	if (!(topItems = (int*)calloc(retArraySize, sizeof(int)))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
-	// set up the counter array
-	for (i = 0; i < numOfImages; i++) {
-		counterArray[i] = 0;
+	// TODO - is best way?
+	for (j = 0; j < retArraySize; j++) {
+		tempMaxIndex = 0;
+
+		for (i = 1; i < counterArraySize; i++) {
+			// the ">" is important (not >=) to keep the "internal sort" so that
+			// if 2 indexes has the same value we will have the smaller one first
+			if (counterArray[i] > counterArray[tempMaxIndex])
+				tempMaxIndex = i;
+		}
+
+		topItems[j] = tempMaxIndex;
+		counterArray[tempMaxIndex] = -1;
 	}
 
-	return counterArray;
+	return topItems;
 }
 
-int* spIQ_getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
+int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq) {
-	int i, j, finalQueueSize;
-	int *topItems, *counterArray, *resultsArray;
-	if (workingImage == NULL || kdTree == NULL){
-		return NULL; //TODO - log relevant error
-	}
+	assert(workingImage != NULL && kdTree != NULL && bpq != NULL);
+	int i, *topItems, *counterArray;
 
 	// create an index-counter array for the images
-	counterArray = initializeCounterArray(numOfImages);
-
-	if (counterArray == NULL){
-		//TODO - report memory problem
+	if (!(counterArray = initializeCounterArray(numOfImages))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
-	// for each feature in the working image send a request to compare the best NUM_OF_BEST_DIST_IMGS
-	// for each NUM_OF_BEST_DIST_IMGS returned increase a counter at the relevant index
 	for (i = 0; i < workingImage->numOfFeatures; i++) {
-		resultsArray = spIQ_BestSIFTL2SquaredDistance((workingImage->featuresArray)[i],
-				kdTree, bpq, &finalQueueSize);
-
-		if (resultsArray == NULL) {
-			//TODO - report relevant problem
+		if (!updateCounterArrayPerFeature(counterArray, (workingImage->featuresArray)[i],
+				kdTree, bpq)) {
+			spLoggerPrintError(ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE, __FILE__,
+					__FUNCTION__, __LINE__);
+			// if we get here counterArray is not null
 			free(counterArray);
 			return NULL;
 		}
-
-		for (j = 0; j < finalQueueSize; j++) {
-			counterArray[resultsArray[j]]++;
-		}
-
-		if (resultsArray != NULL)
-			free(resultsArray);
 	}
 
-	// sort the index counter array and get the best NUM_OF_BEST_DIST_IMGS
-	topItems = spIQ_getTopItems(counterArray, numOfImages, numOfSimilarImages);
+	topItems = getTopItems(counterArray, numOfImages, numOfSimilarImages);
+
+	// TODO - maybe free inside previous line function
+	// if we get here counterArray is not null
+	free(counterArray);
+
 	return topItems;
 }

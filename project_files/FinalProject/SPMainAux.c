@@ -7,12 +7,15 @@
 #include "SPImageQuery.h"
 #include "SPLogger.h"
 #include "SPKDTreeNode.h"
+#include "SPBPriorityQueue.h"
 
 //TODO - remove fflush(NULL) at production
 
 #define DEFAULT_CONFIG_FILE	"spcbir.config"
 #define CANNOT_OPEN_MSG "The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Please enter image path:\n"
+#define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
+#define STDOUT	"stdout"
 #define CLOSEST_IMAGES "The closest images are: " //TODO - dont forget to print output as requested
 #define EXITING "Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 0
@@ -29,7 +32,7 @@
 
 
 
-const char* getConfigFilename(int argc, char** argv) {
+char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
 		return DEFAULT_CONFIG_FILE;
 	if (argc == 3 && !strcmp(argv[1], "-c"))
@@ -76,11 +79,14 @@ void getAsString(const char* message, char* destination) {
 }
 
 void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
-		int numOfImages, bool oneImageWasSet) {
+		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq) {
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	freeImageData(image, !oneImageWasSet);
 	freeAllImagesData(imagesList,numOfImages);
+	spKDTreeDestroy(kdTree);
+	spBPQueueDestroy(bpq);
+	spLoggerDestroy();
 }
 
 void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
@@ -107,16 +113,16 @@ int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfIma
 	return sum;
 }
 
-SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages, int totalNumOfFeatures){
+SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages,
+		int totalNumOfFeatures){
 	SPPoint* featuresArray;
-	int i,j,k = 0;
-	featuresArray = (SPPoint*)calloc(sizeof(SPPoint), totalNumOfFeatures);
-	if (featuresArray == NULL){
-		//handle error (memory)
+	int i, j, k = 0;
+	if (!(featuresArray = (SPPoint*)calloc(sizeof(SPPoint), totalNumOfFeatures))) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
 		return NULL;
 	}
-	for (i=0;i<numOfImages;i++){
-		for (j = 0 ;j< workingImagesDatabase[i]->numOfFeatures ; j++){
+	for (i = 0; i < numOfImages; i++){
+		for (j = 0 ;j < workingImagesDatabase[i]->numOfFeatures; j++) {
 			featuresArray[k] = (workingImagesDatabase[i]->featuresArray)[j];
 			k++;
 		}
@@ -126,12 +132,11 @@ SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numO
 
 int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq) {
-	return spIQ_getSimilarImages(workingImage, kdTree, numOfImages, numOfSimilarImages, bpq);
+	return getSimilarImages(workingImage, kdTree, numOfImages, numOfSimilarImages, bpq);
 }
 
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
-		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn,
-		SP_KDTREE_SPLIT_METHOD* splitMethod) {
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
 	assert( config != NULL);
 
@@ -154,18 +159,6 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 	}
 
 	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
-	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
-		return rslt;
-	}
-
-	*knn = spConfigGetKNN(config, &rslt);
-	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
-		return rslt;
-	}
-
-	*splitMethod = spConfigGetSplitMethod(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
 		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
@@ -202,7 +195,6 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 	setFeaturesMatrix(*imagesDataList);
 }
 
-
 SPImageData initializeWorkingImage() {
 	SPImageData workingImage = NULL;
 	workingImage = (SPImageData)malloc(sizeof(struct sp_image_data));
@@ -215,3 +207,99 @@ SPImageData initializeWorkingImage() {
 	workingImage->index = QUERY_IMAGE_DEFAULT_INDEX;
 	return workingImage;
 }
+
+bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataList,
+		SPImageData* currentImageData, SPKDTreeNode* kdTree, SPBPQueue* bpq,
+		int numOfImages) {
+	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
+	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
+	int totalNumOfFeatures, knn;
+	SPPoint* allFeaturesArray;
+	SP_KDTREE_SPLIT_METHOD splitMethod;
+
+	if (!(*imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage))) {
+		return false;
+	}
+
+	if (!(*currentImageData = initializeWorkingImage())) {
+		return false;
+	}
+
+	totalNumOfFeatures = calculateTotalNumOfFeatures(*imagesDataList, numOfImages);
+
+	if (!(allFeaturesArray = initializeAllFeaturesArray(*imagesDataList, numOfImages,
+			totalNumOfFeatures))) {
+		//TODO - talk with Matan about where it's better to free
+		//freeAllImagesData(imagesDataList, numOfImages);
+		return false;
+	}
+
+	splitMethod = spConfigGetSplitMethod(config, &configMessage);
+
+	if (configMessage != SP_CONFIG_SUCCESS){
+		free(allFeaturesArray);
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		return false;
+	}
+
+	if (!(*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
+			splitMethod))) {
+		free(allFeaturesArray);
+		//TODO - talk with Matan about where it's better to free
+		//freeAllImagesData(imagesDataList, numOfImages);
+		return false;
+	}
+
+	free(allFeaturesArray);
+	//TODO - talk with Matan about where it's better to free
+	//freeAllImagesData(imagesDataList, numOfImages);
+
+	knn = spConfigGetKNN(config, &configMessage);
+
+	if (configMessage != SP_CONFIG_SUCCESS){
+		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		return false;
+	}
+
+	if (!(*bpq = spBPQueueCreate(knn))) {
+		return false;
+	}
+
+	return true;
+}
+
+bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
+		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag) {
+	char *configFilename, *loggerFilename;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	SP_LOGGER_LEVEL loggerLevel;
+
+	if (!(configFilename = getConfigFilename(argc, argv))) {
+		printf(INVALID_CMD_LINE);
+		return false; //exit - maybe return something...
+	}
+
+	if (!(*config = getConfigFromFile(configFilename, &msg)) || msg != SP_CONFIG_SUCCESS)
+		return false; // TODO - maybe report relevant error (log still not initialized)
+
+	loggerFilename = spConfigGetLoggerFilename(*config, &msg);
+	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
+		return false; // TODO - maybe report relevant error (log still not initialized)
+
+	loggerLevel = spConfigGetLoggerLevel(*config, &msg);
+
+	if (msg != SP_CONFIG_SUCCESS)
+		return false;
+
+	if (spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
+			loggerLevel) != SP_LOGGER_SUCCESS)
+		return false;// TODO - maybe report relevant error (log not initialized)
+
+	//load relevant data from settings
+	if (loadRelevantSettingsData(*config, numOfImages, numOfSimilarImages, extractFlag,
+			GUIFlag) != SP_CONFIG_SUCCESS) {
+		return false;
+	}
+	return true;
+}
+

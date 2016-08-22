@@ -33,18 +33,43 @@ struct sp_kd_tree_node {
  */
 typedef struct sp_kd_tree_node* SPKDTreeNode;
 
-//TODO - doc this
-SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size, SP_KDTREE_SPLIT_METHOD splitMethod);
+/* The method initializes a new kd-tree recursively according to the given SPPoint
+ * array and split method.
+ *
+ * @param pointsArray - the relevant SPPoint array to work by
+ * @param size - the size of the 'pointsArray'
+ * @param splitMethod - an enum representing the splitting criteria:
+ *   - MAX_SPREAD - uses the dimension that contains the largest difference between the
+ *   last and first items (when sorted)
+ *   - RANDOM - choose a random dimension
+ *	 - INCREMENTAL - the splitting dimension of the upper level is i%d where i is the
+ *	 recursive depth.
+ * @returns -
+ *  NULL if :
+ *   - array is NULL
+ *   - memory allocation failed
+ *   - //TODO - verify no other errors in this process
+ *   otherwise returns a pointer to the root of the
+ *   kd-tree that is built by the given array and split method.
+ *
+ * @logger -
+ * in case of any type of failure the relevant error is logged to the
+ * logger
+ */
+SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
+		SP_KDTREE_SPLIT_METHOD splitMethod);
 
 /*
  * The method initializes a new kd-tree recursively according to the given
  * kd-array and split method.
  *
  * @param array - the relevant kd-array to work by
- * @param splitMethod - an enum representing the splitting criteria :
- *   - MAX_SPREAD - uses the dimension that contains the largest difference between the last and first items (when sorted)
+ * @param splitMethod - an enum representing the splitting criteria:
+ *   - MAX_SPREAD - uses the dimension that contains the largest difference between the
+ *   last and first items (when sorted)
  *   - RANDOM - choose a random dimension
- *	 - INCREMENTAL - the splitting dimension of the upper level is i%d where i is the recursive depth.
+ *	 - INCREMENTAL - the splitting dimension of the upper level is i%d where i is the
+ *	 recursive depth.
  * @returns -
  *  NULL if :
  *   - array is NULL
@@ -101,7 +126,7 @@ int getSplitDimInMaxSpreadMethod(SPKDArray array);
  *
  * @param node - the previously initiated SPKDTreeNode instance
  * @param array - the relevant kd-array to work by
- * @param splitMethod - an enum representing the splitting criteria :
+ * @param splitMethod - an enum representing the splitting criteria:
  *   - MAX_SPREAD - uses the dimension that contains the largest difference
  *   between the last and first items (when sorted)
  *   - RANDOM - choose a random dimension
@@ -125,10 +150,13 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
  *
  * @param array - the relevant kd-array to work by
  * @param splitMethod - an enum representing the splitting criteria :
- *   - MAX_SPREAD - uses the dimension that contains the largest difference between the last and first items (when sorted)
+ *   - MAX_SPREAD - uses the dimension that contains the largest difference between the
+ *   last and first items (when sorted)
  *   - RANDOM - choose a random dimension
- *	 - INCREMENTAL - the splitting dimension of the upper level is i%d where i is the recursive depth.
- * @param recDepth - the ((depth of the recursive - 1) modulo d), used in case the splitMethod is 'INCREMENTAL'
+ *	 - INCREMENTAL - the splitting dimension of the upper level is i%d where i is the
+ *	 recursive depth.
+ * @param recDepth - the ((depth of the recursive - 1) modulo d), used in case the
+ * splitMethod is 'INCREMENTAL'
  *
  * @returns -
  *  NULL if :
@@ -142,7 +170,8 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
  * in case of any type of failure the relevant error is logged to the
  * logger
  */
-SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth);
+SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod,
+		int recDepth);
 
 /**
  * Frees all memory resources associated with kdTreeNode.

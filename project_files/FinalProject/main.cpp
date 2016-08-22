@@ -8,148 +8,101 @@
 extern "C" {
 #include "SPConfig.h"
 #include "SPLogger.h"
-#include "SPConfigUnitTest.h"
+#include "unit_tests/SPConfigUnitTest.h"
 #include "SPImagesParser.h"
 #include "SPPoint.h"
-#include "SPImagesParserUnitTest.h"
+#include "unit_tests/SPImagesParserUnitTest.h"
 #include "SPImageQuery.h"
 #include "SPMainAux.h"
-#include "SPKDArrayUnitTest.h"
-#include "SPKDTreeNodeUnitTest.h"
+#include "unit_tests/SPKDArrayUnitTest.h"
+#include "unit_tests/SPKDTreeNodeUnitTest.h"
 #include "SPBPriorityQueue.h"
-#include "SPKDTreeNodeKNNUnitTest.h"
+#include "unit_tests/SPKDTreeNodeKNNUnitTest.h"
 #include "SPKDTreeNode.h"
 }
-
-#define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
 #define QUERY_EXIT_INPUT "<>"
 
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
-#define STDOUT	"stdout"
 //TODO - verify calloc args order
 
 int main(int argc, char** argv) {
-	const char* configFilename;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config;
-	const char* loggerFilename;
-	SP_LOGGER_MSG loggerMsg;
-	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
-	int* similarImagesIndexes, numOfSimilarImages,i,numOfImages, knn;
-	SPImageData currentImageData;
-	SPImageData* imagesDataList = NULL;
+	int* similarImagesIndexes, numOfSimilarImages, i, numOfImages = 0;
+	SPImageData currentImageData = NULL, *imagesDataList = NULL;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
-	bool extractFlag, GUIFlag,oneImageWasSet = false;
+	bool extractFlag, GUIFlag, oneImageWasSet = false;
+	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
-	SP_KDTREE_SPLIT_METHOD splitMethod;
-	int totalNumOfFeatures;
-	SPPoint* allFeaturesArray;
-	SPKDTreeNode kdTree;
 
-	configFilename = getConfigFilename(argc, argv);
-	if (!configFilename) {
-		printf(INVALID_CMD_LINE);
-		return -1; //exit - maybe return something...
-	}
-
-	config = getConfigFromFile(configFilename, &msg);
-	if (config == NULL || msg != SP_CONFIG_SUCCESS)
-		return -1; // TODO - maybe report relevant error (log still not initialized)
-
-	loggerFilename = spConfigGetLoggerFilename(config, &msg);
-	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
-		return -1; // TODO - maybe report relevant error (log still not initialized)
-
-	loggerMsg = spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
-			spConfigGetLoggerLevel(config, &msg));
-	if (loggerMsg != SP_LOGGER_SUCCESS || msg != SP_CONFIG_SUCCESS)
-		return -1 ;// TODO - maybe report relevant error (log not initialized)
-
-	// call extract/non extract function according to Extraction Mode field in the config struct
-
-	//load relevant data from settings
-	msg = loadRelevantSettingsData(config, &numOfImages, &numOfSimilarImages, &extractFlag, &GUIFlag, &knn, &splitMethod);
-	if (msg != SP_CONFIG_SUCCESS) {
+	if (!initConfigAndSettings(argc, argv, &config, &numOfImages, &numOfSimilarImages,
+			&extractFlag, &GUIFlag)) {
+		endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+				oneImageWasSet, kdTree, bpq);
 		return -1;
 	}
 
 	//build features database
 	sp::ImageProc imageProcObject(config);
 
-
 	if (extractFlag) {
 		initializeImagesDataList(&imagesDataList,numOfImages);
 		if (imagesDataList == NULL) {
+			endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+							oneImageWasSet, kdTree, bpq);
 			return -1;
 		}
-		for (i=0 ; i<numOfImages; i++){
-			msg = spConfigGetImagePath(tempPath, config,i);
-			if (msg != SP_CONFIG_SUCCESS){
+		for (i = 0; i < numOfImages; i++){
+			msg = spConfigGetImagePath(tempPath, config, i);
+			if (msg != SP_CONFIG_SUCCESS) {
 				spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
+				endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+								oneImageWasSet, kdTree, bpq);
 				return -1;
 			}
-			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath,i,&(imagesDataList[i]->numOfFeatures));
+			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath, i, &(imagesDataList[i]->numOfFeatures));
 		}
 	}
 
-	//handle images data
-	imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage);
-	if (imagesDataList == NULL) {
-		return -1;
-	}
-
-	currentImageData = initializeWorkingImage();
-	if (currentImageData == NULL) {
+	if (!(initializeKDTreeAndBPQueue(config, &imagesDataList, &currentImageData, &kdTree,
+			&bpq, numOfImages))) {
+		endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+						oneImageWasSet, kdTree, bpq);
 		return -1;
 	}
 
 	// first run must always happen
 	getQuery(workingImagePath);
 
-	totalNumOfFeatures = calculateTotalNumOfFeatures(imagesDataList, numOfImages);
-
-	allFeaturesArray = initializeAllFeaturesArray(imagesDataList, numOfImages,
-			totalNumOfFeatures);
-	if (allFeaturesArray == NULL)
-		return -1;
-
-	kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures, splitMethod);
-	if (kdTree == NULL)
-		return -1;
-
-	bpq = spBPQueueCreate(knn);
-	if (bpq == NULL)
-		return -1;
-
 	// iterating until the user inputs "<>"
-	while (strcmp(workingImagePath, QUERY_EXIT_INPUT))
-	{
+	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
 		oneImageWasSet = true;
-		if (!verifyPathAndAvailableFile(workingImagePath)){
-			endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
+		if (!verifyPathAndAvailableFile(workingImagePath)) {
+			endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+							oneImageWasSet, kdTree, bpq);
 			return -1;
 		}
-		if (currentImageData->featuresArray != NULL){
+		if (currentImageData->featuresArray != NULL) {
 			free(currentImageData->featuresArray);
 		}
 		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
 		similarImagesIndexes = searchSimilarImages(currentImageData, kdTree, numOfImages,
 				numOfSimilarImages, bpq);
 
-		if (GUIFlag){
-			for (i=0;i<numOfSimilarImages;i++){
+		if (GUIFlag) {
+			for (i=0;i<numOfSimilarImages;i++) {
 				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
 
-				if (msg != SP_CONFIG_SUCCESS){
-					endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
+				if (msg != SP_CONFIG_SUCCESS) {
 					spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
+					endControlFlow(config, currentImageData, imagesDataList, numOfImages,
+									oneImageWasSet, kdTree, bpq);
 					return -1;
 				}
 				imageProcObject.showImage(tempPath);
 			}
-		}
-		else{
+		} else {
 			presentSimilarImagesNoGUI(similarImagesIndexes, numOfSimilarImages);
 		}
 
@@ -157,7 +110,8 @@ int main(int argc, char** argv) {
 	}
 
 	// end control flow
-	endControlFlow(config,currentImageData,imagesDataList,numOfImages, oneImageWasSet);
+	endControlFlow(config, currentImageData, imagesDataList, numOfImages, oneImageWasSet,
+			kdTree, bpq);
 	return 0;
 }
 /*

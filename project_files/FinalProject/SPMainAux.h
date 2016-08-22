@@ -16,7 +16,7 @@
  * @return the configuration filename extracted from the command line arguments if they
  * were given in a valid way, NULL otherwise.
  */
-const char* getConfigFilename(int argc, char** argv);
+char* getConfigFilename(int argc, char** argv);
 
 /*
  * Builds a configuration structure instance based on the given configuration filename
@@ -36,9 +36,12 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
  * @param imagesList - images array to be freed
  * @param numOfImages - number of images to free at images list
  * @param oneImageWasSet - indicates that image->features is not NULL
+ * @param kdTree - the KDTree item to be freed
+ * @param bpq - the priority queue item to be freed
  *
  */
-void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList, int numOfImages, bool oneImageWasSet);
+void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
+		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq);
 
 /*
  * The method prints a message to the console and gets an input from the user
@@ -58,21 +61,24 @@ void getAsString(const char* message, char* destination);
 void getQuery(char* destination);
 
 /*
- * The method search the database for similar images and returns an array of integers representing
- * the closest images fount to the query image
+ * The method search the database for similar images and returns an array of integers
+ * representing the closest images found to the query image
  *
- * @param imagesDatabase - images array to be searched
  * @param workingImage - image item to query
- * @param simmilarCount - the count of requested items that the method should return
+ * @param kdTree - a KDTree instance representing the KDTree created from all the features
+ * of all the images whose paths were given in the configuration file
  * @param numOfImages - the total number of images in the database
- * @param knn - the max-size of the bpq at the knn search process
+ * @param numOfSimilarImages - the size of the returned array
+ * @param bpq - a priority queue used to store the nearest features to each feature of the
+ * working image
  *
  * @returns
- * NULL on memory allocation error, SP CONFIG error, logs the error to the logger
- * otherwise returns an integer array with "simmilarCount" size that contains the indexes of the matched images
+ * NULL on memory allocation error, or error in an internal function
+ * otherwise returns an integer array with "numOfSimilarImages" size that contains the
+ * indices of the matched images
+ *
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
-//int* searchSimilarImages(SPImageData* imagesDatabase,SPImageData workingImage, int simmilarCount, int numOfImages, int knn);
-//TODO - change doc
 int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq);
 
@@ -92,15 +98,13 @@ void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount);
  * @param numOfSimilar - pointer to an integer representing the count if similar images
  * @param extractFlag - pointer to a boolean representing the extraction flag
  * @param GUIFlag - pointer to a boolean representing the GUI flag
- * @param knn - pointer to an integer representing the size of bpq at knn search
  *
  * @returns
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
  */
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
-		int* numOfSimilar, bool* extractFlag, bool* GUIFlag, int* knn,
-		SP_KDTREE_SPLIT_METHOD* splitMethod);
+		int* numOfSimilar, bool* extractFlag, bool* GUIFlag);
 
 /*
  * The method gets a pointer to images data array and initialize it, allocated memory and indexes values.
@@ -129,7 +133,41 @@ SPImageData initializeWorkingImage();
  */
 bool verifyPathAndAvailableFile(char* path);
 
+/*
+ * Calculates the sum of all features of all images in 'workingImagesDatabase' SPImageData
+ * instances array and returns it
+ *
+ * @param workingImagesDatabase - an array of SPImageData instances
+ * @param numOfImages - the number of images in workingImagesDatabase (the size of the
+ * array)
+ *
+ * @returns the sum of all features of all images in 'workingImagesDatabase'
+ */
 int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfImages);
 
-SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages, int totalNumOfFeatures);
+/*
+ * Creates and fills an SPPoint array of all the features of all the images in
+ * 'workingImagesDatabase' SPImageData instances array
+ *
+ * @param workingImagesDatabase - an array of SPImageData instances
+ * @param numOfImages - the number of images in workingImagesDatabase (the size of the
+ * SPImageData instances array)
+ * @param totalNumOfFeatures - the size of the return array
+ *
+ * @returns an SPPoint array of all the features of all the images in
+ * 'workingImagesDatabase'
+ */
+SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages,
+		int totalNumOfFeatures);
+
+// TODO - doc
+bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataList,
+		SPImageData* currentImageData, SPKDTreeNode* kdTree, SPBPQueue* bpq,
+		int numOfImages);
+
+bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
+		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag);
+
+
 #endif /* SPMAINAUX_H_ */
+

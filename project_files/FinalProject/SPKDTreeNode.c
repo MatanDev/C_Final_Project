@@ -7,10 +7,14 @@
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
 #define ERROR_POINT_COPY		"Error in copying point"
 
-SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size, SP_KDTREE_SPLIT_METHOD splitMethod){
+SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
+		SP_KDTREE_SPLIT_METHOD splitMethod) {
+	SPKDTreeNode ret = NULL;
 	SPKDArray kdArray = NULL;
 	kdArray = Init(pointsArray, size);
-	return InitKDTree(kdArray, splitMethod);
+	ret = InitKDTree(kdArray, splitMethod);
+	spKDArrayDestroy(kdArray);
+	return ret;
 }
 
 SPKDTreeNode InitKDTree(SPKDArray array,
@@ -154,7 +158,6 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 		free(kdTreeNode);
 	}
 }
-
 
 bool isLeaf(SPKDTreeNode treeNode){
 	return (treeNode->data != NULL);
