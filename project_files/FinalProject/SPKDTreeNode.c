@@ -72,6 +72,7 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 	if (!(node->val = (double*)calloc(1, sizeof(double)))) {
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
 						__FUNCTION__, __LINE__);
+		spKDArrayPairDestroy(splitResPair);
 		return onErrorInInitKDTree(node);
 	}
 
@@ -89,11 +90,13 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 			!(node->kdtRight =
 			internalInitKDTree(splitResPair->kdRight, splitMethod,
 					(recDepth + 1) % array->dim))	) {
+		spKDArrayPairDestroy(splitResPair);
 		return onErrorInInitKDTree(node);
 	}
 
 	node->data = NULL;
 
+	spKDArrayPairDestroy(splitResPair);
 
 	return node;
 }
