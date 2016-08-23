@@ -211,25 +211,29 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg);
 
 /*
- * Destroys the given configuration structure instance and returns NULL
+ * Closes given FILE pointer 'configFile', destroys the given configuration structure
+ * instance and returns NULL
  *
  * @param config - pointer to the configuration structure instance
+ * @param configFile - pointer to the configuration FILE
  * @return NULL
  */
-SPConfig onError(SPConfig config);
+SPConfig onError(SPConfig config, FILE* configFile);
 
 /*
- * Check if the parameters that don't have a default value were set in the configuration file
+ * Check if the parameters that don't have a default value were set in the configuration
+ * file
  *
  * @param config - pointer to the configuration structure instance
  * @param msg - pointer in which the msg returned by the function is stored
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
+ * @param configFile - pointer to the configuration FILE
  * @return config if all parameters that don't have a default value were set in the
  * configuration file, otherwise return NULL
  */
 SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
-		const char* filename, int lineNum);
+		const char* filename, int lineNum, FILE* configFile);
 
 /*
  * Returns true if both config is not null, otherwise false

@@ -30,7 +30,7 @@ extern "C" {
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config;
-	int* similarImagesIndexes, numOfSimilarImages, i, numOfImages = 0;
+	int *similarImagesIndices = NULL, numOfSimilarImages, i, numOfImages = 0;
 	SPImageData currentImageData = NULL, *imagesDataList = NULL;
 	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
 	bool extractFlag, GUIFlag, oneImageWasSet = false;
@@ -88,12 +88,12 @@ int main(int argc, char** argv) {
 			free(currentImageData->featuresArray);
 		}
 		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
-		similarImagesIndexes = searchSimilarImages(currentImageData, kdTree, numOfImages,
+		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
 				numOfSimilarImages, bpq);
 
 		if (GUIFlag) {
 			for (i=0;i<numOfSimilarImages;i++) {
-				msg = spConfigGetImagePath(tempPath, config,similarImagesIndexes[i]);
+				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);
 
 				if (msg != SP_CONFIG_SUCCESS) {
 					spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
@@ -104,8 +104,11 @@ int main(int argc, char** argv) {
 				imageProcObject.showImage(tempPath);
 			}
 		} else {
-			presentSimilarImagesNoGUI(similarImagesIndexes, numOfSimilarImages);
+			presentSimilarImagesNoGUI(similarImagesIndices, numOfSimilarImages);
 		}
+
+		free(similarImagesIndices);
+		similarImagesIndices = NULL;
 
 		getQuery(workingImagePath);
 	}

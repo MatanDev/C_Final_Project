@@ -69,7 +69,6 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 
 	node->dim = splitDim;
 
-
 	if (!(node->val = (double*)calloc(1, sizeof(double)))) {
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
 						__FUNCTION__, __LINE__);
@@ -89,10 +88,12 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 	// valid cause we get here only if array->size > 1
 			!(node->kdtRight =
 			internalInitKDTree(splitResPair->kdRight, splitMethod,
-					(recDepth + 1) % array->dim))	)
+					(recDepth + 1) % array->dim))	) {
 		return onErrorInInitKDTree(node);
+	}
 
 	node->data = NULL;
+
 
 	return node;
 }
@@ -135,23 +136,23 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 }
 
 void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
-	if (!kdTreeNode) {
-		if (!(kdTreeNode->val)) {
+	if (kdTreeNode) {
+		if (kdTreeNode->val) {
 			free(kdTreeNode->val);
 			kdTreeNode->val = NULL;
 		}
 
-		if (!(kdTreeNode->kdtLeft)) {
+		if (kdTreeNode->kdtLeft) {
 			spKDTreeDestroy(kdTreeNode->kdtLeft);
 			kdTreeNode->kdtLeft = NULL;
 		}
 
-		if (!(kdTreeNode->kdtRight)) {
+		if (kdTreeNode->kdtRight) {
 			spKDTreeDestroy(kdTreeNode->kdtRight);
 			kdTreeNode->kdtRight = NULL;
 		}
 
-		if (!(kdTreeNode->data)) {
+		if (kdTreeNode->data) {
 			spPointDestroy(kdTreeNode->data);
 			kdTreeNode->data = NULL;
 		}

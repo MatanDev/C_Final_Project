@@ -177,14 +177,14 @@ bool testDefault() {
 	ASSERT_TRUE(config->spImagesSuffix == NULL);
 	ASSERT_TRUE(config->spNumOfImages == 0);
 
-	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_DIR);
 	msg = SP_CONFIG_SUCCESS;
 
 	config = malloc(sizeof(struct sp_config_t));
 	initConfigToDefault(config);
 	config->spImagesDirectory = "./bla/bla/";
-	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_PREFIX);
 	msg = SP_CONFIG_SUCCESS;
 
@@ -192,7 +192,7 @@ bool testDefault() {
 	initConfigToDefault(config);
 	config->spImagesDirectory = "./bla/bla/";
 	config->spImagesPrefix = "whatever";
-	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_SUFFIX);
 	msg = SP_CONFIG_SUCCESS;
 
@@ -201,7 +201,7 @@ bool testDefault() {
 	config->spImagesDirectory = "./bla/bla/";
 	config->spImagesPrefix = "whatever";
 	config->spImagesSuffix = ".jpg";
-	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == NULL);
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_NUM_IMAGES);
 	msg = SP_CONFIG_SUCCESS;
 
@@ -211,7 +211,7 @@ bool testDefault() {
 	config->spImagesPrefix = "whatever";
 	config->spImagesSuffix = ".jpg";
 	config->spNumOfImages = 9000;
-	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1) == config);
+	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == config);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
 	char imagePath[100];

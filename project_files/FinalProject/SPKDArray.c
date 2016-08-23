@@ -323,6 +323,10 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 		}
 	}
 
+	// TODO - decide if this should be here
+	free(xArr);
+	free(map1);
+	free(map2);
 	return kdArrPair;
 }
 
@@ -380,15 +384,18 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 
 void spKDArrayDestroy(SPKDArray kdArr) {
 	int i, j;
-	if (!kdArr) {
-		if (!(kdArr->pointsArray)) {
-			for (i = 0; i < kdArr->size; i++)
+	if (kdArr) {
+		if (kdArr->pointsArray) {
+			for (i = 0; i < kdArr->size; i++) {
 				spPointDestroy(kdArr->pointsArray[i]);
+			}
+			free(kdArr->pointsArray);
+			kdArr->pointsArray = NULL;
 		}
 
-		if (!(kdArr->indicesMatrix)) {
+		if (kdArr->indicesMatrix) {
 			for (j = 0; j < kdArr->dim; j++) {
-				if (!(kdArr->indicesMatrix[j])) {
+				if (kdArr->indicesMatrix[j]) {
 					free(kdArr->indicesMatrix[j]);
 					kdArr->indicesMatrix[j] = NULL;
 				}
@@ -401,12 +408,12 @@ void spKDArrayDestroy(SPKDArray kdArr) {
 }
 
 void spKDArrayPairDestroy(SPKDArrayPair kdArrPair) {
-	if (!kdArrPair) {
-		if (!(kdArrPair->kdLeft)) {
+	if (kdArrPair) {
+		if (kdArrPair->kdLeft) {
 			spKDArrayDestroy(kdArrPair->kdLeft);
 			kdArrPair->kdLeft = NULL;
 		}
-		if (!(kdArrPair->kdRight)) {
+		if (kdArrPair->kdRight) {
 			spKDArrayDestroy(kdArrPair->kdRight);
 			kdArrPair->kdRight = NULL;
 		}

@@ -197,7 +197,7 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 
 SPImageData initializeWorkingImage() {
 	SPImageData workingImage = NULL;
-	workingImage = (SPImageData)malloc(sizeof(struct sp_image_data));
+	workingImage = (SPImageData)calloc(1, sizeof(struct sp_image_data));
 	if (workingImage == NULL)
 	{
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);

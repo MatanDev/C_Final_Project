@@ -45,7 +45,7 @@
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
 #define MAX_LINE_LENGTH			1024
-//#define FIRST_LINE_INDEX		0
+#define FIRST_LINE_INDEX		1
 //#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
@@ -330,13 +330,15 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 	return false;
 }
 
-SPConfig onError(SPConfig config) {
+SPConfig onError(SPConfig config, FILE* configFile) {
+	if (configFile)
+		fclose(configFile);
 	spConfigDestroy(config);
 	return NULL;
 }
 
 SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
-		const char* filename, int lineNum) {
+		const char* filename, int lineNum, FILE* configFile) {
 	const char* parameterName;
 
 	if (!config->spImagesDirectory) {
@@ -358,7 +360,7 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 
 	if (*msg != SP_CONFIG_SUCCESS) {
 		printErrorMessage(filename, lineNum, PARAMETER_NOT_SET, parameterName);
-		return onError(config);
+		return onError(config, configFile);
 	}
 
 	return config;
@@ -367,9 +369,9 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	assert(msg != NULL);
 	SPConfig config;
-	FILE* configFile;
+	FILE* configFile = NULL;
 	char line[MAX_LINE_LENGTH];
-	int lineNum = 0; // TODO - should lines start from 0 or 1?
+	int lineNum = FIRST_LINE_INDEX;
 	char* varName, *value;
 	bool isCommentOrEmpty = false;
 
@@ -398,11 +400,11 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	while(fgets(line, 1024, configFile) != NULL) {
 		if (!parseLine(filename, lineNum, line, &varName, &value,
 				&isCommentOrEmpty, msg)) {
-			return onError(config);
+			return onError(config, configFile);
 		}
 		if (!isCommentOrEmpty && !handleVariable(config, filename, lineNum,
 				varName, value, msg)) {
-			return onError(config);
+			return onError(config, configFile);
 		}
 		lineNum++;
 		isCommentOrEmpty = false;
@@ -412,10 +414,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	// opertation? (meaning just assign instead of malloc and copy)
 	if (!checkAndSetDefIfNeeded(&(config->spPCAFilename), DEFAULT_PCA_FILENAME, msg) ||
 		!checkAndSetDefIfNeeded(&(config->spLoggerFilename), DEFAULT_LOGGER_FILENAME, msg)) {
-		return onError(config);
+		return onError(config, configFile);
 	}
 
-	return parameterSetCheck(config, msg, filename, lineNum);
+	fclose(configFile);
+
+	return parameterSetCheck(config, msg, filename, lineNum, configFile);
 }
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
