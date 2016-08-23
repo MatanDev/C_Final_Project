@@ -89,6 +89,14 @@ bool allocateKDArrayIndicesMatrix(SPKDArray arr) {
 	for (j = 0; j < arr->dim; j++) {
 		if (!(arr->indicesMatrix[j] =
 				(int*)calloc(arr->size, sizeof(int)))) {
+			//TODO - maybe we need to free memory ? :
+			/*
+			//free memory
+			int rollbackIndex;
+			for (rollbackIndex = 0; rollbackIndex<j;rollbackIndex++)
+				free(arr->indicesMatrix[rollbackIndex]);
+			free(arr->indicesMatrix);
+			*/
 			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
 							__FUNCTION__, __LINE__);
 			return false;

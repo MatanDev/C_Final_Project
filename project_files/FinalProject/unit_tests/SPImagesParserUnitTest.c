@@ -214,12 +214,15 @@ static bool testLoadKnownImageData(){
 		ASSERT_TRUE(spPointCompare(imageData->featuresArray[2],p3));
 
 		free(imageData);
+
 		spPointDestroy(p1);
 		spPointDestroy(p2);
 		spPointDestroy(p3);
-
 		return true;
 	}
+	spPointDestroy(p1);
+	spPointDestroy(p2);
+	spPointDestroy(p3);
 	return false;
 }
 

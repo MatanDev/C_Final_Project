@@ -216,7 +216,7 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode, int maxDim ){
 	SPPoint* relevantPoints;
 	int size;
 	int i = 0 ,j , dimIndex;
-	double suspectedMaxValue;
+	double suspectedMaxValue = 0;
 	double tempValue;
 
 	if (treeNode == NULL || isLeaf(treeNode))

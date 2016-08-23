@@ -257,6 +257,7 @@ bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataL
 	knn = spConfigGetKNN(config, &configMessage);
 
 	if (configMessage != SP_CONFIG_SUCCESS){
+		//TODO - this is not a relevant error
 		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
 		return false;
 	}

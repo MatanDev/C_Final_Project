@@ -23,6 +23,7 @@ extern "C" {
 #define MAXLINE_LEN 1024 //TODO - verify what this should be
 #define QUERY_EXIT_INPUT "<>"
 
+#define STDOUT	"stdout" //TODO - remove at production
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 //TODO - verify calloc args order
 
