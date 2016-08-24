@@ -385,6 +385,7 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 			spLoggerPrintError(ERROR_AT_READING_FEATURES_FROM_FILE, __FILE__,__FUNCTION__, __LINE__);
 			//rollback - free the points that were allocated so far
 			freeFeatures(imageData->featuresArray,i);
+			spPointDestroy(currentPoint);
 			free(line);
 			return message;
 		}

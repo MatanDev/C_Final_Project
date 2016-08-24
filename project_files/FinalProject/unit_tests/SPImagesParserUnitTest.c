@@ -186,7 +186,7 @@ static bool testSaveImageData(){
 static bool testLoadKnownImageData(){
 	SPImageData imageData = NULL;
 	SP_DP_MESSAGES msg = SP_DP_SUCCESS;
-
+	bool successFlag = true;
 	double data1[] = {1,3,5,4};
 	double data2[] = {4,5.5,13413,92,1};
 	double data3[] = {0 , 0,0};
@@ -196,34 +196,29 @@ static bool testLoadKnownImageData(){
 
 
 	imageData = (SPImageData)malloc(sizeof(struct sp_image_data));
-	ASSERT_TRUE(imageData != NULL);
+	successFlag &= (imageData != NULL);
 	imageData->index = 5;
 
 	if (imageData != NULL){
 		msg = loadKnownImageData("./images/test1.feats", imageData);
 
-		ASSERT_TRUE(msg == SP_DP_SUCCESS);
+		successFlag &= (msg == SP_DP_SUCCESS);
 
-		ASSERT_TRUE(imageData->numOfFeatures = 3);
-		ASSERT_TRUE(imageData->index = 5);
+		successFlag &= (imageData->numOfFeatures = 3);
+		successFlag &= (imageData->index = 5);
 
 		imageData->numOfFeatures = 3;
 
-		ASSERT_TRUE(spPointCompare(imageData->featuresArray[0],p1));
-		ASSERT_TRUE(spPointCompare(imageData->featuresArray[1],p2));
-		ASSERT_TRUE(spPointCompare(imageData->featuresArray[2],p3));
+		successFlag &= (spPointCompare(imageData->featuresArray[0],p1));
+		successFlag &= (spPointCompare(imageData->featuresArray[1],p2));
+		successFlag &= (spPointCompare(imageData->featuresArray[2],p3));
 
 		free(imageData);
-
-		spPointDestroy(p1);
-		spPointDestroy(p2);
-		spPointDestroy(p3);
-		return true;
 	}
 	spPointDestroy(p1);
 	spPointDestroy(p2);
 	spPointDestroy(p3);
-	return false;
+	return successFlag;
 }
 
 void RunImagesParserTests(SPConfig config){
