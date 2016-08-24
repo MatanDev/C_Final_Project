@@ -213,7 +213,7 @@ static bool testLoadKnownImageData(){
 		successFlag &= (spPointCompare(imageData->featuresArray[1],p2));
 		successFlag &= (spPointCompare(imageData->featuresArray[2],p3));
 
-		free(imageData);
+		freeImageData(imageData,false);
 	}
 	spPointDestroy(p1);
 	spPointDestroy(p2);
