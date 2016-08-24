@@ -45,7 +45,6 @@
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
 #define MAX_LINE_LENGTH			1024
-#define FIRST_LINE_INDEX		1
 //#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
@@ -363,6 +362,10 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 		return onError(config, configFile);
 	}
 
+	// TODO - it's ugly to do it here but it's in order to avoid double close
+	// is there a better solution?
+	fclose(configFile);
+
 	return config;
 }
 
@@ -371,9 +374,9 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	SPConfig config;
 	FILE* configFile = NULL;
 	char line[MAX_LINE_LENGTH];
-	int lineNum = FIRST_LINE_INDEX;
+	int lineNum = 0;
 	char* varName, *value;
-	bool isCommentOrEmpty = false;
+	bool isCommentOrEmpty;
 
 	*msg = SP_CONFIG_SUCCESS;
 	if (filename == NULL) {
@@ -398,7 +401,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	initConfigToDefault(config);
 
 	while(fgets(line, 1024, configFile) != NULL) {
-		if (!parseLine(filename, lineNum, line, &varName, &value,
+		isCommentOrEmpty = false;
+		if (!parseLine(filename, ++lineNum, line, &varName, &value,
 				&isCommentOrEmpty, msg)) {
 			return onError(config, configFile);
 		}
@@ -406,8 +410,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 				varName, value, msg)) {
 			return onError(config, configFile);
 		}
-		lineNum++;
-		isCommentOrEmpty = false;
 	}
 
 	// TODO - if we fail in initialize to default should we fail the whole
@@ -416,8 +418,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		!checkAndSetDefIfNeeded(&(config->spLoggerFilename), DEFAULT_LOGGER_FILENAME, msg)) {
 		return onError(config, configFile);
 	}
-
-	fclose(configFile);
 
 	return parameterSetCheck(config, msg, filename, lineNum, configFile);
 }

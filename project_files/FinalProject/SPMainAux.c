@@ -82,8 +82,10 @@ void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq) {
 	printf("%s", EXITING);
 	spConfigDestroy(config);
-	freeImageData(image, !oneImageWasSet);
-	freeAllImagesData(imagesList,numOfImages);
+	if (image)
+		freeImageData(image, !oneImageWasSet);
+	if (imagesList) // TODO - not enough to avoid log error - elem in the arr can be NULL
+		freeAllImagesData(imagesList,numOfImages);
 	spKDTreeDestroy(kdTree);
 	spBPQueueDestroy(bpq);
 	spLoggerDestroy();

@@ -6,6 +6,16 @@
 #include "SPBPriorityQueue.h"
 #include "SPKDTreeNode.h"
 
+//TODO - validate and comment
+#define verifyAction(action, errorMessage) do { \
+                if(!((action))) { \
+					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					endControlFlow(config, currentImageData, imagesDataList, numOfImages, \
+									oneImageWasSet, kdTree, bpq); \
+					return -1; \
+                } \
+        } while (0)
+
 /*
  * Extracts the configuration filename from the command line arguments of the program
  *

@@ -29,49 +29,39 @@ extern "C" {
 
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config;
+	SPConfig config = NULL;
 	int *similarImagesIndices = NULL, numOfSimilarImages, i, numOfImages = 0;
 	SPImageData currentImageData = NULL, *imagesDataList = NULL;
-	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN] ;
+	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN];
 	bool extractFlag, GUIFlag, oneImageWasSet = false;
 	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
 
-	if (!initConfigAndSettings(argc, argv, &config, &numOfImages, &numOfSimilarImages,
-			&extractFlag, &GUIFlag)) {
-		endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-				oneImageWasSet, kdTree, bpq);
-		return -1;
-	}
+	//TODO - change error
+	verifyAction((initConfigAndSettings(argc, argv, &config, &numOfImages,
+		&numOfSimilarImages,&extractFlag, &GUIFlag)), "could not do some shit");
 
+	//TODO - in case the directory is invalid or pca file is invalid we fail here
+	//we should check if the path is valid in the previous function
+	//we have other cases of possible failures - think how to deal with them (try catch?)
 	//build features database
 	sp::ImageProc imageProcObject(config);
 
 	if (extractFlag) {
 		initializeImagesDataList(&imagesDataList,numOfImages);
-		if (imagesDataList == NULL) {
-			endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-							oneImageWasSet, kdTree, bpq);
-			return -1;
-		}
+		//TODO - change error
+		verifyAction(imagesDataList, "could not do some other shit");
 		for (i = 0; i < numOfImages; i++){
 			msg = spConfigGetImagePath(tempPath, config, i);
-			if (msg != SP_CONFIG_SUCCESS) {
-				spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
-				endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-								oneImageWasSet, kdTree, bpq);
-				return -1;
-			}
-			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath, i, &(imagesDataList[i]->numOfFeatures));
+			verifyAction((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH);
+			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath,
+					i, &(imagesDataList[i]->numOfFeatures));
 		}
 	}
 
-	if (!(initializeKDTreeAndBPQueue(config, &imagesDataList, &currentImageData, &kdTree,
-			&bpq, numOfImages))) {
-		endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-						oneImageWasSet, kdTree, bpq);
-		return -1;
-	}
+	//TODO - change error
+	verifyAction((initializeKDTreeAndBPQueue(config, &imagesDataList, &currentImageData,
+			&kdTree, &bpq, numOfImages)), "could dot do some other shit");
 
 	// first run must always happen
 	getQuery(workingImagePath);
@@ -79,11 +69,8 @@ int main(int argc, char** argv) {
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
 		oneImageWasSet = true;
-		if (!verifyPathAndAvailableFile(workingImagePath)) {
-			endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-							oneImageWasSet, kdTree, bpq);
-			return -1;
-		}
+		//TODO - change error
+		verifyAction((verifyPathAndAvailableFile(workingImagePath)), "another error");
 		if (currentImageData->featuresArray != NULL) {
 			free(currentImageData->featuresArray);
 		}
@@ -94,13 +81,7 @@ int main(int argc, char** argv) {
 		if (GUIFlag) {
 			for (i=0;i<numOfSimilarImages;i++) {
 				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);
-
-				if (msg != SP_CONFIG_SUCCESS) {
-					spLoggerPrintError(ERROR_LOADING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
-					endControlFlow(config, currentImageData, imagesDataList, numOfImages,
-									oneImageWasSet, kdTree, bpq);
-					return -1;
-				}
+				verifyAction((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH);
 				imageProcObject.showImage(tempPath);
 			}
 		} else {
