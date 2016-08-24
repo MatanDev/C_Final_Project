@@ -238,6 +238,7 @@ void initializeKnnTestCase1(){
 
 	kdArr = Init(kNNtestCase1Points,kNNtestCase1Size);
 	kNNtestCase1Tree = InitKDTree(kdArr, kNNtestCase1SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runKnnTestCase1(){
@@ -373,6 +374,7 @@ void initializeKnnTestCase2(){
 
 	kdArr = Init(kNNtestCase2Points,kNNtestCase2Size);
 	kNNtestCase2Tree = InitKDTree(kdArr, kNNtestCase2SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runKnnTestCase2(){
@@ -489,6 +491,7 @@ void initializeKnnEdgeTestCase1(){
 
 	kdArr = Init(kNNedgeTestCase1Points,kNNedgeTestCase1Size);
 	kNNedgeTestCase1Tree = InitKDTree(kdArr, kNNedgeTestCase1SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runKnnEdgeTestCase1(){

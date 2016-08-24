@@ -425,7 +425,7 @@ static bool testSplitNullCases(){
 
 static bool testSplitEdgeCase1(){
 	SPKDArray kdArr = NULL;
-	SPKDArrayPair kdArrPair;
+	SPKDArrayPair kdArrPair = NULL;
 
 	kdArr = Init(edgeCase1PointsArray,EDGE_CASE1_NUM_OF_POINTS);
 	ASSERT_TRUE(kdArr != NULL);
@@ -453,6 +453,8 @@ static bool testSplitEdgeCase1(){
 
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(kdArrPair);
+	kdArr = NULL;
+	kdArrPair = NULL;
 	return true;
 }
 

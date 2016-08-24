@@ -381,6 +381,7 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 		}
 
 		currentPoint = parsePointFromString(line, imageData->index, &message);
+
 		if (message != SP_DP_SUCCESS) {
 			spLoggerPrintError(ERROR_AT_READING_FEATURES_FROM_FILE, __FILE__,__FUNCTION__, __LINE__);
 			//rollback - free the points that were allocated so far
@@ -411,7 +412,7 @@ SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData){
 
 SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData){
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
-	FILE* imageFile;
+	FILE* imageFile = NULL;
 	imageFile = fopen(imageDataPath, "r");
 	if (imageFile == NULL) {
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
@@ -422,6 +423,7 @@ SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData){
 	message = loadImageDataFromFile(imageFile, imageData);
 
 	fclose(imageFile);
+	imageFile = NULL;
 	return message;
 }
 
@@ -447,6 +449,7 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
 	}
 
 	loadImageDataFromHeader(line, imageData);
+	free(line);
 
 	//read points
 	imageData->featuresArray = (SPPoint*)calloc(sizeof(SPPoint),imageData->numOfFeatures);
@@ -454,7 +457,6 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
 	if (imageData->featuresArray == NULL){
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		free(line);
 		return SP_DP_MEMORY_FAILURE;
 	}
 
@@ -464,7 +466,7 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		free(imageData->featuresArray);
 	}
-	free(line);
+
 	return message;
 }
 
@@ -673,7 +675,7 @@ void freeFeatures(SPPoint* features, int numOfFeatures){
 	int i;
 	if (features != NULL) {
 		for (i = 0 ; i<numOfFeatures;i++){
-			spPointDestroy((features)[i]);
+			spPointDestroy(features[i]);
 		}
 	}
 	else {

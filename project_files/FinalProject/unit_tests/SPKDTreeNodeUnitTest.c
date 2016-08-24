@@ -441,6 +441,7 @@ void initializeTestCase1(){
 
 	kdArr = Init(testCase1Points,testCase1Size);
 	testCase1Tree = InitKDTree(kdArr, testCase1SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runTestCase1(){
@@ -543,6 +544,7 @@ void initializeTestCase2(){
 
 	kdArr = Init(testCase2Points,testCase2Size);
 	testCase2Tree = InitKDTree(kdArr, testCase2SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runTestCase2(){
@@ -639,6 +641,7 @@ void initializeEdgeTestCase1(){
 
 	kdArr = Init(edgeTestCase1Points,edgeTestCase1Size);
 	edgeTestCase1Tree = InitKDTree(kdArr, edgeTestCase1SplitMethod);
+	spKDArrayDestroy(kdArr);
 }
 
 bool runEdgeTestCase1(){
