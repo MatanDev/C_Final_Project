@@ -59,6 +59,8 @@
 #define INVALID_ARG_MSG			"SP_CONFIG_INVALID_ARGUMENT"
 #define INDEX_OUT_OF_RANGE_MSG	"SP_CONFIG_INDEX_OUT_OF_RANGE"
 #define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
+#define SIGNATURE_FORMAT		"==[%s][%d][%d][%d]==\n"
+#define ERROR_CREATING_SIGN     "Error creating config signature"
 
 /**
  * A data-structure which is used for configuring the system.
@@ -202,6 +204,7 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 
 	return *strField != NULL;
 }
+
 
 bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
@@ -518,6 +521,54 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 	sprintf(pcaPath, PCA_PATH_FORMAT, config->spImagesDirectory,
 			config->spPCAFilename);
 	return SP_CONFIG_SUCCESS;
+}
+
+char* getSignature(const SPConfig config){
+	char lastImagePath[MAX_LINE_LENGTH],*signature = NULL;
+	int PCADim,numOfImages,numOfFeatures, rsltFlag;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	numOfImages = spConfigGetNumOfImages(config, &msg);
+	if (msg != SP_CONFIG_SUCCESS || numOfImages < 1) {
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	numOfFeatures = spConfigGetNumOfFeatures(config, &msg);
+	if (msg != SP_CONFIG_SUCCESS) { //TODO -maybe export to macro
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	PCADim = spConfigGetPCADim(config, &msg);
+	if (msg != SP_CONFIG_SUCCESS) {
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
+	if (msg != SP_CONFIG_SUCCESS) {
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	signature = (char*)calloc(MAX_LINE_LENGTH*2,sizeof(char));
+	if (signature == NULL){
+		spLoggerPrintError(ALLOCATION_FAILED_MSG, __FILE__,
+				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	rsltFlag = sprintf(signature, SIGNATURE_FORMAT, lastImagePath,
+			numOfImages, numOfFeatures, PCADim);
+	if (rsltFlag<0){
+		free(signature);
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+				__FUNCTION__, __LINE__);
+		return NULL;
+	}
+	return signature;
 }
 
 void freeAndSetToNull(char** field) {

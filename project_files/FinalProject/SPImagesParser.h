@@ -257,12 +257,13 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image);
  * the createFlag flag indicates if the image data should be processed or not
  *
  * @param config - the configurations data
+ * @param configSignature - a string signature of the config file
  * @param createFlag - true iff the image data should be created from the image file (processed).
  * @param message - a pointer to a message enum
  *
  * @return -
  * NULL if :
- * 	- config is NULL [message = SP_DP_INVALID_ARGUMENT],
+ * 	- config or configSignature is NULL [message = SP_DP_INVALID_ARGUMENT],
  * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
  * 	- could not read from file [message = SP_DP_FILE_READ_ERROR]
@@ -271,7 +272,7 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image);
  *
  * @logger - Prints relevant errors to the logger.
  */
-SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MESSAGES* message);
+SPImageData* loadAllImagesData(const SPConfig config,char* configSignature, bool createFlag, SP_DP_MESSAGES* message);
 
 /*
  * The method loads image data into an allocated SPImageData structure by an opened file
@@ -307,6 +308,7 @@ SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData);
  * The method loads image data given the image path
  * into an allocated SPImageData structure (not processing the data again)
  *
+ * @param configSignature - a string representing the config file relevant settings
  * @param imageDataPath - the file path
  * @param imageData - an allocated SPImageData item to which the data will be written
  *
@@ -316,12 +318,14 @@ SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData);
  * SP_DP_FORMAT_ERROR - the file is not in the correct format
  * SP_DP_SUCCESS - image data created successfully
  */
-SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData);
+SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SPImageData imageData);
 
 /*
  * The method loads image data into an allocated SPImageData structure by an opened file (not processing the data again)
  *
  * @assert - imageFile and imageData != NULL
+ *
+ * @param configSignature - a string representing the config file relevant settings
  * @param imageFile - a pointer to the file that contains the data regarding the image
  * @param imageData - an allocated SPImageData item to which the data will be written
  *
@@ -331,12 +335,13 @@ SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData);
  * SP_DP_FORMAT_ERROR - the file is not in the correct format
  * SP_DP_SUCCESS - image data created successfully
  */
-SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData);
+SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPImageData imageData);
 
 /*
  * The method loads a specific image and creates a SPImageData item containing its features data.
  * the createFlag flag indicates if the image data should be processed or not
  *
+ * @param configSignature - a string representing the config file relevant settings
  * @param imageDataPath - the path of the requested image
  * @param imageIndex - the index of the requested image
  * @param createFlag - true iff the image data should be created from the image file (processed).
@@ -344,7 +349,7 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData);
  *
  * @return -
  * NULL if :
- * 	- config is NULL [message = SP_DP_INVALID_ARGUMENT],
+ * 	- configSignature is NULL or filePath is NULL or message is NULL [message = SP_DP_INVALID_ARGUMENT],
  * 	- imageIndex out of range [message = SP_DP_INVALID_ARGUMENT],
  * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
@@ -354,20 +359,21 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData);
  *
  * @logger - Prints relevant errors to the logger.
  */
-SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
+SPImageData loadImageDataByPath(char* configSignature, char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
 
 /*
  * The method loads a specific image and creates a SPImageData item containing its features data.
  * the createFlag flag indicates if the image data should be processed or not
  *
  * @param config - the configurations data
+ * @param configSignature - a string representing the config file relevant settings
  * @param imageIndex - the index of the requested image
  * @param createFlag - true iff the image data should be created from the image file (processed).
  * @param message - a pointer to a message enum
  *
  * @return -
  * NULL if :
- * 	- config is NULL or index < 0 [message = SP_DP_INVALID_ARGUMENT],
+ * 	- config is NULL or index < 0 or configSignature is NULL [message = SP_DP_INVALID_ARGUMENT],
  * 	- imageIndex out of range [message = SP_DP_INVALID_ARGUMENT],
  * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
@@ -377,26 +383,28 @@ SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createF
  *
  * @logger - Prints relevant errors to the logger.
  */
-SPImageData loadImageData(const SPConfig config, int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
+SPImageData loadImageData(const SPConfig config,char* configSignature, int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
 
 /*
  * The method gets an opened file pointer and an image data item and writes the image data to the file.
- * @assert - imageFile and imageData not NULL
+ * @assert - imageFile and imageData and configSignature not NULL
  * @param imageFile - a pointer to the file that the data should be written to
  * @param imageData - an item that contains the image data
+ * @param configSignature - a string representing a signature of the config file
  *
  * @returns
  * SP_DP_MEMORY_FAILURE - memory allocation failure
  * SP_DP_FILE_WRITE_ERROR - error writing to file
  * SP_DP_SUCCESS - file created and saved successfully
  */
-SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData);
+SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char* configSignature);
 
 /*
  * The method saves to the disk an image data item at a CSV format.
  * The method will override an existing file with the same name.
  *
  * @param config - the configurations data
+ * @param configSignature - a string representing a signature of the config file
  * @param imageData - the image data to save
  *
  * @return -
@@ -407,25 +415,27 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData);
  *
  * @logger - Prints relevant errors to the logger.
  */
-SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData);
+SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImageData imageData);
 
 /*
  * The method saves to the disk a bulk of images data items at a CSV format.
  * The method will override existing files with the same name.
- * In case of failure the method will stop writing files, those who were writen would not be deleted
+ * In case of failure the method will stop writing files, those who were written would not be deleted
+ *
  *
  * @param config - the configurations data.
+ * @param configSignature - a string representing a signature of the config file
  * @param imagesData - the images data to save, as a SPImageData array.
  *
  * @return -
- * SP_DP_INVALID_ARGUMENT - config or imagesData or one of the items at imagesData is NULL,
+ * SP_DP_INVALID_ARGUMENT - config or configSignature or imagesData or one of the items at imagesData is NULL,
  * SP_DP_MEMORY_FAILURE - memory allocation failure
  * SP_DP_FILE_WRITE_ERROR - error writing to file
  * SP_DP_SUCCESS - file created and saved successfully
  *
  * @logger - Prints relevant errors to the logger.
  */
-SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData);
+SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, SPImageData* imagesData);
 
 /*
  * The main method that starts and loads all the images data according to the configurations

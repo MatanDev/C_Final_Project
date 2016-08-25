@@ -501,4 +501,18 @@ char* configMsgToStr(SP_CONFIG_MSG msg);
  */
 char* duplicateString(const char* str);
 
+/*
+ * Creates a string signature of some of the configurations
+ * that are relevant for features loading and verifications
+ *
+ * @param config - the configurations item
+ *
+ * @returns
+ * NULL in case of an error accourd otherwise returns a string representing
+ * the config data as following : '==[last image path][number of images][number of features][PCA dimension]=='
+ *
+ * @logger - the method logs relevant errors
+ */
+char* getSignature(const SPConfig config);
+
 #endif /* SPCONFIG_H_ */

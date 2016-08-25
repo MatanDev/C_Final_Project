@@ -47,7 +47,6 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 	return config;
 }
 
-
 bool verifyPathAndAvailableFile(char* path) {
 	if (path == NULL){
 		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,__FUNCTION__, __LINE__);

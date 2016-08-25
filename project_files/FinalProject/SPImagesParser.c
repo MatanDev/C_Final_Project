@@ -38,6 +38,7 @@
 #define ERROR_WRITING_IMAGE_DATA                   "Error at writing an image data"
 #define ERROR_AT_IMAGE_PARSING_PROCESS             "Error at image parsing process"
 #define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \r\n Description : %s"
+#define ERROR_NOT_MATCHING_CONFIG				   "Error loading image data, configuration data does not match"
 
 #define WARNING_WRONG_POINT_SIZE_CALC              "Wrong point CSV size calculation"
 #define WARNING_WRONG_DIGITS_CALC                  "Wrong digits calculation"
@@ -337,12 +338,12 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
 	return SP_DP_SUCCESS;
 }
 
-SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MESSAGES* message){
+SPImageData* loadAllImagesData(const SPConfig config, char* configSignature, bool createFlag, SP_DP_MESSAGES* message){
 	SPImageData *allImagesData = NULL, currentImageData = NULL;
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
 	int i,j, numOfImages;
 
-	if (config == NULL)
+	if (config == NULL || configSignature == NULL)
 	{
 		spLoggerPrintError(ERROR_LOADING_IMAGES_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
@@ -368,7 +369,7 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 
 	for (i = 0 ;i < numOfImages ; i++)
 	{
-		currentImageData = loadImageData(config, i ,createFlag, message);
+		currentImageData = loadImageData(config, configSignature, i ,createFlag, message);
 		if (*message != SP_DP_SUCCESS)
 		{
 			spLoggerPrintError(ERROR_LOADING_IMAGES_DATA, __FILE__,__FUNCTION__, __LINE__);
@@ -450,7 +451,7 @@ SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData){
 	return SP_DP_SUCCESS;
 }
 
-SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData){
+SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SPImageData imageData){
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	FILE* imageFile = NULL;
 	imageFile = fopen(imageDataPath, "r");
@@ -460,18 +461,35 @@ SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData){
 		return SP_DP_FILE_READ_ERROR;
 	}
 
-	message = loadImageDataFromFile(imageFile, imageData);
+	message = loadImageDataFromFile(configSignature, imageFile, imageData);
 
 	fclose(imageFile);
 	imageFile = NULL;
 	return message;
 }
 
-SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
+SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPImageData imageData){
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	char *line = NULL;
 
-	line = getLine(imageFile); //read headers
+	//verify config signature
+	line = getLine(imageFile);
+	if (line == NULL){
+		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_FILE, __FILE__,__FUNCTION__, __LINE__);
+		free(line);
+		return SP_DP_FILE_READ_ERROR;
+	}
+	if (strcmp(line,configSignature) != 0){
+		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_NOT_MATCHING_CONFIG, __FILE__,__FUNCTION__, __LINE__);
+		free(line);
+		return SP_DP_FORMAT_ERROR;
+	}
+	free(line);
+
+	//read headers
+	line = getLine(imageFile);
 	if (line == NULL){
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_READING_FILE, __FILE__,__FUNCTION__, __LINE__);
@@ -501,10 +519,10 @@ SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
 	return message;
 }
 
-SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
+SPImageData loadImageDataByPath(char* configSignature, char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
 	SPImageData resultImage = NULL;
 
-	if (imageDataPath == NULL || message == NULL) {
+	if (imageDataPath == NULL || message == NULL || configSignature == NULL) {
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
 		*message =  SP_DP_INVALID_ARGUMENT;
@@ -526,7 +544,7 @@ SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createF
 		*message = createImageDataByPreloadedPath(resultImage);
 	}
 	else{
-		*message = loadKnownImageData(imageDataPath, resultImage);
+		*message = loadKnownImageData(configSignature, imageDataPath, resultImage);
 	}
 
 	if (*message != SP_DP_SUCCESS){
@@ -538,11 +556,11 @@ SPImageData loadImageDataByPath(char* imageDataPath,int imageIndex, bool createF
 	return resultImage;
 }
 
-SPImageData loadImageData(const SPConfig config, int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
+SPImageData loadImageData(const SPConfig config, char* configSignature, int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
 	SPImageData image;
 	char* filePath;
 
-	if (config == NULL || imageIndex < 0) {
+	if (config == NULL || imageIndex < 0 || configSignature == NULL) {
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
 		*message =  SP_DP_INVALID_ARGUMENT;
@@ -551,7 +569,7 @@ SPImageData loadImageData(const SPConfig config, int imageIndex, bool createFlag
 
 	filePath = getImagePath(config, imageIndex, !createFlag, message);
 	if (*message == SP_DP_SUCCESS) {
-		image = loadImageDataByPath(filePath,imageIndex, createFlag,  message);
+		image = loadImageDataByPath(configSignature, filePath,imageIndex, createFlag,  message);
 	}
 	else{
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
@@ -561,11 +579,16 @@ SPImageData loadImageData(const SPConfig config, int imageIndex, bool createFlag
 	return image;
 }
 
-SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
-	assert(imageFile != NULL && imageData != NULL);
+SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char* configSignature){
+	assert(imageFile != NULL && imageData != NULL && configSignature != NULL);
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	int i;
 	char *line;
+	//write config signature to file
+	fputs(configSignature,imageFile);
+	fflush(imageFile);
+
+	//write header to file
 	line = getImageStringHeader(imageData, &message);
 
 	if (line == NULL)
@@ -577,7 +600,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
 	fputs(line,imageFile);
 	fflush(imageFile);
 	free(line);
-
+	//write features to file
 	for (i=0;i<imageData->numOfFeatures;i++)
 	{
 		line = pointToString(imageData->featuresArray[i], &message);
@@ -596,7 +619,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData){
 	return SP_DP_SUCCESS;
 }
 
-SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData){
+SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImageData imageData){
 	SP_DP_MESSAGES outputMessage = SP_DP_SUCCESS;
 	char* filePath;
 	FILE* imageFile;
@@ -626,19 +649,19 @@ SP_DP_MESSAGES saveImageData(const SPConfig config, SPImageData imageData){
 		return SP_DP_FILE_WRITE_ERROR;
 	}
 
-	outputMessage = writeImageDataToFile(imageFile, imageData);
+	outputMessage = writeImageDataToFile(imageFile, imageData, configSignature);
 
 	fclose(imageFile);
 	free(filePath);
 	return outputMessage;
 }
 
-SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData){
+SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, SPImageData* imagesData){
 	SP_DP_MESSAGES outputMessage = SP_DP_SUCCESS;
 	SP_CONFIG_MSG configMessage;
 	int i, numOfImages;
 
-	if (config == NULL || imagesData == NULL){
+	if (config == NULL || imagesData == NULL || configSignature == NULL){
 		spLoggerPrintError(ERROR_WRITING_IMAGES_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_INVALID_ARGUMENTS, __FILE__,__FUNCTION__, __LINE__);
 		return SP_DP_INVALID_ARGUMENT;
@@ -654,7 +677,7 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, SPImageData* imagesData)
 
 	for (i= 0 ; i < numOfImages; i++)
 	{
-		outputMessage = saveImageData(config, imagesData[i]);
+		outputMessage = saveImageData(config, configSignature, imagesData[i]);
 		if (outputMessage != SP_DP_SUCCESS){
 			spLoggerPrintError(ERROR_WRITING_IMAGES_DATA, __FILE__,__FUNCTION__, __LINE__);
 			return outputMessage;
@@ -668,6 +691,7 @@ SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESS
 	*msg = SP_DP_SUCCESS;
 	SP_CONFIG_MSG configMsg = SP_CONFIG_SUCCESS;
 	SPImageData* allImagesData = NULL;
+	char* configSignature = NULL;
 	bool createDatabase;
 
 	if (config == NULL){
@@ -686,17 +710,25 @@ SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESS
 		return NULL;
 	}
 
+	configSignature = getSignature(config);
+
+	if (configSignature == NULL){
+		spLoggerPrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
+		*msg = SP_DP_INVALID_ARGUMENT;
+		return NULL;
+	}
+
 	assert (!createDatabase || featuresMatrix != NULL);
 
-	allImagesData = loadAllImagesData(config, createDatabase, msg);
+	allImagesData = loadAllImagesData(config, configSignature, createDatabase, msg);
 
 	if (*msg == SP_DP_SUCCESS && createDatabase){
-		*msg = saveAllImagesData(config, allImagesData);
+		*msg = saveAllImagesData(config, configSignature, allImagesData);
 	}
 	if (*msg != SP_DP_SUCCESS){
 		spLoggerPrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
 	}
-
+	free(configSignature);
 	return allImagesData;
 }
 

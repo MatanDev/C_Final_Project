@@ -31,7 +31,7 @@ extern "C" {
 #define ERROR_USER_QUERY "Error at user input. neither a valid image path, nor exit request"
 
 //TODO - verify calloc args order
-
+/*
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;
@@ -101,11 +101,11 @@ int main(int argc, char** argv) {
 			kdTree, bpq);
 	return 0;
 }
+*/
 
-/*
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("spcbir.config", &msg);
+	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
 	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
 	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
 		return -1; // TODO - maybe report relevant error (log still not initialized)
@@ -120,4 +120,3 @@ int main() {
 	spConfigDestroy(config);
 	return 0;
 }
-*/

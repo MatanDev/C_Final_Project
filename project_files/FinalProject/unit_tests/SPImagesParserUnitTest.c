@@ -12,7 +12,7 @@
 #include "SPImagesParserUnitTest.h"
 
 SPConfig internalConfig = NULL;
-
+char* configSign = NULL;
 
 static bool identicalFiles(const char* fname1, const char* fname2) {
 	FILE *fp1, *fp2;
@@ -164,12 +164,12 @@ static bool testSaveImageData(){
 		imageData->numOfFeatures = 3;
 		imageData->featuresArray = points;
 
-		msg = saveImageData(internalConfig, imageData);
+		msg = saveImageData(internalConfig,configSign, imageData);
 
 		ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
 
-		ASSERT_TRUE(identicalFiles("./images/img5.feats","./images/test1.feats"));
+		ASSERT_TRUE(identicalFiles("./unit_tests/images/img5.feats","./unit_tests/images/test1.feats"));
 
 
 		free(imageData);
@@ -200,7 +200,7 @@ static bool testLoadKnownImageData(){
 	imageData->index = 5;
 
 	if (imageData != NULL){
-		msg = loadKnownImageData("./images/test1.feats", imageData);
+		msg = loadKnownImageData(configSign,"./unit_tests/images/test1.feats", imageData);
 
 		successFlag &= (msg == SP_DP_SUCCESS);
 
@@ -222,12 +222,13 @@ static bool testLoadKnownImageData(){
 }
 
 bool testGetLineBySize(int size){
-	char *line1 = NULL, *line2 = NULL, *line3 = NULL, *line4 = NULL, *line5 = NULL, *line6 = NULL;
+	char *line0 = NULL, *line1 = NULL, *line2 = NULL, *line3 = NULL, *line4 = NULL, *line5 = NULL, *line6 = NULL;
 	FILE* fp = NULL;
-	fp = fopen("./images/test1.feats","r");
+	fp = fopen("./unit_tests/images/test1.feats","r");
 
 	ASSERT_TRUE(fp != NULL);
 
+	line0 = getLineByMinBufferSize(fp,size);
 	line1 = getLineByMinBufferSize(fp,size);
 	line2 = getLineByMinBufferSize(fp,size);
 	line3 = getLineByMinBufferSize(fp,size);
@@ -235,6 +236,7 @@ bool testGetLineBySize(int size){
 	line5 = getLineByMinBufferSize(fp,size);
 	line6 = getLineByMinBufferSize(fp,size);
 
+	ASSERT_TRUE(strcmp(line0,configSign) == 0);
 	ASSERT_TRUE(strcmp(line1,"5,3\n") == 0);
 	ASSERT_TRUE(strcmp(line2,"4,1.000000,3.000000,5.000000,4.000000\n") == 0);
 	ASSERT_TRUE(strcmp(line3,"5,4.000000,5.500000,13413.000000,92.000000,1.000000\n") == 0);
@@ -265,6 +267,11 @@ bool testGetLine(){
 
 void RunImagesParserTests(SPConfig config){
 	internalConfig = config;
+	configSign = getSignature(config);
+	if (configSign == NULL){
+		printf("%s Line %d: %s", __FILE__, __LINE__, "could not create config signature");
+		return;
+	}
 	RUN_TEST(pointToStringTests);
 	RUN_TEST(stringToPoint);
 	RUN_TEST(testGetImageHeaderAsString);
@@ -272,4 +279,5 @@ void RunImagesParserTests(SPConfig config){
 	RUN_TEST(testSaveImageData);
 	RUN_TEST(testLoadKnownImageData);
 	RUN_TEST(testGetLine);
+	free(configSign);
 }
