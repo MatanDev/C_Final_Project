@@ -9,7 +9,7 @@
 
 #define BREAKLINE_NO_CR							   '\n'
 #define BREAKLINE                                  "\r\n"
-#define DEF_LINE_LEN                               512 //TODO - test this
+#define DEF_LINE_LEN                               512
 #define MAX_PATH_LEN                               2048 //TODO - verify what this should be
 #define HEADER_STRING_FORMAT                       "%d,%d\r\n"
 #define POINT_STRING_FORMAT                        "%d%s\r\n"
