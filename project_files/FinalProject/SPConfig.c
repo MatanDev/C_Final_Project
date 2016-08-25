@@ -499,7 +499,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
-	if (isFeats)
+	if (isFeats) //TODO - sprintf should return negative value on failure, need to handle that case
 		sprintf(imagePath, IMAGE_PATH_FORMAT, config->spImagesDirectory,
 				config->spImagesPrefix, index, FEATS_FILE_EXTENSION);
 	else
