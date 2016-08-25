@@ -178,6 +178,8 @@ bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataL
 bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag);
 
+//TODO - doc
+bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag);
 
 #endif /* SPMAINAUX_H_ */
 

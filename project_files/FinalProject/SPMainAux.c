@@ -10,27 +10,26 @@
 #include "SPBPriorityQueue.h"
 
 //TODO - remove fflush(NULL) at production
+#define MAXLINE_LEN 											1024 //TODO - verify what this should be
+#define DEFAULT_CONFIG_FILE										"spcbir.config"
+#define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
+#define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE 					"Please enter image path:\n"
+#define INVALID_CMD_LINE										"Invalid command line : use -c <config_filename>\n"
+#define STDOUT													"stdout"
+#define CLOSEST_IMAGES 											"The closest images are: " //TODO - dont forget to print output as requested
+#define EXITING 												"Exiting...\n"
+#define QUERY_IMAGE_DEFAULT_INDEX 								0
+#define QUERY_STRING_ERROR 										"Query is not in the correct format, or file is not available\n"
 
-#define DEFAULT_CONFIG_FILE	"spcbir.config"
-#define CANNOT_OPEN_MSG "The configuration file %s couldn’t be open\n"
-#define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE "Please enter image path:\n"
-#define INVALID_CMD_LINE	"Invalid command line : use -c <config_filename>\n"
-#define STDOUT	"stdout"
-#define CLOSEST_IMAGES "The closest images are: " //TODO - dont forget to print output as requested
-#define EXITING "Exiting...\n"
-#define QUERY_IMAGE_DEFAULT_INDEX 0
-#define QUERY_STRING_ERROR 	"Query is not in the correct format, or file is not available\n"
-
-#define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
-
-#define ERROR_INVALID_ARGUMENT "Error Invalid argument"
-#define ERROR_WRONG_FILE "Error, wrong file path or file not available"
-#define ERROR_READING_SETTINGS "Could not load data from the configurations"
-
-#define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM "Error creating query image item"
-#define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS "Error creating image database items"
-
-
+#define ERROR_ALLOCATING_MEMORY 								"Could not allocate memory"
+#define ERROR_INVALID_ARGUMENT 									"Error Invalid argument"
+#define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
+#define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
+#define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
+#define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
+#define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
+#define ERROR_AT_IMAGES_FEATURES_FILE_PATH 						"Error at images features file path, image does not exists or not available"
+#define ERROR_AT_PCA_FILE_PATH									"Error at PCA file path, does not exists or not available"
 
 char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
@@ -271,6 +270,39 @@ bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataL
 	return true;
 }
 
+bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
+	char tempPath[MAXLINE_LEN];
+	int i;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	//verify PCA file
+	msg = spConfigGetPCAPath(tempPath, config);
+	if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+		spLoggerPrintError(ERROR_AT_PCA_FILE_PATH, __FILE__,
+				__FUNCTION__, __LINE__);
+		return false;
+	}
+	//verify images files
+	for (i = 0;i < numOfImages ; i++){
+		msg = spConfigGetImagePath(tempPath, config, i);
+		if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+			spLoggerPrintError(ERROR_AT_IMAGES_FILE_PATH, __FILE__,
+					__FUNCTION__, __LINE__);
+			return false;
+		}
+
+		if (!extractFlag){
+			msg = spConfigGetImagePathFeats(tempPath, config, i, true);
+			if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+				spLoggerPrintError(ERROR_AT_IMAGES_FEATURES_FILE_PATH, __FILE__,
+						__FUNCTION__, __LINE__);
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag) {
 	char *configFilename, *loggerFilename;
@@ -303,6 +335,7 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
 			GUIFlag) != SP_CONFIG_SUCCESS) {
 		return false;
 	}
-	return true;
+
+	return verifyImagesFiles(*config, *numOfImages, *extractFlag);
 }
 
