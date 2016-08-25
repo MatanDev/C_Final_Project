@@ -7,8 +7,10 @@
 
 #define DOUBLE_PRECISION 6
 
+#define BREAKLINE_NO_CR							   '\n'
 #define BREAKLINE                                  "\r\n"
-#define MAXLINE_LEN                                2048 //TODO - verify what this should be
+#define DEF_LINE_LEN                               512 //TODO - test this
+#define MAX_PATH_LEN                               2048 //TODO - verify what this should be
 #define HEADER_STRING_FORMAT                       "%d,%d\r\n"
 #define POINT_STRING_FORMAT                        "%d%s\r\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
@@ -48,6 +50,52 @@
 //global variable for holding the features matrix
 SPImageData* featuresMatrix = NULL;
 
+bool isAFullLine(char* line){
+	return line[strlen(line)-1] == BREAKLINE_NO_CR;
+}
+
+void onGetLineError(char* s1, char* s2){
+	if (s1) free(s1);
+	if (s2) free(s2);
+}
+
+char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
+	int buffer_size = min_buffer_size;
+	char *line = NULL, *tempLine = NULL, *rslt = NULL;
+
+	spSafeCalloc(line, char, buffer_size, onGetLineError(line,tempLine));
+
+	rslt = fgets(line,buffer_size,fp);
+
+	if (!feof(fp) && rslt == NULL){
+		onGetLineError(line,tempLine);
+		return NULL;
+	}
+
+	while (!feof(fp) && ! isAFullLine(line)){
+		spSafeCalloc(tempLine, char, buffer_size,onGetLineError(line,tempLine));
+		strcpy(tempLine,line);
+
+		buffer_size <<= 1; // buffer *= 2
+
+		spSafeRealloc(line, char, buffer_size , onGetLineError(line,tempLine));
+
+		rslt = fgets(tempLine,buffer_size >> 1,fp);
+
+		if (!feof(fp) && rslt == NULL){
+			onGetLineError(line,tempLine);
+			return NULL;
+		}
+		strcat(line,tempLine);
+	}
+	free(tempLine);
+	return line;
+}
+
+char* getLine(FILE* fp){
+	return getLineByMinBufferSize(fp, MAX_PATH_LEN);
+}
+
 char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message){
 	SP_CONFIG_MSG  configMessage;
 	char *path  = NULL;
@@ -58,7 +106,7 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 		return NULL;
 	}
 
-	path = (char*)calloc(sizeof(char),MAXLINE_LEN);
+	path = (char*)calloc(sizeof(char),MAX_PATH_LEN);
 	if (path == NULL){
 		spLoggerPrintError(ERROR_CREATING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
@@ -81,7 +129,7 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 
 double getFloatingNumberFromSubString(char* myString, int* start){
 	assert (myString != NULL && *start >= 0);
-	char rsltAsString[MAXLINE_LEN];
+	char rsltAsString[strlen(myString)];
 	int i = 0;
 
 	while (isdigit(myString[*start]) || myString[*start] == '.' || myString[*start] == '-'){
@@ -348,7 +396,7 @@ SPImageData* loadAllImagesData(const SPConfig config, bool createFlag, SP_DP_MES
 SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	int i;
-	char *readResult, *line;
+	char *line = NULL;
 	SPPoint currentPoint;
 
 	if (imageFile == NULL || imageData== NULL || imageData->featuresArray == NULL || imageData->numOfFeatures<0){
@@ -357,19 +405,10 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 		return SP_DP_INVALID_ARGUMENT;
 	}
 
-	//TODO - this is not a good limit and need to change to get line with dynamoc realloc
-	line = (char*)calloc(sizeof(char),MAXLINE_LEN);
-
-	if (line == NULL){
-		spLoggerPrintError(ERROR_AT_READING_FEATURES_FROM_FILE, __FILE__,__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		return SP_DP_MEMORY_FAILURE;
-	}
-
 	for (i=0;i<imageData->numOfFeatures;i++)
 	{
-		readResult = fgets(line, MAXLINE_LEN, imageFile);
-		if (readResult == NULL)
+		line = getLine(imageFile);
+		if (line == NULL)
 		{
 			spLoggerPrintError(ERROR_AT_READING_FEATURES_FROM_FILE, __FILE__,__FUNCTION__, __LINE__);
 			spLoggerPrintError(ERROR_READING_FILE, __FILE__,__FUNCTION__, __LINE__);
@@ -390,9 +429,10 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 			free(line);
 			return message;
 		}
+		free(line);
 		imageData->featuresArray[i] = currentPoint;
 	}
-	free(line);
+
 	return message;
 
 }
@@ -429,19 +469,10 @@ SP_DP_MESSAGES loadKnownImageData(char* imageDataPath, SPImageData imageData){
 
 SP_DP_MESSAGES loadImageDataFromFile(FILE* imageFile, SPImageData imageData){
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
-	char *readResult, *line;
+	char *line = NULL;
 
-	line = (char*)calloc(sizeof(char),MAXLINE_LEN);
+	line = getLine(imageFile); //read headers
 	if (line == NULL){
-		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		return SP_DP_MEMORY_FAILURE;
-	}
-
-	//read headers
-	readResult = fgets(line, MAXLINE_LEN, imageFile);
-	if (readResult == NULL)
-	{
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_READING_FILE, __FILE__,__FUNCTION__, __LINE__);
 		free(line);

@@ -9,6 +9,43 @@
 
 //TODO - logger !!!!!!!!!!!!!!!!!!!!!!!!!!
 
+/*
+ * This macro is used to generate safe calloc action
+ * @param pointer - the pointer we want to allocate
+ * @param type - the type of data we want to allocate
+ * @param countOfItems - the number of items to be allocated
+ * @param onError - some action to be performed in case of error
+ *
+ * the macro is used to allocate data, and in case of an error report it to the logger,
+ * invoke "onError" and return NULL
+ */
+#define spSafeCalloc(pointer, type, countOfItems, onError)  do { \
+				pointer = (type*)calloc(countOfItems, sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					onError; \
+					return NULL;\
+                } \
+        } while (0)
+
+/*
+ * This macro is used to generate safe realloc action
+ * @param pointer - the pointer we want to reallocate
+ * @param type - the type of data we want to allocate
+ * @param countOfItems - the number of items to be allocated
+ * @param onError - some action to be performed in case of error
+ *
+ * the macro is used to reallocate data, and in case of an error report it to the logger,
+ * invoke "onError" and return NULL
+ */
+#define spSafeRealloc(pointer, type, countOfItems, onError)  do { \
+				pointer = (type*)realloc(pointer, countOfItems * sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					onError; \
+					return NULL;\
+                } \
+        } while (0)
 
 /** A type used for defining an ImageData item**/
 struct sp_image_data {
@@ -31,6 +68,64 @@ typedef enum sp_data_parse_messages {
 	SP_DP_FEATURE_EXTRACTION_ERROR
 } SP_DP_MESSAGES;
 
+/*
+ * The method gets a pre-allocated char array and returns
+ * true if it represents a line i.e ends with '\n'
+ *
+ * @param line - the char array
+ *
+ * @returns true iff line[line length -1] == '\n'
+ */
+bool isAFullLine(char* line);
+
+/*
+ * A helper method used to free the allocated data for 2 char arrays,
+ * if they do not point to NULL
+ *
+ * @param s1 - first item
+ * @param s2 - second item
+ */
+void onGetLineError(char* s1, char* s2);
+
+/*
+ * A method that is used to get a line (at an unknown length)
+ * from a pre-allocated file pointer and a minimum estimation for the line length
+ * the file pointer will point to the beginning of the next line after the
+ * method is invoked
+ *
+ * pre assumptions - fp != NULL and min_buffer_size > 0
+ *
+ * @param fp - a pointer to a pre-allocated file at read mode
+ * @param min_buffer_size - a positive integer used for the
+ * 								minimum guess of the line size
+ *
+ * @returns :
+ * NULL in case of memory allocation error
+ * otherwise returns a char array that represent the current line in the file
+ * an empty string will be returned if the fp already pointer to eof
+ *
+ * @logger - the method logs a memory allocation error if needed
+ */
+char* getLineByMinBufferSize(FILE* fp, int min_buffer_size);
+
+/*
+ * A method that is used to get a line (at an unknown length)
+ * from a pre-allocated file pointer
+ * the file pointer will point to the beginning of the next line after the
+ * method is invoked
+ *
+ * pre assumptions - fp != NULL
+ *
+ * @param fp - a pointer to a pre-allocated file at read mode
+ *
+ * @returns :
+ * NULL in case of memory allocation error
+ * otherwise returns a char array that represent the current line in the file
+ * an empty string will be returned if the fp already pointer to eof
+ *
+ * @logger - the method logs a memory allocation error if needed
+ */
+char* getLine(FILE* fp);
 
 /*
  * The method sets the value of the features matrix

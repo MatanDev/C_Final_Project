@@ -221,6 +221,48 @@ static bool testLoadKnownImageData(){
 	return successFlag;
 }
 
+bool testGetLineBySize(int size){
+	char *line1 = NULL, *line2 = NULL, *line3 = NULL, *line4 = NULL, *line5 = NULL, *line6 = NULL;
+	FILE* fp = NULL;
+	fp = fopen("./images/test1.feats","r");
+
+	ASSERT_TRUE(fp != NULL);
+
+	line1 = getLineByMinBufferSize(fp,size);
+	line2 = getLineByMinBufferSize(fp,size);
+	line3 = getLineByMinBufferSize(fp,size);
+	line4 = getLineByMinBufferSize(fp,size);
+	line5 = getLineByMinBufferSize(fp,size);
+	line6 = getLineByMinBufferSize(fp,size);
+
+	ASSERT_TRUE(strcmp(line1,"5,3\n") == 0);
+	ASSERT_TRUE(strcmp(line2,"4,1.000000,3.000000,5.000000,4.000000\n") == 0);
+	ASSERT_TRUE(strcmp(line3,"5,4.000000,5.500000,13413.000000,92.000000,1.000000\n") == 0);
+	ASSERT_TRUE(strcmp(line4,"3,0.000000,0.000000,0.000000\n") == 0);
+	ASSERT_TRUE(strcmp(line5,"") == 0);
+	ASSERT_TRUE(strcmp(line5,"") == 0);
+
+	free(line1);
+	free(line2);
+	free(line3);
+	free(line4);
+	free(line5);
+	free(line6);
+
+	fclose(fp);
+	return true;
+}
+
+bool testGetLine(){
+	int i;
+	for (i = 1 ; i <= 2048 ; i++){
+		if (!testGetLineBySize(i)){
+			return false;
+		}
+	}
+	return true;
+}
+
 void RunImagesParserTests(SPConfig config){
 	internalConfig = config;
 	RUN_TEST(pointToStringTests);
@@ -229,4 +271,5 @@ void RunImagesParserTests(SPConfig config){
 	RUN_TEST(testLoadImageDataFromHeader);
 	RUN_TEST(testSaveImageData);
 	RUN_TEST(testLoadKnownImageData);
+	RUN_TEST(testGetLine);
 }

@@ -26,7 +26,7 @@ extern "C" {
 #define STDOUT	"stdout" //TODO - remove at production
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 //TODO - verify calloc args order
-
+/*
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;
@@ -98,22 +98,9 @@ int main(int argc, char** argv) {
 	endControlFlow(config, currentImageData, imagesDataList, numOfImages, oneImageWasSet,
 			kdTree, bpq);
 	return 0;
-}
-/*
-int main() {
-	runConfigTests();
-	return 0;
-}
-
-
-int main(){
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("spcbir.config", &msg);
-	RunImagesParserTests(config);
-	spConfigDestroy(config);
-	return 0;
 }*/
-/*
+
+
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
@@ -123,10 +110,12 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
+	RunImagesParserTests(config);
+	//runConfigTests();
 	//runKDArrayTests();
 	//runKDTreeNodeTests();
-	runKDTreeNodeKNNTests();
+	//runKDTreeNodeKNNTests();
 	spConfigDestroy(config);
 	return 0;
-}*/
+}
 
