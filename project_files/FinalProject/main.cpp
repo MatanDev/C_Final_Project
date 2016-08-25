@@ -25,6 +25,11 @@ extern "C" {
 
 #define STDOUT	"stdout" //TODO - remove at production
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
+#define ERROR_INIT_CONFIG "Error initializing configurations and settings"
+#define ERROR_INIT_IMAGES "Error at initialize images data items process"
+#define ERROR_INIT_KDTREE "Error building the kd-tree data structure"
+#define ERROR_USER_QUERY "Error at user input. neither a valid image path, nor exit request"
+
 //TODO - verify calloc args order
 
 int main(int argc, char** argv) {
@@ -37,20 +42,19 @@ int main(int argc, char** argv) {
 	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
 
-	//TODO - change error
 	verifyAction((initConfigAndSettings(argc, argv, &config, &numOfImages,
-		&numOfSimilarImages,&extractFlag, &GUIFlag)), "could not do some shit");
+		&numOfSimilarImages,&extractFlag, &GUIFlag)), ERROR_INIT_CONFIG);
 
 	//TODO - in case the directory is invalid or pca file is invalid we fail here
 	//we should check if the path is valid in the previous function
 	//we have other cases of possible failures - think how to deal with them (try catch?)
+
 	//build features database
 	sp::ImageProc imageProcObject(config);
 
 	if (extractFlag) {
 		initializeImagesDataList(&imagesDataList,numOfImages);
-		//TODO - change error
-		verifyAction(imagesDataList, "could not do some other shit");
+		verifyAction(imagesDataList, ERROR_INIT_IMAGES);
 		for (i = 0; i < numOfImages; i++){
 			msg = spConfigGetImagePath(tempPath, config, i);
 			verifyAction((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH);
@@ -59,9 +63,8 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	//TODO - change error
 	verifyAction((initializeKDTreeAndBPQueue(config, &imagesDataList, &currentImageData,
-			&kdTree, &bpq, numOfImages)), "could dot do some other shit");
+			&kdTree, &bpq, numOfImages)), ERROR_INIT_KDTREE);
 
 	// first run must always happen
 	getQuery(workingImagePath);
@@ -69,8 +72,7 @@ int main(int argc, char** argv) {
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
 		oneImageWasSet = true;
-		//TODO - change error
-		verifyAction((verifyPathAndAvailableFile(workingImagePath)), "another error");
+		verifyAction((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY);
 		if (currentImageData->featuresArray != NULL) {
 			free(currentImageData->featuresArray);
 		}

@@ -24,7 +24,7 @@
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
 
 #define ERROR_INVALID_ARGUMENT "Error Invalid argument"
-#define ERROR_WRONG_QUERY "Query is not a valid path, or file is not available"
+#define ERROR_WRONG_FILE "Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS "Could not load data from the configurations"
 
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM "Error creating query image item"
@@ -59,8 +59,8 @@ bool verifyPathAndAvailableFile(char* path) {
 		return false;
    fp = fopen(path,"r");
    if (fp == NULL){
-	   spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
-	   printf(QUERY_STRING_ERROR);
+	   spLoggerPrintError(ERROR_WRONG_FILE, __FILE__,__FUNCTION__, __LINE__);
+	   //printf(QUERY_STRING_ERROR);
 	   return false;
    }
    fclose(fp);
@@ -144,25 +144,25 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 
 	*extractFlag = spConfigIsExtractionMode(config , &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
 	}
 
 	*numOfImages = spConfigGetNumOfImages(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
 	}
 
 	*GUIFlag = spConfigMinimalGui(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
 	}
 
 	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
 	if (rslt != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return rslt;
 	}
 
@@ -240,7 +240,7 @@ bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataL
 
 	if (configMessage != SP_CONFIG_SUCCESS){
 		free(allFeaturesArray);
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return false;
 	}
 
@@ -260,7 +260,7 @@ bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataL
 
 	if (configMessage != SP_CONFIG_SUCCESS){
 		//TODO - this is not a relevant error
-		spLoggerPrintError(ERROR_WRONG_QUERY, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return false;
 	}
 
