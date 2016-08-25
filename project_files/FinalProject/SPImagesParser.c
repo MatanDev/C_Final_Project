@@ -93,7 +93,7 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
 }
 
 char* getLine(FILE* fp){
-	return getLineByMinBufferSize(fp, MAX_PATH_LEN);
+	return getLineByMinBufferSize(fp, DEF_LINE_LEN);
 }
 
 char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message){
