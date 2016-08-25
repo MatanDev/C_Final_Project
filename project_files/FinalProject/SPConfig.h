@@ -513,6 +513,6 @@ char* duplicateString(const char* str);
  *
  * @logger - the method logs relevant errors
  */
-char* getSignature(const SPConfig config);
+char* getSignature(const SPConfig config); //TODO - (matan) need to add tests for this..
 
 #endif /* SPCONFIG_H_ */
