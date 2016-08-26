@@ -10,7 +10,7 @@
 #define DEFAULT_NUM_OF_FEATURES	100
 #define DEFAULT_NUM_OF_SIM_IMGS	1
 #define DEFAULT_KNN				1
-#define DEFAULT_LOGGER_LEVEL	3
+#define DEFAULT_LOGGER_LEVEL	SP_LOGGER_INFO_WARNING_ERROR_LEVEL
 #define DEFAULT_LOGGER_FILENAME	"stdout"
 #define FILE_TEMPLATE_FOR_ERROR	"File: %s\n"
 #define LINE_TEMPLATE_FOR_ERROR	"Line: %d\n"
@@ -61,6 +61,10 @@
 #define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
 #define SIGNATURE_FORMAT		"==[%s][%d][%d][%d]==\n"
 #define ERROR_CREATING_SIGN     "Error creating config signature"
+#define PCA_DIM_MIN_VALID_VAL	10
+#define PCA_DIM_MAX_VALID_VAL	28
+#define LOG_LVL_MIN_VALID_VAL	1
+#define LOG_LVL_MAX_VALID_VAL	4
 
 /**
  * A data-structure which is used for configuring the system.
@@ -78,7 +82,7 @@
 	SP_KDTREE_SPLIT_METHOD spKDTreeSplitMethod;
 	int spKNN;
 	bool spMinimalGUI;
-	int spLoggerLevel;
+	SP_LOGGER_LEVEL spLoggerLevel;
 	char* spLoggerFilename;
 };*/
 
@@ -122,14 +126,10 @@ void printErrorMessage(const char* filename, int lineNum,
 		break;
 	case PARAMETER_NOT_SET:
 		printf(PARAM_NOT_SET_MSG, parameterName);
-		break;
 	}
 }
 
 //TODO - in case of error - what should msg be? - right now: invalid string - ask in forum
-/*
- * basically it's like getVarNameAndValueFromLine
- */
 bool parseLine(const char* filename, int lineNum, char* line,
 		char** varName, char** value, bool* isCommentOrEmpty,
 		SP_CONFIG_MSG* msg) {
@@ -209,7 +209,9 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	if ((tmpInt = atoi(value)) <= 0) {
+	// we use strchr because atoi doesn't return an error in case of floating point
+	// TODO - think about using strtol instead of atoi
+	if (strchr(value, '.') || (tmpInt = atoi(value)) <= 0) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
@@ -219,17 +221,18 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
 	return true;
 }
 
-// TODO - maybe unite with previous one
-bool handleBoundedPosIntField(int* posIntField, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg, int minVal, int maxVal) {
+bool handlePCADimension(SPConfig config, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	if ((tmpInt = atoi(value)) < minVal || tmpInt > maxVal) {
+	// we use strchr because atoi doesn't return an error in case of floating point
+	if (strchr(value, '.') || (tmpInt = atoi(value)) < PCA_DIM_MIN_VALID_VAL ||
+			tmpInt > PCA_DIM_MAX_VALID_VAL) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
 
-	*posIntField = tmpInt;
+	config->spPCADimension = tmpInt;
 	return true;
 }
 
@@ -270,6 +273,34 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 	return true;
 }
 
+bool handleLoggerLevel(SPConfig config, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+	int tmpInt;
+	// we use strchr because atoi doesn't return an error in case of floating point
+	if (strchr(value, '.') || ((tmpInt = atoi(value)) < LOG_LVL_MIN_VALID_VAL ||
+			tmpInt > LOG_LVL_MAX_VALID_VAL)) {
+		*msg = SP_CONFIG_INVALID_INTEGER;
+		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
+		return false;
+	}
+
+	switch(tmpInt) {
+	case 1:
+		config->spLoggerLevel = SP_LOGGER_ERROR_LEVEL;
+		break;
+	case 2:
+		config->spLoggerLevel = SP_LOGGER_WARNING_ERROR_LEVEL;
+		break;
+	case 3:
+		config->spLoggerLevel = SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
+		break;
+	case 4:
+		config->spLoggerLevel = SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL;
+	}
+
+	return true;
+}
+
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
@@ -289,8 +320,7 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 				lineNum, value, msg);
 
 	if (!strcmp(varName, SP_PCA_DIMENSION))
-		return handleBoundedPosIntField(&(config->spPCADimension), filename,
-				lineNum, value, msg, 10, 28);
+		return handlePCADimension(config, filename, lineNum, value, msg);
 
 	if (!strcmp(varName, SP_PCA_FILENAME))
 		return handleStringField(&(config->spPCAFilename), filename, lineNum,
@@ -320,8 +350,7 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 				value, msg);
 
 	if (!strcmp(varName, SP_LOGGER_LVL))
-		return handleBoundedPosIntField(&(config->spLoggerLevel), filename,
-				lineNum, value, msg, 1, 4);
+		return handleLoggerLevel(config, filename, lineNum, value, msg);
 
 	if (!strcmp(varName, SP_LOGGER_FILENAME))
 		return handleStringField(&(config->spLoggerFilename), filename,
@@ -394,7 +423,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		return NULL;
 	}
 
-	config = (SPConfig)malloc(sizeof(struct sp_config_t));
+	config = (SPConfig)calloc(1, sizeof(struct sp_config_t));
 	if (config == NULL) {
 		*msg = SP_CONFIG_ALLOC_FAIL;
 		return NULL;
@@ -416,8 +445,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		}
 	}
 
-	// TODO - if we fail in initialize to default should we fail the whole
-	// opertation? (meaning just assign instead of malloc and copy)
 	if (!checkAndSetDefIfNeeded(&(config->spPCAFilename), DEFAULT_PCA_FILENAME, msg) ||
 		!checkAndSetDefIfNeeded(&(config->spLoggerFilename), DEFAULT_LOGGER_FILENAME, msg)) {
 		return onError(config, configFile);
@@ -468,23 +495,9 @@ SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_M
 	return isValid(config, msg) ? config->spKDTreeSplitMethod : MAX_SPREAD;
 }
 
-// TODO - should we deal with this in the handler and keep spLoggerLevel as SP_LOGGER_LEVEL
-// and not as int?
 SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg) {
-	if (isValid(config, msg)) {
-		switch(config->spLoggerLevel) {
-		case 1:
-			return SP_LOGGER_ERROR_LEVEL;
-		case 2:
-			return SP_LOGGER_WARNING_ERROR_LEVEL;
-		case 3:
-			return SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
-		case 4:
-			return SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL;
-		}
-	}
-	// TODO - think of a message to indicate that logger level is not in 1,2,3,4
-	return SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
+	return isValid(config, msg) ? config->spLoggerLevel :
+			SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
 }
 
 char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
@@ -509,8 +522,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	return SP_CONFIG_SUCCESS;
 }
 
-SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
-		int index) {
+SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int index) {
 	return spConfigGetImagePathFeats(imagePath, config, index, false);
 }
 
@@ -536,7 +548,7 @@ char* getSignature(const SPConfig config){
 		return NULL;
 	}
 	numOfFeatures = spConfigGetNumOfFeatures(config, &msg);
-	if (msg != SP_CONFIG_SUCCESS) { //TODO -maybe export to macro
+	if (msg != SP_CONFIG_SUCCESS) { //TODO - maybe export to macro
 		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
 				__FUNCTION__, __LINE__);
 		return NULL;

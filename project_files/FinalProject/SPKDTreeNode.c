@@ -33,25 +33,21 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
 	if (!(node->data = spPointCopy(array->pointsArray[0]))) {
-		spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_POINT_COPY, __FILE__, __FUNCTION__, __LINE__);
 		return onErrorInInitKDTree(node);
 	}
 
 	return node;
 }
 
-//TODO - validate that its okay that default is 0
 int getSplitDimInMaxSpreadMethod(SPKDArray array) {
 	int splitDim = 0, j, maxPtrIndex, minPtrIndex;
 	double maxPtrCoor, minPtrCoor, maxSpread = 0.0;
 	for (j = 0; j < array->dim; j++) {
 		maxPtrIndex = array->indicesMatrix[j][array->size - 1];
 		minPtrIndex = array->indicesMatrix[j][0];
-		maxPtrCoor =
-			spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
-		minPtrCoor =
-			spPointGetAxisCoor(array->pointsArray[minPtrIndex], j);
+		maxPtrCoor = spPointGetAxisCoor(array->pointsArray[maxPtrIndex], j);
+		minPtrCoor = spPointGetAxisCoor(array->pointsArray[minPtrIndex], j);
 		if (maxSpread < maxPtrCoor - minPtrCoor) {
 			maxSpread = maxPtrCoor - minPtrCoor;
 			splitDim = j;
@@ -70,25 +66,20 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 	node->dim = splitDim;
 
 	if (!(node->val = (double*)calloc(1, sizeof(double)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-						__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		spKDArrayPairDestroy(splitResPair);
 		return onErrorInInitKDTree(node);
 	}
 
-	//TODO 1 - validate that val should be kind of median value
-	//TODO 2 - maybe change getMedianIndex function
-	*(node->val) = spPointGetAxisCoor(array->pointsArray[
-		array->indicesMatrix[splitDim][getMedianIndex(array->size) - 1]],
+	*(node->val) = spPointGetAxisCoor(
+			array->pointsArray[array->indicesMatrix[splitDim][(array->size - 1) / 2]],
 			splitDim);
 
-	if (	!(node->kdtLeft =
-			internalInitKDTree(splitResPair->kdLeft, splitMethod,
+	if (	!(node->kdtLeft = internalInitKDTree(splitResPair->kdLeft, splitMethod,
 					(recDepth + 1) % array->dim)) ||
 
 	// valid cause we get here only if array->size > 1
-			!(node->kdtRight =
-			internalInitKDTree(splitResPair->kdRight, splitMethod,
+			!(node->kdtRight = internalInitKDTree(splitResPair->kdRight, splitMethod,
 					(recDepth + 1) % array->dim))	) {
 		spKDArrayPairDestroy(splitResPair);
 		return onErrorInInitKDTree(node);
@@ -107,15 +98,13 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 	int splitDim;
 
 	if (!array) {
-		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
 	if (!(ret = (SPKDTreeNode)calloc(1, sizeof(struct sp_kd_tree_node))))
 	{
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
@@ -163,6 +152,7 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 	}
 }
 
-bool isLeaf(SPKDTreeNode treeNode){
+bool isLeaf(SPKDTreeNode treeNode) {
 	return (treeNode->data != NULL);
 }
+

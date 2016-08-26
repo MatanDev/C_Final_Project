@@ -21,7 +21,6 @@ int compareIndexWithCoorValue(const void* a, const void* b) {
 	IndexWithCoorValue* first = (IndexWithCoorValue *)a;
 	IndexWithCoorValue* second = (IndexWithCoorValue *)b;
 	//TODO - deal with epsilon issue
-	//TODO - validate what happens in case of equality
 	return ((*first)->coor_value == (*second)->coor_value) ? 0 :
 			((*first)->coor_value > (*second)->coor_value) ? 1 : -1;
 }
@@ -89,14 +88,6 @@ bool allocateKDArrayIndicesMatrix(SPKDArray arr) {
 	for (j = 0; j < arr->dim; j++) {
 		if (!(arr->indicesMatrix[j] =
 				(int*)calloc(arr->size, sizeof(int)))) {
-			//TODO - maybe we need to free memory ? :
-			/*
-			//free memory
-			int rollbackIndex;
-			for (rollbackIndex = 0; rollbackIndex<j;rollbackIndex++)
-				free(arr->indicesMatrix[rollbackIndex]);
-			free(arr->indicesMatrix);
-			*/
 			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
 							__FUNCTION__, __LINE__);
 			return false;
@@ -227,7 +218,7 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
 	return NULL;
 }
 
-bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor) {
+bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor) {
 	int i;
 	if (!(*xArr = (int*)calloc(kdArr->size, sizeof(int)))) {
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
@@ -235,10 +226,10 @@ bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor) {
 		return false;
 	}
 
-	for (i = 0; i < medianIndex; i++)
+	for (i = 0; i < leftKdArrSize; i++)
 		(*xArr)[kdArr->indicesMatrix[coor][i]] = 0;
 
-	for (i = medianIndex; i < kdArr->size; i++)
+	for (i = leftKdArrSize; i < kdArr->size; i++)
 		(*xArr)[kdArr->indicesMatrix[coor][i]] = 1;
 
 	return true;
@@ -330,13 +321,8 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 	return kdArrPair;
 }
 
-int getMedianIndex(int size) {
-	return (size % 2 == 0) ? (size / 2) : (size / 2) + 1;
-}
-
 SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	SPKDArrayPair ret = NULL;
-	int medianIndex;
 	int *xArr = NULL, *map1 = NULL, *map2 = NULL;
 
 	if (!kdArr || coor < 0) {
@@ -367,14 +353,12 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 		return onErrorInSplit(ret, xArr, map1, map2);
 	}
 
-	medianIndex = getMedianIndex(kdArr->size);
-
 	ret->kdLeft->dim = kdArr->dim;
 	ret->kdRight->dim = kdArr->dim;
-	ret->kdLeft->size = medianIndex;
-	ret->kdRight->size = kdArr->size - medianIndex;
+	ret->kdLeft->size = ((kdArr->size - 1) / 2) + 1; // +1 because we start from 0
+	ret->kdRight->size = kdArr->size - ret->kdLeft->size;
 
-	if (!initXArr(&xArr, kdArr, medianIndex, coor))
+	if (!initXArr(&xArr, kdArr, ret->kdLeft->size, coor))
 		return onErrorInSplit(ret, xArr, map1, map2);
 
 	if (!createKDArrayPairPointsArrays(ret, kdArr, xArr))

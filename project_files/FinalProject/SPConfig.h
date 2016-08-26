@@ -54,7 +54,7 @@ struct sp_config_t {
 	SP_KDTREE_SPLIT_METHOD spKDTreeSplitMethod;
 	int spKNN;
 	bool spMinimalGUI;
-	int spLoggerLevel;
+	SP_LOGGER_LEVEL spLoggerLevel;
 	char* spLoggerFilename;
 };
 
@@ -145,22 +145,20 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg);
 
 /*
- * Checks if the given value is a positive integer in the given domain
- * and if so sets the given integer field value to the given value
+ * Checks if the given value is a positive integer between 10 and 28
+ * and if so sets config->spPCADimension to the given value (as an integer)
  *
- * @param posIntField - pointer to integer field to set the value to
+ * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
  * configuration file in case of parameter not set error
  * @param value - a string which contains the value to set
  * @param msg - pointer in which the msg returned by the function is stored
- * @param minVal - the minimum legal value that value can have
- * @param maxVal - the maximum legal value that value can have
- * @return true if the given value is a positive integer in the given domain,
+ * @return true if the given value is a positive integer between 10 and 28,
  * otherwise returns false
  */
-bool handleBoundedPosIntField(int* posIntField, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg, int minVal, int maxVal);
+bool handlePCADimension(SPConfig config, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value is "true" or "false"
@@ -191,6 +189,22 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
  * @return true if the given value is a KDTree split method, otherwise returns false
  */
 bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
+		int lineNum, char* value, SP_CONFIG_MSG* msg);
+
+/*
+ * Checks if the given value is a positive integer between 1 and 4
+ * and if so sets config->spLoggerLevel accordingly
+ *
+ * @param config - pointer to the configuration structure instance
+ * @param filename - the configuration filename
+ * @param lineNum - the number of the invalid line or the number of lines in the
+ * configuration file in case of parameter not set error
+ * @param value - a string which contains the value to set
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return true if the given value is a positive integer between 1 and 4,
+ * otherwise returns false
+ */
+bool handleLoggerLevel(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg);
 
 /*
@@ -355,7 +369,6 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
-
 /*
  * Returns the KNN set in the configuration file, i.e the value
  * of spKNN.
@@ -370,8 +383,20 @@ int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
  */
 int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
 
+/*
+ * Returns the split method as configured in the configuration file,
+ * i.e the SP_KDTREE_SPLIT_METHOD represented by the value of spSplitMethod.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return the SP_KDTREE_SPLIT_METHOD represented by the value of spSplitMethod in success,
+ * MAX_SPREAD otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
 SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg);
-
 
 /*
  * Returns the logger level as configured in the configuration file,
@@ -446,9 +471,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
  * - SP_CONFIG_INDEX_OUT_OF_RANGE - if index >= spNumOfImages
  * - SP_CONFIG_SUCCESS - in case of success
  */
-SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
-		int index);
-
+SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int index);
 
 /**
  * The function stores in pcaPath the full path of the pca file.

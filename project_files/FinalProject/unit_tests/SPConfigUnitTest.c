@@ -21,7 +21,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(config->spNumOfSimilarImages == 5);
 	ASSERT_TRUE(config->spKNN == 5);
 	ASSERT_TRUE(config->spKDTreeSplitMethod == MAX_SPREAD);
-	ASSERT_TRUE(config->spLoggerLevel == 4);
+	ASSERT_TRUE(config->spLoggerLevel == SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
 	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
 
 	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg) == false);
@@ -265,6 +265,20 @@ bool testHandler() {
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "-9000", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfImages", "014", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spNumOfImages == 14);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfImages", "+1", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	ASSERT_TRUE(config->spNumOfImages == 1);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "1.1", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
 	msg = SP_CONFIG_SUCCESS;
 

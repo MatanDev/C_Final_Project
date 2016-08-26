@@ -206,8 +206,7 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
  *
  * @param xArr - a pointer to the array to fill and return
  * @param kdArr - the given SPKDArray to split
- * @param medianIndex - [n/2] (upper crop) such that n is the number of
- * points in kdArr
+ * @param leftKdArrSize - the size of the left KDArray
  * @param coor - the relevant coordination to split by
  *
  * @returns false in case of memory allocation failure, otherwise
@@ -217,7 +216,7 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
  * in case of any type of failure the relevant error is logged to the
  * logger
  */
-bool initXArr(int** xArr, SPKDArray kdArr, int medianIndex, int coor);
+bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor);
 
 /*
  * The method creates and fills the two kd-arrays points arrays
@@ -281,14 +280,6 @@ bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
  */
 SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 		SPKDArray kdArr, int* xArr, int* map1, int* map2);
-
-/*
- * The method calculates [size/2] (upper crop)
- * @param size - the size of the given points array
- *
- * @returns [size/2] (upper crop)
- */
-int getMedianIndex(int size);
 
 /*
  * The method returns two kd-arrays (using the SPKDArrayPair)

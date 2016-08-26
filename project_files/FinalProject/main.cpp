@@ -31,6 +31,7 @@ extern "C" {
 #define ERROR_USER_QUERY "Error at user input. neither a valid image path, nor exit request"
 
 //TODO - verify calloc args order
+//TODO - what to do with logger write return value
 /*
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -108,15 +109,15 @@ int main() {
 	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
 	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
 	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
-		return -1; // TODO - maybe report relevant error (log still not initialized)
+		return -1;
 
 	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
 	//RunImagesParserTests(config);
 	runConfigTests();
-	runKDArrayTests();
-	runKDTreeNodeTests();
-	runKDTreeNodeKNNTests();
+	//runKDArrayTests();
+	//runKDTreeNodeTests();
+	//runKDTreeNodeKNNTests();
 	spConfigDestroy(config);
 	spLoggerDestroy();
 	return 0;
