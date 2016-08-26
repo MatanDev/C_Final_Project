@@ -48,21 +48,24 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 }
 
 bool verifyPathAndAvailableFile(char* path) {
-	if (path == NULL){
+	FILE* fp;
+
+	if (path == NULL) {
 		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,__FUNCTION__, __LINE__);
 		return false;
 	}
-	FILE* fp;
-	if (path == NULL)
-		return false;
-   fp = fopen(path,"r");
-   if (fp == NULL){
+
+	fp = fopen(path,"r");
+
+	if (fp == NULL){
 	   spLoggerPrintError(ERROR_WRONG_FILE, __FILE__,__FUNCTION__, __LINE__);
 	   //printf(QUERY_STRING_ERROR);
 	   return false;
-   }
-   fclose(fp);
-   return true;
+	}
+
+	fclose(fp);
+
+	return true;
 }
 
 void getQuery(char* destination) {
@@ -276,7 +279,7 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 
 	//verify PCA file
 	msg = spConfigGetPCAPath(tempPath, config);
-	if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+	if (msg != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
 		spLoggerPrintError(ERROR_AT_PCA_FILE_PATH, __FILE__,
 				__FUNCTION__, __LINE__);
 		return false;
@@ -284,7 +287,7 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 	//verify images files
 	for (i = 0;i < numOfImages ; i++){
 		msg = spConfigGetImagePath(tempPath, config, i);
-		if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+		if (msg != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
 			spLoggerPrintError(ERROR_AT_IMAGES_FILE_PATH, __FILE__,
 					__FUNCTION__, __LINE__);
 			return false;
@@ -292,7 +295,7 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 
 		if (!extractFlag){
 			msg = spConfigGetImagePathFeats(tempPath, config, i, true);
-			if (msg  != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
+			if (msg != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
 				spLoggerPrintError(ERROR_AT_IMAGES_FEATURES_FILE_PATH, __FILE__,
 						__FUNCTION__, __LINE__);
 				return false;

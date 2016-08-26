@@ -112,11 +112,13 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	RunImagesParserTests(config);
-	//runConfigTests();
-	//runKDArrayTests();
-	//runKDTreeNodeTests();
-	//runKDTreeNodeKNNTests();
+	//RunImagesParserTests(config);
+	runConfigTests();
+	runKDArrayTests();
+	runKDTreeNodeTests();
+	runKDTreeNodeKNNTests();
 	spConfigDestroy(config);
+	spLoggerDestroy();
 	return 0;
 }
+

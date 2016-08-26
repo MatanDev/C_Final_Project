@@ -367,7 +367,8 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 
 	// TODO - it's ugly to do it here but it's in order to avoid double close
 	// is there a better solution?
-	fclose(configFile);
+	if (configFile)
+		fclose(configFile);
 
 	return config;
 }
@@ -620,10 +621,10 @@ char* configMsgToStr(SP_CONFIG_MSG msg) {
 char* duplicateString(const char *str)
 {
 	char* duplicated;
-    int len = 1; //for '\0\'
+    int len = 1; // for '\0'
     len += strlen(str);
-    duplicated = (char*)malloc(len);
-    if(duplicated != NULL){
+    duplicated = (char*)calloc(len, sizeof(char));
+    if (duplicated != NULL) {
         strcpy(duplicated, str);
     }
     return duplicated;

@@ -346,21 +346,25 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	}
 
 	if (  !(ret =
-			   (SPKDArrayPair)calloc(1, sizeof(struct sp_kd_array_pair)))
-	   || !(ret->kdLeft =
-			   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))
-	   || !(ret->kdRight =
-			   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))  ) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-						__FUNCTION__, __LINE__);
+			   (SPKDArrayPair)calloc(1, sizeof(struct sp_kd_array_pair)))  ) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return onErrorInSplit(ret, xArr, map1, map2);
 	}
 
+	// This condition should never be true in the way we build the KDTree, but just in case
 	if (kdArr->size == 1) {
 		if (!(ret->kdLeft = spKDArrayCopy(kdArr)))
 			return onErrorInSplit(ret, xArr, map1, map2);
 		ret->kdRight = NULL;
 		return ret;
+	}
+
+	if (  !(ret->kdLeft =
+				   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))
+	   || !(ret->kdRight =
+			   	   (SPKDArray)calloc(1, sizeof(struct sp_kd_array)))  ) {
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
+		return onErrorInSplit(ret, xArr, map1, map2);
 	}
 
 	medianIndex = getMedianIndex(kdArr->size);

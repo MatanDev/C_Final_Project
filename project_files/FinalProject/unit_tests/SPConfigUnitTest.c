@@ -17,11 +17,11 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
 	ASSERT_TRUE(config->spNumOfFeatures == 100);
 	ASSERT_TRUE(config->spExtractionMode == false);
-	ASSERT_TRUE(config->spMinimalGUI == true);
+	ASSERT_TRUE(config->spMinimalGUI == false);
 	ASSERT_TRUE(config->spNumOfSimilarImages == 5);
-	ASSERT_TRUE(config->spKNN == 1);
+	ASSERT_TRUE(config->spKNN == 5);
 	ASSERT_TRUE(config->spKDTreeSplitMethod == MAX_SPREAD);
-	ASSERT_TRUE(config->spLoggerLevel == 3);
+	ASSERT_TRUE(config->spLoggerLevel == 4);
 	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
 
 	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg) == false);
@@ -30,7 +30,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(spConfigIsExtractionMode(NULL, &msg) == false);
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
 
-	ASSERT_TRUE(spConfigMinimalGui(config, &msg) == true);
+	ASSERT_TRUE(spConfigMinimalGui(config, &msg) == false);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
 	ASSERT_TRUE(spConfigMinimalGui(NULL, &msg) == false);
@@ -169,7 +169,7 @@ bool testParseLine() {
 }
 
 bool testDefault() {
-	SPConfig config = malloc(sizeof(struct sp_config_t));
+	SPConfig config = calloc(1, sizeof(struct sp_config_t));
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	initConfigToDefault(config);
 	ASSERT_TRUE(config->spImagesDirectory == NULL);
@@ -181,35 +181,35 @@ bool testDefault() {
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_DIR);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = malloc(sizeof(struct sp_config_t));
+	config = calloc(1, sizeof(struct sp_config_t));
 	initConfigToDefault(config);
-	config->spImagesDirectory = "./bla/bla/";
+	config->spImagesDirectory = duplicateString("./bla/bla/");
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_PREFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = malloc(sizeof(struct sp_config_t));
+	config = calloc(1, sizeof(struct sp_config_t));
 	initConfigToDefault(config);
-	config->spImagesDirectory = "./bla/bla/";
-	config->spImagesPrefix = "whatever";
+	config->spImagesDirectory = duplicateString("./bla/bla/");
+	config->spImagesPrefix = duplicateString("whatever");
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_SUFFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = malloc(sizeof(struct sp_config_t));
+	config = calloc(1, sizeof(struct sp_config_t));
 	initConfigToDefault(config);
-	config->spImagesDirectory = "./bla/bla/";
-	config->spImagesPrefix = "whatever";
-	config->spImagesSuffix = ".jpg";
+	config->spImagesDirectory = duplicateString("./bla/bla/");
+	config->spImagesPrefix = duplicateString("whatever");
+	config->spImagesSuffix = duplicateString(".jpg");
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_NUM_IMAGES);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = malloc(sizeof(struct sp_config_t));
+	config = calloc(1, sizeof(struct sp_config_t));
 	initConfigToDefault(config);
-	config->spImagesDirectory = "./bla/bla/";
-	config->spImagesPrefix = "whatever";
-	config->spImagesSuffix = ".jpg";
+	config->spImagesDirectory = duplicateString("./bla/bla/");
+	config->spImagesPrefix = duplicateString("whatever");
+	config->spImagesSuffix = duplicateString(".jpg");
 	config->spNumOfImages = 9000;
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == config);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
@@ -221,7 +221,9 @@ bool testDefault() {
 	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
 	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	config->spLoggerFilename = "/tmp/whatever";
+	free(config->spLoggerFilename);
+
+	config->spLoggerFilename = duplicateString("/tmp/whatever");
 	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
 	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "/tmp/whatever"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
@@ -229,7 +231,9 @@ bool testDefault() {
 	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
 	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	config->spPCAFilename = "/tmp/whatever2";
+	free(config->spPCAFilename);
+
+	config->spPCAFilename = duplicateString("/tmp/whatever2");
 	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
 	ASSERT_TRUE(!strcmp(config->spPCAFilename, "/tmp/whatever2"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
@@ -239,7 +243,7 @@ bool testDefault() {
 }
 
 bool testHandler() {
-	SPConfig config = malloc(sizeof(struct sp_config_t));
+	SPConfig config = calloc(1, sizeof(struct sp_config_t));
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectori", "C:\\MyDocuments\\",
@@ -326,6 +330,7 @@ bool testHandler() {
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(config->spKDTreeSplitMethod == INCREMENTAL);
 
+	spConfigDestroy(config);
 	return true;
 }
 
