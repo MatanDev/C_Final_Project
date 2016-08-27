@@ -29,9 +29,10 @@ extern "C" {
 #define ERROR_INIT_KDTREE "Error building the kd-tree data structure"
 #define ERROR_USER_QUERY "Error at user input. neither a valid image path, nor exit request"
 
+//TODO - remove asserts ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675
 //TODO - verify calloc args order
 //TODO - forum: what to do with logger write return value
-
+//TODO - expend to 3 methods - http://moodle.tau.ac.il/mod/forum/discuss.php?d=79730
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
 
 	//build features database
 	sp::ImageProc imageProcObject(config);
+	//TODO - verify we don't need to clean this object.. http://moodle.tau.ac.il/mod/forum/discuss.php?d=79258
 
 	if (extractFlag) {
 		initializeImagesDataList(&imagesDataList,numOfImages);
@@ -70,6 +72,7 @@ int main(int argc, char** argv) {
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
 		oneImageWasSet = true;
+		//TODO - if not a good path ask again - http://moodle.tau.ac.il/mod/forum/discuss.php?d=77911
 		verifyAction((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY);
 		if (currentImageData->featuresArray != NULL) {
 			free(currentImageData->featuresArray);
@@ -78,6 +81,7 @@ int main(int argc, char** argv) {
 		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
 				numOfSimilarImages, bpq);
 
+		//TODO - check minimal gui at schrieber or at least at my linux vm
 		if (GUIFlag) {
 			for (i=0;i<numOfSimilarImages;i++) {
 				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);

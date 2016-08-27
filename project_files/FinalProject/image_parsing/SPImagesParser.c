@@ -47,7 +47,7 @@
 
 
 
-//TODO - verify we can use a global
+//TODO - verify we can use a global http://moodle.tau.ac.il/mod/forum/discuss.php?d=77431
 //global variable for holding the features matrix
 SPImageData* featuresMatrix = NULL;
 

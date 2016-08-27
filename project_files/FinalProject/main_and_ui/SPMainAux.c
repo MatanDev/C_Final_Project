@@ -146,6 +146,9 @@ SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numO
 			k++;
 		}
 	}
+	//TODO - all points dimension needs to be the same, can assume ? maybe just warning ?
+	//http://moodle.tau.ac.il/mod/forum/discuss.php?d=78631
+
 	return featuresArray;
 }
 
@@ -274,6 +277,7 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 }
 
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
+	//TODO  - verify num of similar <= num of images and decide how to handle
 	char tempPath[MAX_FILE_PATH_LENGTH];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -295,6 +299,8 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 		}
 
 		if (!extractFlag){
+			//TODO - maybe load from image ?
+			// or ignore ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=79724
 			msg = spConfigGetImagePathFeats(tempPath, config, i, true);
 			if (msg != SP_CONFIG_SUCCESS || !verifyPathAndAvailableFile(tempPath)) {
 				spLoggerPrintError(ERROR_AT_IMAGES_FEATURES_FILE_PATH, __FILE__,
