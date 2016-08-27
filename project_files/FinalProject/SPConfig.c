@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "SPConfig.h"
+#include "general_utils/SPUtils.h"
 
 #define DEFAULT_PCA_DIMENSION	20
 #define DEFAULT_PCA_FILENAME	"pca.yml"
@@ -44,7 +45,6 @@
 #define SP_MINIMAL_GUI			"spMinimalGUI"
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
-#define MAX_LINE_LENGTH			1024
 //#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
@@ -409,7 +409,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	assert(msg != NULL);
 	SPConfig config;
 	FILE* configFile = NULL;
-	char line[MAX_LINE_LENGTH];
+	char line[MAX_PATH_LEN];
 	int lineNum = 0;
 	char* varName, *value;
 	bool isCommentOrEmpty;
@@ -434,7 +434,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 
 	initConfigToDefault(config);
 
-	while(fgets(line, MAX_LINE_LENGTH, configFile) != NULL) {
+	while(fgets(line, MAX_PATH_LEN, configFile) != NULL) {
 		isCommentOrEmpty = false;
 		if (!parseLine(filename, ++lineNum, line, &varName, &value,
 				&isCommentOrEmpty, msg)) {
@@ -541,7 +541,7 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 }
 
 char* getSignature(const SPConfig config){
-	char lastImagePath[MAX_LINE_LENGTH],*signature = NULL;
+	char lastImagePath[MAX_PATH_LEN],*signature = NULL;
 	int PCADim,numOfImages,numOfFeatures, rsltFlag;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
@@ -560,7 +560,7 @@ char* getSignature(const SPConfig config){
 	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
 	VALID_MSG_IN_SIGN;
 
-	signature = (char*)calloc(MAX_LINE_LENGTH*2,sizeof(char));
+	signature = (char*)calloc(MAX_PATH_LEN*2,sizeof(char));
 	if (signature == NULL){
 		spLoggerPrintError(ALLOCATION_FAILED_MSG, __FILE__,
 				__FUNCTION__, __LINE__);

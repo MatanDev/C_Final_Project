@@ -4,13 +4,14 @@
 #include <string.h>
 #include <assert.h>
 #include "SPImagesParser.h"
+#include "../general_utils/SPUtils.h"
 
 #define DOUBLE_PRECISION 6
 
 #define BREAKLINE_NO_CR							   '\n'
 #define BREAKLINE                                  "\r\n"
 #define DEF_LINE_LEN                               512
-#define MAX_PATH_LEN                               1025 // 1024 from project specs + 1 for '\0'
+
 #define HEADER_STRING_FORMAT                       "%d,%d\r\n"
 #define POINT_STRING_FORMAT                        "%d%s\r\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
@@ -107,22 +108,11 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 		return NULL;
 	}
 
-	path = (char*)calloc(sizeof(char),MAX_PATH_LEN);
-	if (path == NULL){
-		spLoggerPrintError(ERROR_CREATING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		*message =  SP_DP_MEMORY_FAILURE;
-		return NULL;
-	}
+	spCallocErWc(path, char, MAX_PATH_LEN, ERROR_CREATING_IMAGE_PATH, *message =  SP_DP_MEMORY_FAILURE);
 
 	configMessage = spConfigGetImagePathFeats(path,config,index,dataPath);
+	spValWcRn(configMessage == SP_CONFIG_SUCCESS, ERROR_CREATING_IMAGE_PATH, *message =  SP_DP_INVALID_ARGUMENT; free(path) );
 
-	if (configMessage != SP_CONFIG_SUCCESS){
-		spLoggerPrintError(ERROR_CREATING_IMAGE_PATH, __FILE__,__FUNCTION__, __LINE__);
-		*message =  SP_DP_INVALID_ARGUMENT;
-		free(path);
-		return NULL;
-	}
 	*message = SP_DP_SUCCESS;
 	return path;
 
@@ -180,7 +170,7 @@ int getPointCSVSize(SPPoint point){
 
 char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 	char *rsltString = NULL , *tempString = NULL, *secondTempString;
-	int size,i,rsltFlag;
+	int size,i;
 
 	if (point == NULL){
 		*message = SP_DP_INVALID_ARGUMENT;
@@ -193,43 +183,25 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 		spLoggerPrintWarning(WARNING_WRONG_POINT_SIZE_CALC, __FILE__,__FUNCTION__, __LINE__);
 	}
 
-	rsltString = (char*)calloc(sizeof(char),size);
-	tempString = (char*)calloc(sizeof(char),size);
-	secondTempString = (char*)calloc(sizeof(char),size);
-
-	if (rsltString == NULL || tempString == NULL || secondTempString == NULL){
-		spLoggerPrintError(ERROR_CONVERTING_POINT_TO_STRING, __FILE__,__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		*message = SP_DP_MEMORY_FAILURE;
-		return NULL;
-	}
+	spCallocErWc(rsltString, char, size, ERROR_CONVERTING_POINT_TO_STRING,*message = SP_DP_MEMORY_FAILURE);
+	spCallocErWc(tempString, char, size, ERROR_CONVERTING_POINT_TO_STRING,*message = SP_DP_MEMORY_FAILURE);
+	spCallocErWc(secondTempString, char, size, ERROR_CONVERTING_POINT_TO_STRING,*message = SP_DP_MEMORY_FAILURE);
 
 	tempString[0] = '\0';
 
 	//create internal string data
 	for (i = spPointGetDimension(point) -1 ;i>=0;i--){
 		strcpy(secondTempString, tempString);
-		rsltFlag = sprintf(tempString, INTERNAL_POINT_DATA_STRING_FORMAT,
-				spPointGetAxisCoor(point,i),secondTempString);
-		if (rsltFlag < 0){
-			free(tempString);
-			free(rsltString);
-			spLoggerPrintError(ERROR_CONVERTING_POINT_TO_STRING, __FILE__,__FUNCTION__, __LINE__);
-			*message = SP_DP_FORMAT_ERROR;
-			return NULL;
-		}
+		spValWcRn(sprintf(tempString, INTERNAL_POINT_DATA_STRING_FORMAT,
+				spPointGetAxisCoor(point,i),secondTempString) >= 0,
+				ERROR_CONVERTING_POINT_TO_STRING,
+				free(tempString); free(rsltString); *message = SP_DP_FORMAT_ERROR );
 	}
+	spValWcRn(sprintf(rsltString, POINT_STRING_FORMAT,
+			spPointGetDimension(point),tempString) >= 0,
+			ERROR_CONVERTING_POINT_TO_STRING,
+			free(tempString); free(rsltString); free(secondTempString); *message = SP_DP_FORMAT_ERROR );
 
-	rsltFlag = sprintf(rsltString, POINT_STRING_FORMAT,
-			spPointGetDimension(point),tempString);
-	if (rsltFlag < 0){
-		free(tempString);
-		free(secondTempString);
-		free(rsltString);
-		spLoggerPrintError(ERROR_CONVERTING_POINT_TO_STRING, __FILE__,__FUNCTION__, __LINE__);
-		*message = SP_DP_FORMAT_ERROR;
-		return NULL;
-	}
 	free(secondTempString);
 	free(tempString);
 	return rsltString;

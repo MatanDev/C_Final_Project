@@ -33,6 +33,23 @@ extern "C" {
 //TODO - verify calloc args order
 //TODO - forum: what to do with logger write return value
 //TODO - expend to 3 methods - http://moodle.tau.ac.il/mod/forum/discuss.php?d=79730
+
+/*
+ * The main function of the project, loads all the relevant data according
+ * to the settings file, afterwards interacts with the user to get his queries
+ * the interaction ends in case of a failure or the use of '<>'
+ *
+ * All errors data that can, will be written to the log file
+ *
+ * specific settings file will be loaded using the parameter '-c'
+ *
+ * @param argc - the arguments count
+ * @param argv - the main arguments
+ *
+ * @returns :
+ * -1 in case of an error //TODO - maybe add more errors ?
+ * 0 on success
+ */
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;

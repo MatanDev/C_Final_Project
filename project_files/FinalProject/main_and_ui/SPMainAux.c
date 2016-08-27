@@ -8,9 +8,9 @@
 #include "../SPLogger.h"
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
 #include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
+#include "../general_utils/SPUtils.h"
 
 //TODO - remove fflush(NULL) at production
-#define MAX_FILE_PATH_LENGTH									1024
 #define DEFAULT_CONFIG_FILE										"spcbir.config"
 #define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE 					"Please enter image path:\n"
@@ -20,6 +20,7 @@
 #define EXITING 												"Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 								0
 #define QUERY_STRING_ERROR 										"Query is not in the correct format, or file is not available\n"
+#define CONFIG_FILE_PATH_ARG									"-c"
 
 #define ERROR_ALLOCATING_MEMORY 								"Could not allocate memory"
 #define ERROR_INVALID_ARGUMENT 									"Error Invalid argument"
@@ -36,10 +37,11 @@
 #define ERROR_AT_CREATE_LOGGER									"Failed to create logger with message %s"
 #define ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG						"Failed to get image path from configuration"
 
+
 char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
 		return DEFAULT_CONFIG_FILE;
-	if (argc == 3 && !strcmp(argv[1], "-c"))
+	if (argc == 3 && !strcmp(argv[1], CONFIG_FILE_PATH_ARG))
 		return argv[2];
 	return NULL;
 }
@@ -86,6 +88,8 @@ void getAsString(const char* message, char* destination) {
 
 void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq) {
+	//TODO - add error as a parameter and if an error :
+	//printf("An error has been encountered, please check the log file for more information.\n");
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	if (image)
@@ -102,7 +106,7 @@ void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
 		int* imagesIndicesArray, int imagesCount) {
 	int i = 0;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	char tmpImagePath[MAX_FILE_PATH_LENGTH];
+	char tmpImagePath[MAX_PATH_LEN];
 
 	if (queryImagePath == NULL || config == NULL || imagesIndicesArray == NULL ||
 			imagesCount < 0) {
@@ -213,11 +217,7 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 
 SPImageData initializeWorkingImage() {
 	SPImageData workingImage = NULL;
-	workingImage = createImageData(QUERY_IMAGE_DEFAULT_INDEX);
-	if (workingImage == NULL) {
-		spLoggerPrintError(ERROR_AT_CREATEING_QUERY_IMAGE_ITEM, __FILE__,__FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spValRn((workingImage = createImageData(QUERY_IMAGE_DEFAULT_INDEX)) != NULL, ERROR_AT_CREATEING_QUERY_IMAGE_ITEM);
 	return workingImage;
 }
 
@@ -278,7 +278,7 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 	//TODO  - verify num of similar <= num of images and decide how to handle
-	char tempPath[MAX_FILE_PATH_LENGTH];
+	char tempPath[MAX_PATH_LEN];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 

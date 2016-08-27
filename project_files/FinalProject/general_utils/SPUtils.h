@@ -68,6 +68,17 @@
                 } \
         } while (0)
 
+//Er stand for error message
+#define spCallocErWc(pointer, type, countOfItems, errorMessage, onError)  do { \
+				pointer = (type*)calloc(countOfItems, sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					onError; \
+					return NULL;\
+                } \
+        } while (0)
+
 #define spRealloc(pointer, type, countOfItems)  do { \
 				pointer = ((type)*)realloc((pointer), countOfItems * sizeof(type)); \
                 if(!(pointer)) { \

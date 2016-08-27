@@ -5,19 +5,14 @@
 #include "../image_parsing/SPImagesParser.h"
 #include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
+#include "../general_utils/SPUtils.h"
 
 /*
  * this macro is used to run the given 'action' and if it fails print the given
  * 'errorMessage' to the log, end the control flow and return -1
  */
-#define verifyAction(action, errorMessage) do { \
-                if(!((action))) { \
-					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
-					endControlFlow(config, currentImageData, imagesDataList, numOfImages, \
-									oneImageWasSet, kdTree, bpq); \
-					return -1; \
-                } \
-        } while (0)
+#define verifyAction(action, errorMessage) spValWc(action,errorMessage, endControlFlow(config, \
+					currentImageData, imagesDataList, numOfImages, oneImageWasSet, kdTree, bpq), -1)
 
 /*
  * Extracts the configuration filename from the command line arguments of the program
