@@ -20,10 +20,9 @@ extern "C" {
 #include "unit_tests/SPKDTreeNodeKNNUnitTest.h"
 #include "data_structures/kd_ds/SPKDTreeNode.h"
 }
-#define MAXLINE_LEN 1024 //TODO - verify what this should be
+#define MAX_FILE_PATH_LENGTH 1024
 #define QUERY_EXIT_INPUT "<>"
 
-#define STDOUT	"stdout" //TODO - remove at production
 #define ERROR_LOADING_IMAGE_PATH "Error creating image path"
 #define ERROR_INIT_CONFIG "Error initializing configurations and settings"
 #define ERROR_INIT_IMAGES "Error at initialize images data items process"
@@ -31,14 +30,14 @@ extern "C" {
 #define ERROR_USER_QUERY "Error at user input. neither a valid image path, nor exit request"
 
 //TODO - verify calloc args order
-//TODO - what to do with logger write return value
+//TODO - forum: what to do with logger write return value
 
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;
 	int *similarImagesIndices = NULL, numOfSimilarImages, i, numOfImages = 0;
 	SPImageData currentImageData = NULL, *imagesDataList = NULL;
-	char workingImagePath[MAXLINE_LEN], tempPath[MAXLINE_LEN];
+	char workingImagePath[MAX_FILE_PATH_LENGTH], tempPath[MAX_FILE_PATH_LENGTH];
 	bool extractFlag, GUIFlag, oneImageWasSet = false;
 	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
@@ -46,9 +45,7 @@ int main(int argc, char** argv) {
 	verifyAction((initConfigAndSettings(argc, argv, &config, &numOfImages,
 		&numOfSimilarImages,&extractFlag, &GUIFlag)), ERROR_INIT_CONFIG);
 
-	//TODO - in case the directory is invalid or pca file is invalid we fail here
-	//we should check if the path is valid in the previous function
-	//we have other cases of possible failures - think how to deal with them (try catch?)
+	//TODO - maybe try catch?
 
 	//build features database
 	sp::ImageProc imageProcObject(config);
@@ -112,11 +109,11 @@ int main() {
 	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
 		return -1;
 
-	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
+	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
 	//RunImagesParserTests(config);
-	runConfigTests();
-	//runKDArrayTests();
+	//runConfigTests();
+	runKDArrayTests();
 	//runKDTreeNodeTests();
 	//runKDTreeNodeKNNTests();
 	spConfigDestroy(config);

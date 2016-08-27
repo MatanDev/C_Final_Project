@@ -91,7 +91,7 @@ bool verifyNotLeafAndData(SPKDTreeNode treeNode, int dim, double value){
 			(treeNode->dim == dim);
 }
 
-//TODO - this should be in sppoint?
+//TODO - forum: this should be in sppoint? (waiting to see if we need to hand in tests)
 bool verifyPointData(SPPoint point, int index, int dim, ...){
 	int i;
     va_list args;

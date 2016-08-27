@@ -101,7 +101,7 @@ int* getTopItems(int* counterArray, int counterArraySize, int retArraySize) {
 		return NULL;
 	}
 
-	// TODO - is best way?
+	// TODO - forum: is best way?
 	for (j = 0; j < retArraySize; j++) {
 		tempMaxIndex = 0;
 
@@ -143,7 +143,6 @@ int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfIm
 
 	topItems = getTopItems(counterArray, numOfImages, numOfSimilarImages);
 
-	// TODO - maybe free inside previous line function
 	// if we get here counterArray is not null
 	free(counterArray);
 

@@ -20,8 +20,7 @@ struct index_with_coor_value {
 int compareIndexWithCoorValue(const void* a, const void* b) {
 	IndexWithCoorValue* first = (IndexWithCoorValue *)a;
 	IndexWithCoorValue* second = (IndexWithCoorValue *)b;
-	//TODO - deal with epsilon issue
-	return ((*first)->coor_value == (*second)->coor_value) ? 0 :
+	return isEqual((*first)->coor_value, (*second)->coor_value) ? 0 :
 			((*first)->coor_value > (*second)->coor_value) ? 1 : -1;
 }
 
@@ -61,17 +60,16 @@ bool checkInitArgs(SPPoint* arr, int size) {
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size) {
 	int i;
 	if (!(*dst = (SPPoint*)calloc(size, sizeof(SPPoint)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return false;
 	}
 
 	for (i = 0; i < size; i++) {
-		if (!((*dst)[i] = spPointCopy(src[i]))) {
-			spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
-							__FUNCTION__, __LINE__);
+		(*dst)[i] = src[i];
+		/*if (!((*dst)[i] = spPointCopy(src[i]))) {
+			spLoggerPrintError(ERROR_POINT_COPY, __FILE__, __FUNCTION__, __LINE__);
 			return false;
-		}
+		}*/
 	}
 	return true;
 }
@@ -190,8 +188,7 @@ SPKDArray spKDArrayCopy(SPKDArray source) {
 	ret->dim = source->dim;
 	ret->size = source->size;
 
-	if (!copyPointsArr(&(ret->pointsArray), source->pointsArray,
-			ret->size))
+	if (!copyPointsArr(&(ret->pointsArray), source->pointsArray, ret->size))
 		onErrorInInitOrCopy(ret);
 
 	if (!allocateKDArrayIndicesMatrix(ret))
@@ -243,27 +240,26 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
 		(SPPoint*)calloc(kdArrPair->kdLeft->size, sizeof(SPPoint)))
 		|| !(kdArrPair->kdRight->pointsArray =
 		(SPPoint*)calloc(kdArrPair->kdRight->size, sizeof(SPPoint)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-						__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return false;
 	}
 
 	for (i = 0; i < kdArr->size; i++) {
 		if (xArr[i] == 0) {
-			if (!(kdArrPair->kdLeft->pointsArray[kdLeftIndex++] =
+			kdArrPair->kdLeft->pointsArray[kdLeftIndex++] = kdArr->pointsArray[i];
+			/*if (!(kdArrPair->kdLeft->pointsArray[kdLeftIndex++] =
 					spPointCopy(kdArr->pointsArray[i]))) {
-				spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
-								__FUNCTION__, __LINE__);
+				spLoggerPrintError(ERROR_POINT_COPY, __FILE__, __FUNCTION__, __LINE__);
 				return false;
-			}
+			}*/
 		}
 		else {
-			if (!(kdArrPair->kdRight->pointsArray[kdRightIndex++] =
+			kdArrPair->kdRight->pointsArray[kdRightIndex++] = kdArr->pointsArray[i];
+			/*if (!(kdArrPair->kdRight->pointsArray[kdRightIndex++] =
 					spPointCopy(kdArr->pointsArray[i]))) {
-				spLoggerPrintError(ERROR_POINT_COPY, __FILE__,
-								__FUNCTION__, __LINE__);
+				spLoggerPrintError(ERROR_POINT_COPY, __FILE__, __FUNCTION__, __LINE__);
 				return false;
-			}
+			}*/
 		}
 	}
 
@@ -277,8 +273,7 @@ bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
 
 	if (!(*map1 = (int*)calloc(kdArr->size, sizeof(int))) ||
 			!(*map2 = (int*)calloc(kdArr->size, sizeof(int)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,
-						__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
 		return false;
 	}
 
@@ -305,16 +300,13 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 			indexInOrig = kdArr->indicesMatrix[j][i];
 
 			if (xArr[indexInOrig] == 0)
-				kdArrPair->kdLeft->indicesMatrix[j][kdLeftIndex++] =
-						map1[indexInOrig];
+				kdArrPair->kdLeft->indicesMatrix[j][kdLeftIndex++] = map1[indexInOrig];
 
 			else
-				kdArrPair->kdRight->indicesMatrix[j][kdRightIndex++] =
-						map2[indexInOrig];
+				kdArrPair->kdRight->indicesMatrix[j][kdRightIndex++] = map2[indexInOrig];
 		}
 	}
 
-	// TODO - decide if this should be here
 	free(xArr);
 	free(map1);
 	free(map2);
@@ -326,8 +318,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	int *xArr = NULL, *map1 = NULL, *map2 = NULL;
 
 	if (!kdArr || coor < 0) {
-		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
@@ -371,12 +362,12 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 }
 
 void spKDArrayDestroy(SPKDArray kdArr) {
-	int i, j;
+	int /*i,*/ j;
 	if (kdArr) {
 		if (kdArr->pointsArray) {
-			for (i = 0; i < kdArr->size; i++) {
+			/*for (i = 0; i < kdArr->size; i++) {
 				spPointDestroy(kdArr->pointsArray[i]);
-			}
+			}*/
 			free(kdArr->pointsArray);
 			kdArr->pointsArray = NULL;
 		}

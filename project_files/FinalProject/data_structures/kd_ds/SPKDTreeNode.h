@@ -1,6 +1,4 @@
-//TODO - verify the name SPKDTreeNode is OK (and not KDTreeNode)
-//TODO - talk about logger
-//TODO - check params in inner functions (convention)
+//TODO - check params in inner functions (convention) - as warning (for all files)
 //TODO - logger documentation in inner functions (convention)
 //TODO - add more logs
 //TODO - check documentation where spPointCopy takes place

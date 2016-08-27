@@ -10,7 +10,6 @@
 #include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 
 //TODO - remove fflush(NULL) at production
-#define MAXLINE_LEN 											1024 //TODO - verify what this should be
 #define MAX_FILE_PATH_LENGTH									1024
 #define DEFAULT_CONFIG_FILE										"spcbir.config"
 #define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
@@ -91,7 +90,8 @@ void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 	spConfigDestroy(config);
 	if (image)
 		freeImageData(image, !oneImageWasSet);
-	if (imagesList) // TODO - not enough to avoid log error - elem in the arr can be NULL
+	if (imagesList)
+		//TODO - for Matan to take care of logic of destroying
 		freeAllImagesData(imagesList,numOfImages);
 	spKDTreeDestroy(kdTree);
 	spBPQueueDestroy(bpq);
@@ -188,7 +188,7 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 
 void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 	int i,j;
-	*imagesDataList = (SPImageData*)calloc(sizeof(SPImageData),numOfImages);
+	*imagesDataList = (SPImageData*)calloc(numOfImages, sizeof(SPImageData));
 	if ((*imagesDataList) == NULL){
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
 		spLoggerPrintError(ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, __FILE__,__FUNCTION__, __LINE__);
@@ -196,9 +196,8 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 	}
 	for (i=0 ; i<numOfImages; i++){
 		//extract each relevant image data
-		(*imagesDataList)[i] = (SPImageData)malloc(sizeof(struct sp_image_data));
+		(*imagesDataList)[i] = (SPImageData)calloc(1, sizeof(struct sp_image_data));
 		if ((*imagesDataList)[i] == NULL){ //error allocating memory
-			//TODO - report relevant error
 			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
 			spLoggerPrintError(ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, __FILE__,__FUNCTION__, __LINE__);
 			//roll-back
@@ -248,8 +247,6 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 	if (!(allFeaturesArray = initializeAllFeaturesArray(*imagesDataList, numOfImages,
 			totalNumOfFeatures))) {
-		//TODO - talk with Matan about where it's better to free
-		//freeAllImagesData(imagesDataList, numOfImages);
 		return false;
 	}
 
@@ -264,19 +261,14 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 	if (!(*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
 			splitMethod))) {
 		free(allFeaturesArray);
-		//TODO - talk with Matan about where it's better to free
-		//freeAllImagesData(imagesDataList, numOfImages);
 		return false;
 	}
 
 	free(allFeaturesArray);
-	//TODO - talk with Matan about where it's better to free
-	//freeAllImagesData(imagesDataList, numOfImages);
 
 	knn = spConfigGetKNN(config, &configMessage);
 
 	if (configMessage != SP_CONFIG_SUCCESS){
-		//TODO - this is not a relevant error
 		spLoggerPrintError(ERROR_READING_SETTINGS, __FILE__,__FUNCTION__, __LINE__);
 		return false;
 	}
@@ -289,7 +281,7 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 }
 
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
-	char tempPath[MAXLINE_LEN];
+	char tempPath[MAX_FILE_PATH_LENGTH];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 

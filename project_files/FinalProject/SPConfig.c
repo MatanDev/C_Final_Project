@@ -233,7 +233,6 @@ bool isValidInt(char* strVal, int* intVal) {
 
 bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
-	//TODO - still some code repetition - take care of it?
 	int tmpInt;
 	VALIDATE_INT(tmpInt <= 0);
 	*posIntField = tmpInt;
@@ -460,9 +459,7 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		// TODO - understand how the hell to solve this issue (isValid is called from
-		// getLogger functions as well)
-		//spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
 		return false;
 	}
 	*msg = SP_CONFIG_SUCCESS;
@@ -517,7 +514,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	if (index >= config->spNumOfImages)
 		return SP_CONFIG_INDEX_OUT_OF_RANGE;
 
-	//TODO - forum: what should we return in case sprintf fails?
+	// TODO - forum: what should we return in case sprintf fails?
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
 	if (isFeats)
