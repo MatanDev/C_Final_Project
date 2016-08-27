@@ -2,7 +2,7 @@
 #define SPKDTREENODEKNN_H_
 
 #include "SPKDTreeNode.h"
-#include "SPBPriorityQueue.h"
+#include "../bpqueue_ds/SPBPriorityQueue.h"
 
 /*
  * The method returns a squared distance between 2 real values

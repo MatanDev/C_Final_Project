@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "SPKDArray.h"
-#include "SPLogger.h"
+#include "../../SPLogger.h"
 
 #define ERROR_INVALID_ARGUMENT	"Error Invalid argument"
 #define ERROR_ALLOCATING_MEMORY "Could not allocate memory"

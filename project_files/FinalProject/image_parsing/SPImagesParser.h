@@ -3,9 +3,9 @@
 
 #include <stdbool.h>
 
-#include "SPPoint.h"
-#include "SPConfig.h"
-
+#include "../SPPoint.h"
+#include "../SPConfig.h"
+#include "SPImageData.h"
 
 //TODO - logger !!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -47,15 +47,7 @@
                 } \
         } while (0)
 
-/** A type used for defining an ImageData item**/
-struct sp_image_data {
-	int index;
-	int numOfFeatures;
-	SPPoint* featuresArray;
-};
 
-/** A type used for defining an ImageData item as a pointer**/
-typedef struct sp_image_data* SPImageData;
 
 /** A type used to indicate errors in function calls **/
 typedef enum sp_data_parse_messages {
@@ -456,37 +448,5 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
  */
 SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESSAGES* msg);
 
-/*
- * Deallocates a number of features from a given features array
- *
- * @param features - the features array
- * @param numOfFeatures - the number of features
- *
- * @assert numOfFeatures >= 0
- *  @logger - prints a warning if images data is null
- */
-void freeFeatures(SPPoint* features, int numOfFeatures);
-
-/*
- * Deallocates an image data item
- *
- * @param imageData - the image data to destroy
- * @param suppressFeaturesArrayWarning - indicates if imageData->features = NULL should cause a warning
- *
- * @logger - prints a warning if image data is null
- */
-void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning);
-
-/*
- * Deallocates an images data items array
- *
- * @param imagesData - the images data array that should be destryed
- * @param size - the size of the array
- *
- * @assert size >= 0
- *
- * @logger - prints a warning if images data is null
- */
-void freeAllImagesData(SPImageData* imagesData, int size);
 
 #endif /* SPIMAGESPARSER_H_ */

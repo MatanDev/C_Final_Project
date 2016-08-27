@@ -8,9 +8,9 @@
 #ifndef SPKDTREENODE_H_
 #define SPKDTREENODE_H_
 
-#include "SPPoint.h"
+#include "../../SPPoint.h"
+#include "../../SPConfig.h"
 #include "SPKDArray.h"
-#include "SPConfig.h"
 
 /*
  * A structure used to represent a KD tree node,

@@ -7,9 +7,9 @@
 #include "unit_test_util.h"
 #include "../SPPoint.h"
 #include "SPKDArrayUnitTest.h"
-#include "../SPKDArray.h"
+#include "../data_structures/kd_ds/SPKDArray.h"
 #include "../SPLogger.h"
-#include "../SPImagesParser.h"
+#include "../image_parsing/SPImagesParser.h"
 
 #define SPKDARRAY_TESTS_ALLOCATION_ERROR 				"Error allocating memory at kd-array test unit"
 #define SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR 		"Error initializing point, at kd-array test unit"

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../SPImagesParser.h"
+#include "../image_parsing/SPImagesParser.h"
 #include "unit_test_util.h"
 #include "../SPPoint.h"
 #include "../SPConfig.h"

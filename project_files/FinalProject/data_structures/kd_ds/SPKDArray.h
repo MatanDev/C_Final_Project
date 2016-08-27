@@ -1,7 +1,7 @@
 #ifndef SPKDARRAY_H_
 #define SPKDARRAY_H_
 
-#include "SPPoint.h"
+#include "../../SPPoint.h"
 
 // TODO - talk about logger
 

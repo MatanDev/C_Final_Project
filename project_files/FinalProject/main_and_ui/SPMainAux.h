@@ -1,10 +1,10 @@
 #ifndef SPMAINAUX_H_
 #define SPMAINAUX_H_
 
-#include "SPConfig.h"
-#include "SPImagesParser.h"
-#include "SPBPriorityQueue.h"
-#include "SPKDTreeNode.h"
+#include "../SPConfig.h"
+#include "../image_parsing/SPImagesParser.h"
+#include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
+#include "../data_structures/kd_ds/SPKDTreeNode.h"
 
 //TODO - validate and comment
 #define verifyAction(action, errorMessage) do { \

@@ -1,9 +1,9 @@
 #ifndef SPIMAGEQUERY_H_
 #define SPIMAGEQUERY_H_
 
-#include "SPImagesParser.h"
-#include "SPBPriorityQueue.h"
-#include "SPKDTreeNode.h"
+#include "../image_parsing/SPImagesParser.h"
+#include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
+#include "../data_structures/kd_ds/SPKDTreeNode.h"
 
 /*
  * Allocates a counterArray of size 'size' and initialize each cell in it to 0

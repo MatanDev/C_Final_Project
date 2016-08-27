@@ -1,5 +1,5 @@
-#ifndef SPGENERALAUX_H_
-#define SPGENERALAUX_H_
+#ifndef SPUTILS_H_
+#define SPUTILS_H_
 
 //TODO - validate and comment
 
@@ -12,6 +12,7 @@
 
 #define WARNING_FREE_NULL		 								"Trying to free a null pointer"
 
+#define MAX_PATH_LEN                               1025 // 1024 from project specs + 1 for '\0'
 
 #define spVal(action, errorMessage, returnValue) do { \
                 if(!((action))) { \
@@ -68,7 +69,7 @@
         } while (0)
 
 #define spRealloc(pointer, type, countOfItems)  do { \
-				pointer = (type*)realloc((pointer), countOfItems * sizeof(type)); \
+				pointer = ((type)*)realloc((pointer), countOfItems * sizeof(type)); \
                 if(!(pointer)) { \
 					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
 					return NULL;\
@@ -76,7 +77,7 @@
         } while (0)
 
 #define spReallocWc(pointer, type, countOfItems, onError)  do { \
-				pointer = (type*)realloc((pointer), countOfItems * sizeof(type)); \
+				pointer = ((type)*)realloc((pointer), countOfItems * sizeof(type)); \
                 if(!(pointer)) { \
 					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
 					onError; \
@@ -101,15 +102,15 @@
         } while (0)
 
 #define spFreeByPointer(pointerToPointer)  do { \
-                if(!(*pointerToPointer)) { \
-					free(*pointerToPointer);\
+                if(!(*(pointerToPointer))) { \
+					free(*(pointerToPointer));\
 					*pointerToPointer = NULL;\
                 } \
         } while (0)
 
 #define spSafeFreeByPointer(pointerToPointer, warningMessage)  do { \
-               if(!(*pointerToPointer)) { \
-					free(*pointerToPointer);\
+               if(!(*(pointerToPointer))) { \
+					free(*(pointerToPointer));\
 					*pointerToPointer = NULL;\
                 } \
                 else {\
@@ -120,4 +121,4 @@
 
 
 
-#endif /* SPGENERALAUX_H_ */
+#endif /* SPUTILS_H_ */

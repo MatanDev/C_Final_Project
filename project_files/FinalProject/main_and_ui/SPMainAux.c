@@ -5,9 +5,9 @@
 
 #include "SPMainAux.h"
 #include "SPImageQuery.h"
-#include "SPLogger.h"
-#include "SPKDTreeNode.h"
-#include "SPBPriorityQueue.h"
+#include "../SPLogger.h"
+#include "../data_structures/kd_ds/SPKDTreeNode.h"
+#include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 
 //TODO - remove fflush(NULL) at production
 #define MAXLINE_LEN 											1024 //TODO - verify what this should be

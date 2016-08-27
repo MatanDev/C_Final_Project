@@ -10,7 +10,7 @@
 #define BREAKLINE_NO_CR							   '\n'
 #define BREAKLINE                                  "\r\n"
 #define DEF_LINE_LEN                               512
-#define MAX_PATH_LEN                               2048 //TODO - verify what this should be
+#define MAX_PATH_LEN                               1025 // 1024 from project specs + 1 for '\0'
 #define HEADER_STRING_FORMAT                       "%d,%d\r\n"
 #define POINT_STRING_FORMAT                        "%d%s\r\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
@@ -43,9 +43,9 @@
 #define WARNING_WRONG_POINT_SIZE_CALC              "Wrong point CSV size calculation"
 #define WARNING_WRONG_DIGITS_CALC                  "Wrong digits calculation"
 #define WARNING_TRY_TO_SET_NULL_FEATURES           "Features data is set to NULL"
-#define WARNING_IMAGES_DATA_NULL                   "Images data object is null when free is called"
-#define WARNING_IMAGE_DATA_NULL                    "Image data object is null when free is called"
-#define WARNING_IMAGE_DATA_POINTS_ARRAY_NULL       "Image data array is null when free is called"
+
+
+
 
 
 //global variable for holding the features matrix
@@ -733,49 +733,4 @@ SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESS
 }
 
 
-void freeFeatures(SPPoint* features, int numOfFeatures){
-	assert(numOfFeatures >= 0);
-	int i;
-	if (features != NULL) {
-		for (i = 0 ; i<numOfFeatures;i++){
-			spPointDestroy(features[i]);
-		}
-	}
-	else {
-		spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
-	}
-}
 
-void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning){
-	if (imageData != NULL){
-		if (imageData->featuresArray != NULL) {
-			freeFeatures(imageData->featuresArray,imageData->numOfFeatures);
-			free(imageData->featuresArray);
-			imageData->featuresArray = NULL;
-		}
-		else {
-			if (!suppressFeaturesArrayWarning)
-				spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
-		}
-		free(imageData);
-		imageData = NULL;
-	}
-	else {
-		spLoggerPrintWarning(WARNING_IMAGE_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
-	}
-}
-
-void freeAllImagesData(SPImageData* imagesData, int size){
-	assert(size>=0);
-	int i;
-	if (imagesData != NULL){
-		for (i=0;i<size;i++){
-			freeImageData(imagesData[i], false);
-		}
-		free(imagesData);
-		imagesData = NULL;
-	}
-	else {
-		spLoggerPrintWarning(WARNING_IMAGES_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
-	}
-}

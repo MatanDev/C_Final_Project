@@ -5,10 +5,10 @@
 
 #include "unit_test_util.h"
 #include "SPKDTreeNodeKNNUnitTest.h"
-#include "../SPKDTreeNode.h"
-#include "../SPKDTreeNodeKNN.h"
+#include "../data_structures/kd_ds/SPKDTreeNode.h"
+#include "../data_structures/kd_ds/SPKDTreeNodeKNN.h"
 #include "SPKDArrayUnitTest.h"
-#include "../SPBPriorityQueue.h"
+#include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "../SPPoint.h"
 
 #define ERROR_ALLOCATING_MEMORY 							"Error allocating memory"

@@ -4,8 +4,8 @@
 #include <stdbool.h>
 
 #include "SPImageQuery.h"
-#include "SPKDTreeNodeKNN.h"
-#include "SPLogger.h"
+#include "../data_structures/kd_ds/SPKDTreeNodeKNN.h"
+#include "../SPLogger.h"
 
 #define ERROR_ALLOCATING_MEMORY 					"Could not allocate memory"
 #define ERROR_EMPTY_QUEUE 							"Queue is empty"
