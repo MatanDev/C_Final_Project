@@ -60,9 +60,11 @@ int compareIndexWithCoorValue(const void* a, const void* b);
  *
  * @param indexWithCoorValueArr - the IndexWithCoorValue array to destroy
  * @param size - the number of elements that were initiated in the array
+ *
+ * @logger -
+ * in case of we try to free a null pointer a relevant warning is logged to the logger
  */
-void indexWithCoorValueArrDestroy(IndexWithCoorValue*
-		indexWithCoorValueArr, int size);
+void indexWithCoorValueArrDestroy(IndexWithCoorValue* indexWithCoorValueArr, int size);
 
 /*
  * The method validates that all params given to the init function of
@@ -85,18 +87,17 @@ bool checkInitArgs(SPPoint* arr, int size);
 
 /*
  * The method allocates an SPPoint array of size 'size' pointed by 'dst'
- * and copies all the points in the points array 'src' into it
+ * and copies all the points pointers in the points array 'src' into it
  *
  * @param dst - a pointer to the destination SPPoint array
  * @param src - the source SPPoint array
  * @param size - the number of points to copy from src to *dst
  *
- * @returns false in case of memory allocation failure, otherwise
+ * @returns false in case of memory allocation failure or invalid argument, otherwise
  * returns true
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
 
@@ -106,12 +107,11 @@ bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
  *
  * @param arr - the given SPKDArray to allocate its indices matrix
  *
- * @returns false in case of memory allocation failure, otherwise
+ * @returns false in case of memory allocation failure or invalid argument, otherwise
  * returns true
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 bool allocateKDArrayIndicesMatrix(SPKDArray arr);
 
@@ -129,12 +129,11 @@ SPKDArray onErrorInInitOrCopy(SPKDArray arr);
  *
  * @param arr - the given SPKDArray to fill its indices matrix
  *
- * @returns NULL in case of memory allocation failure, otherwise
+ * @returns NULL in case of memory allocation failure or invalid argument, otherwise
  * returns arr after its indices matrix was filled
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDArray fillIndicesMatrix(SPKDArray arr);
 
@@ -313,6 +312,9 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor);
  * If kdArr == NULL nothing is done.
  *
  * @param kdArr - the SPKDArray instance to destroy
+ *
+ * @logger -
+ * in case of we try to free a null pointer a relevant warning is logged to the logger
  */
 void spKDArrayDestroy(SPKDArray kdArr);
 
@@ -321,6 +323,9 @@ void spKDArrayDestroy(SPKDArray kdArr);
  * If kdArrPair == NULL nothing is done.
  *
  * @param kdArrPair - the SPKDArrayPair instance to destroy
+ *
+ * @logger -
+ * in case of we try to free a null pointer a relevant warning is logged to the logger
  */
 void spKDArrayPairDestroy(SPKDArrayPair kdArrPair);
 

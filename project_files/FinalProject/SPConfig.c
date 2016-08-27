@@ -45,7 +45,7 @@
 #define SP_MINIMAL_GUI			"spMinimalGUI"
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
-#define MAX_LINE_LENGTH			1024
+#define MAX_LINE_LENGTH			1025 // 1024 from project specs + 1 for '\0'
 //#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
