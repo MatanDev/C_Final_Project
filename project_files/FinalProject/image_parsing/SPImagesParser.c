@@ -47,7 +47,7 @@
 
 
 
-
+//TODO - verify we can use a global
 //global variable for holding the features matrix
 SPImageData* featuresMatrix = NULL;
 
