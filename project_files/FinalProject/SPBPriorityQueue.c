@@ -22,7 +22,7 @@ struct sp_bp_queue_t {
 SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool createNewList) {
 	SPBPQueue newQueue;
 
-	if (maxSize < 0)
+	if (maxSize <= 0)
 		return NULL;
 
 	newQueue = (SPBPQueue)calloc(1,sizeof(struct sp_bp_queue_t));
@@ -50,7 +50,7 @@ SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool creat
 }
 
 SPBPQueue spBPQueueCreate(int maxSize) {
-	if (maxSize < 0)
+	if (maxSize <= 0)
 		return NULL;
 
 	return spBPQueueCreateWrapper(maxSize, NULL, true);

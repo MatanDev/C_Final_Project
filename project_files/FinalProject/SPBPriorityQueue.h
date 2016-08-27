@@ -33,7 +33,7 @@
  *   spBPQueueIsEmpty           - Returns true if and only if the queue is empty
  *   spBPQueueIsFull            - Returns true if and only if the queue is full
  */
-//TODO - fix ex3 issue
+
 
 /** type used to define Bounded priority queue **/
 typedef struct sp_bp_queue_t* SPBPQueue;
@@ -52,7 +52,7 @@ typedef enum sp_bp_queue_msg_t {
  * This function creates a new empty queue.
  * @param maxSize - a limit for the size of the queue
  * @return
- * 	NULL - If allocations failed or maxSize < 0
+ * 	NULL - If allocations failed or maxSize <= 0
  * 	A new queue in case of success.
  */
 SPBPQueue spBPQueueCreate(int maxSize);
@@ -192,7 +192,6 @@ bool spBPQueueIsEmpty(SPBPQueue source);
 bool spBPQueueIsFull(SPBPQueue source);
 
 
-//TODO - verify its ok we moved these methods here:
 /**
  * Allocates a new queue.
  * This function creates a new empty queue,
@@ -202,7 +201,7 @@ bool spBPQueueIsFull(SPBPQueue source);
  * @param source_queue - the given queue, this parameter should be NULL if the createNewList flag is on
  * @param createNewList - a flag used to indicate whether to create the internal list
  * @return
- * 	NULL - If allocations failed or maxSize < 0 or createNewList flag is off and source_queue is NULL
+ * 	NULL - If allocations failed or maxSize <= 0 or createNewList flag is off and source_queue is NULL
  * 	A new queue in case of success, with respect to the createNewList flag
  */
 SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool createNewList);
