@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "SPConfig.h"
-#include "general_utils/SPUtils.h"
+#include "general_utils\SPUtils.h"
 
 #define DEFAULT_PCA_DIMENSION	20
 #define DEFAULT_PCA_FILENAME	"pca.yml"
@@ -45,6 +45,7 @@
 #define SP_MINIMAL_GUI			"spMinimalGUI"
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
+#define MAX_LINE_LENGTH			1024
 //#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
@@ -409,7 +410,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	assert(msg != NULL);
 	SPConfig config;
 	FILE* configFile = NULL;
-	char line[MAX_PATH_LEN];
+	char line[MAX_LINE_LENGTH];
 	int lineNum = 0;
 	char* varName, *value;
 	bool isCommentOrEmpty;
@@ -434,7 +435,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 
 	initConfigToDefault(config);
 
-	while(fgets(line, MAX_PATH_LEN, configFile) != NULL) {
+	while(fgets(line, MAX_LINE_LENGTH, configFile) != NULL) {
 		isCommentOrEmpty = false;
 		if (!parseLine(filename, ++lineNum, line, &varName, &value,
 				&isCommentOrEmpty, msg)) {
