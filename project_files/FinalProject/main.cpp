@@ -32,7 +32,7 @@ extern "C" {
 
 //TODO - verify calloc args order
 //TODO - what to do with logger write return value
-/*
+
 int main(int argc, char** argv) {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = NULL;
@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	verifyAction((initializeKDTreeAndBPQueue(config, &imagesDataList, &currentImageData,
-			&kdTree, &bpq, numOfImages)), ERROR_INIT_KDTREE);
+	verifyAction((initializeWorkingImageKDTreeAndBPQueue(config, &imagesDataList,
+		&currentImageData, &kdTree, &bpq, numOfImages)), ERROR_INIT_KDTREE);
 
 	// first run must always happen
 	getQuery(workingImagePath);
@@ -88,7 +88,8 @@ int main(int argc, char** argv) {
 				imageProcObject.showImage(tempPath);
 			}
 		} else {
-			presentSimilarImagesNoGUI(similarImagesIndices, numOfSimilarImages);
+			presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
+					numOfSimilarImages);
 		}
 
 		free(similarImagesIndices);
@@ -102,8 +103,8 @@ int main(int argc, char** argv) {
 			kdTree, bpq);
 	return 0;
 }
-*/
 
+/*
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
@@ -122,4 +123,4 @@ int main() {
 	spLoggerDestroy();
 	return 0;
 }
-
+*/

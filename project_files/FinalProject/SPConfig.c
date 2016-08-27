@@ -19,7 +19,7 @@
 #define PARAM_NOT_SET_MSG		"Message: Parameter %s is not set\n"
 #define COMMENT_SPECIFIER		'#'
 #define ASSIGNMENT_SPECIFIER	'='
-//#define NULL_CHARACTER			'\0'
+#define NULL_CHARACTER			'\0'
 #define JPG_FILE_EXTENSION		".jpg"
 #define PNG_FILE_EXTENSION		".png"
 #define BMP_FILE_EXTENSION		".bmp"
@@ -61,10 +61,27 @@
 #define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
 #define SIGNATURE_FORMAT		"==[%s][%d][%d][%d]==\n"
 #define ERROR_CREATING_SIGN     "Error creating config signature"
+#define ERROR_INVALID_CONF_ARG	"The given configuration instance is not valid"
 #define PCA_DIM_MIN_VALID_VAL	10
 #define PCA_DIM_MAX_VALID_VAL	28
 #define LOG_LVL_MIN_VALID_VAL	1
 #define LOG_LVL_MAX_VALID_VAL	4
+
+#define VALIDATE_INT(condition)	do { \
+                if(!isValidInt(value, &tmpInt) || (condition)) { \
+					*msg = SP_CONFIG_INVALID_INTEGER; \
+					printErrorMessage(filename, lineNum, INVALID_VALUE, NULL); \
+					return false; \
+                } \
+        } while (0)
+
+#define VALID_MSG_IN_SIGN		do { \
+                if (msg != SP_CONFIG_SUCCESS) { \
+					spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, \
+							__LINE__); \
+					return NULL; \
+				} \
+        } while (0)
 
 /**
  * A data-structure which is used for configuring the system.
@@ -129,7 +146,7 @@ void printErrorMessage(const char* filename, int lineNum,
 	}
 }
 
-//TODO - in case of error - what should msg be? - right now: invalid string - ask in forum
+//TODO - forum: what should msg be in case of error?
 bool parseLine(const char* filename, int lineNum, char* line,
 		char** varName, char** value, bool* isCommentOrEmpty,
 		SP_CONFIG_MSG* msg) {
@@ -154,21 +171,22 @@ bool parseLine(const char* filename, int lineNum, char* line,
 	}
 
 	*value = tmpPtr + 1;
-	tmpPtr[0] = '\0';
+	tmpPtr[0] = NULL_CHARACTER;
 	*varName = line + startIndex;
 
 	// clear spaces from end of varName
 	for (i = strlen(*varName) - 1; i > 0 && isspace((*varName)[i]); i--);
-	(*varName)[i+1] = '\0';
+	(*varName)[i+1] = NULL_CHARACTER;
 
 	// clear spaces from beginning of value
 	for (startIndex = 0; startIndex < strlen(*value) &&
 	isspace((*value)[startIndex]); startIndex++);
 	*value = (*value) + startIndex;
 
-	// clear spaces from end of value (TODO - should clear only \n? - ask in forum)
+	// TODO - forum: should clear only \n?
+	// clear spaces from end of value
 	for (i = strlen(*value) - 1; i > 0 && isspace((*value)[i]); i--);
-	(*value)[i+1] = '\0';
+	(*value)[i+1] = NULL_CHARACTER;
 
 	return true;
 }
@@ -206,23 +224,18 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 }
 
 bool isValidInt(char* strVal, int* intVal) {
-	// we use check if the last parsed char is '\0' to know if we reached the end of the
+	// we check if the last parsed char is '\0' to know if we reached the end of the
 	// string in parsing (to avoid cases like floating point, white space after num, etc.)
 	char* endOfParse;
 	*intVal = strtol(strVal, &endOfParse, 10);
-	return *endOfParse == '\0';
+	return *endOfParse == NULL_CHARACTER;
 }
 
 bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	//TODO - still some code repetition - take care of it?
 	int tmpInt;
-	if (!isValidInt(value, &tmpInt) || tmpInt <= 0) {
-		*msg = SP_CONFIG_INVALID_INTEGER;
-		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
-		return false;
-	}
-
+	VALIDATE_INT(tmpInt <= 0);
 	*posIntField = tmpInt;
 	return true;
 }
@@ -230,13 +243,7 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
 bool handlePCADimension(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	if (!isValidInt(value, &tmpInt) || tmpInt < PCA_DIM_MIN_VALID_VAL ||
-			tmpInt > PCA_DIM_MAX_VALID_VAL) {
-		*msg = SP_CONFIG_INVALID_INTEGER;
-		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
-		return false;
-	}
-
+	VALIDATE_INT(tmpInt < PCA_DIM_MIN_VALID_VAL || tmpInt > PCA_DIM_MAX_VALID_VAL);
 	config->spPCADimension = tmpInt;
 	return true;
 }
@@ -281,12 +288,7 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 bool handleLoggerLevel(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	if (!isValidInt(value, &tmpInt) || tmpInt < LOG_LVL_MIN_VALID_VAL ||
-			tmpInt > LOG_LVL_MAX_VALID_VAL) {
-		*msg = SP_CONFIG_INVALID_INTEGER;
-		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
-		return false;
-	}
+	VALIDATE_INT(tmpInt < LOG_LVL_MIN_VALID_VAL || tmpInt > LOG_LVL_MAX_VALID_VAL);
 
 	switch(tmpInt) {
 	case 1:
@@ -398,8 +400,6 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
 		return onError(config, configFile);
 	}
 
-	// TODO - it's ugly to do it here but it's in order to avoid double close
-	// is there a better solution?
 	if (configFile)
 		fclose(configFile);
 
@@ -433,11 +433,9 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		return NULL;
 	}
 
-	// TODO - maybe instead of returning bool in the functions we should
-	// check if msg is not success?
 	initConfigToDefault(config);
 
-	while(fgets(line, 1024, configFile) != NULL) {
+	while(fgets(line, MAX_LINE_LENGTH, configFile) != NULL) {
 		isCommentOrEmpty = false;
 		if (!parseLine(filename, ++lineNum, line, &varName, &value,
 				&isCommentOrEmpty, msg)) {
@@ -458,9 +456,13 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 }
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
+	//TODO - forum: what to do in case msg in NULL?
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
+		// TODO - understand how the hell to solve this issue (isValid is called from
+		// getLogger functions as well)
+		//spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
 		return false;
 	}
 	*msg = SP_CONFIG_SUCCESS;
@@ -515,9 +517,10 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	if (index >= config->spNumOfImages)
 		return SP_CONFIG_INDEX_OUT_OF_RANGE;
 
+	//TODO - forum: what should we return in case sprintf fails?
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
-	if (isFeats) //TODO - sprintf should return negative value on failure, need to handle that case
+	if (isFeats)
 		sprintf(imagePath, IMAGE_PATH_FORMAT, config->spImagesDirectory,
 				config->spImagesPrefix, index, FEATS_FILE_EXTENSION);
 	else
@@ -552,23 +555,14 @@ char* getSignature(const SPConfig config){
 		return NULL;
 	}
 	numOfFeatures = spConfigGetNumOfFeatures(config, &msg);
-	if (msg != SP_CONFIG_SUCCESS) { //TODO - maybe export to macro
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
-		return NULL;
-	}
+	VALID_MSG_IN_SIGN;
+
 	PCADim = spConfigGetPCADim(config, &msg);
-	if (msg != SP_CONFIG_SUCCESS) {
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
-		return NULL;
-	}
+	VALID_MSG_IN_SIGN;
+
 	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
-	if (msg != SP_CONFIG_SUCCESS) {
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
-		return NULL;
-	}
+	VALID_MSG_IN_SIGN;
+
 	signature = (char*)calloc(MAX_LINE_LENGTH*2,sizeof(char));
 	if (signature == NULL){
 		spLoggerPrintError(ALLOCATION_FAILED_MSG, __FILE__,
@@ -606,30 +600,30 @@ void spConfigDestroy(SPConfig config) {
 	}
 }
 
-char* configMsgToStr(SP_CONFIG_MSG msg) {
+const char* configMsgToStr(SP_CONFIG_MSG msg) {
 	switch(msg) {
 	case SP_CONFIG_MISSING_DIR:
-		return duplicateString(MISSING_DIR_MSG);
+		return MISSING_DIR_MSG;
 	case SP_CONFIG_MISSING_PREFIX:
-		return duplicateString(MISSING_PREFIX_MSG);
+		return MISSING_PREFIX_MSG;
 	case SP_CONFIG_MISSING_SUFFIX:
-		return duplicateString(MISSING_SUFFIX_MSG);
+		return MISSING_SUFFIX_MSG;
 	case SP_CONFIG_MISSING_NUM_IMAGES:
-		return duplicateString(MISSING_IMAGES_NUM_MSG);
+		return MISSING_IMAGES_NUM_MSG;
 	case SP_CONFIG_CANNOT_OPEN_FILE:
-		return duplicateString(CANNOT_OPEN_FILE_MSG);
+		return CANNOT_OPEN_FILE_MSG;
 	case SP_CONFIG_ALLOC_FAIL:
-		return duplicateString(ALLOCATION_FAILED_MSG);
+		return ALLOCATION_FAILED_MSG;
 	case SP_CONFIG_INVALID_INTEGER:
-		return duplicateString(INVALID_INT_MSG);
+		return INVALID_INT_MSG;
 	case SP_CONFIG_INVALID_STRING:
-		return duplicateString(INVALID_STR_MSG);
+		return INVALID_STR_MSG;
 	case SP_CONFIG_INVALID_ARGUMENT:
-		return duplicateString(INVALID_ARG_MSG);
+		return INVALID_ARG_MSG;
 	case SP_CONFIG_INDEX_OUT_OF_RANGE:
-		return duplicateString(INDEX_OUT_OF_RANGE_MSG);
+		return INDEX_OUT_OF_RANGE_MSG;
 	case SP_CONFIG_SUCCESS:
-		return duplicateString(SUCCESS_MSG);
+		return SUCCESS_MSG;
 	}
 	return NULL;
 }

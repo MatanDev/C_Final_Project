@@ -215,4 +215,12 @@ SP_LOGGER_MSG spLoggerPrintDebug(const char* msg, const char* file,
  */
 SP_LOGGER_MSG spLoggerPrintMsg(const char* msg);
 
+/**
+ * Returns the given SP_LOGGER_MSG instance as string
+ *
+ * @param msg - the SP_LOGGER_MSG instance
+ * @return the given SP_LOGGER_MSG instance as string
+ */
+const char* loggerMsgToStr(SP_LOGGER_MSG msg);
+
 #endif

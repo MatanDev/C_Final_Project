@@ -6,7 +6,10 @@
 #include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
 
-//TODO - validate and comment
+/*
+ * this macro is used to run the given 'action' and if it fails print the given
+ * 'errorMessage' to the log, end the control flow and return -1
+ */
 #define verifyAction(action, errorMessage) do { \
                 if(!((action))) { \
 					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
@@ -19,8 +22,8 @@
 /*
  * Extracts the configuration filename from the command line arguments of the program
  *
- * @param argc - the number of arguments the program received in the command line, including
- * the name of the program
+ * @param argc - the number of arguments the program received in the command line,
+ * including the name of the program
  * @param argv - an array containing all the arguments the program received in the command
  * line
  * @return the configuration filename extracted from the command line arguments if they
@@ -93,12 +96,15 @@ int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numO
 		int numOfSimilarImages, SPBPQueue bpq);
 
 /*
- * The method gets indexes list and prints them to the user
+ * The method prints the result to the user in non-minimal GUI mode in the requested format
  *
- * @param imagesIndexesArray - the chosen indexes that should be printed
- * @param imagesCount - the size of "imagesIndexesArray"
+ * @param queryImagePath - the path of the given query image
+ * @param config - the configuration structure instance
+ * @param imagesIndexesArray - the chosen indices that should be printed
+ * @param imagesCount - the size of "imagesIndicesArray"
  */
-void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount);
+void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
+		int* imagesIndicesArray, int imagesCount);
 
 /*
  * The method load some settings from the config item into given pointers.
@@ -170,15 +176,66 @@ int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfIma
 SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numOfImages,
 		int totalNumOfFeatures);
 
-// TODO - doc
-bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataList,
-		SPImageData* currentImageData, SPKDTreeNode* kdTree, SPBPQueue* bpq,
-		int numOfImages);
+/*
+ * Initializes SPImageData addressed by given SPImageData pointer 'currentImageData',
+ * creates KDTree according to the given SPImageData pointers list 'imagesDataList'
+ * and initializes a priority queue with max size using given configuration structure
+ * instance 'config'
+ *
+ * @param config - configuration structure instance
+ * @param imagesDataList - list of SPImageData pointers according to which the function
+ * creates the KDTree
+ * @param currentImageData - pointer to address to initialize SPImageData in
+ * @param kdTree - pointer to a SPKDTreeNode which will be the root of the KDTree to be
+ * built in the function
+ * @param bpq - pointer to SPBPQueue to be initialized in the function
+ * @param numOfImages - the number of images in workingImagesDatabase (the size of the
+ * SPImageData instances array)
+ *
+ * @returns false if failed in any stage during these all operations, otherwise returns
+ * true
+ */
+bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
+		SPImageData** imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
+		SPBPQueue* bpq, int numOfImages);
 
+/*
+ * Initializes the configuration structure instance pointed by 'config' according to 'argc'
+ * and 'argv', and the values of the settings pointed by: 'numOfImages',
+ * 'numOfSimilarImages', 'extractFlag' and 'GUIFlag'
+ *
+ * @param argc - the number of arguments the program received in the command line,
+ * including the name of the program
+ * @param argv - an array containing all the arguments the program received in the command
+ * line
+ * @param config - pointer to a configuration structure instance to be initialized in the
+ * function
+ * @param numOfImages - pointer to an integer to contain the number of images that was set
+ * in the configuration file
+ * @param numOfSimilarImages - pointer to an integer to contain the number of similar
+ * images that was set in the configuration file
+ * @param extractFlag - pointer to a boolean to contain the value of spExtractionFlag that
+ * was set in the configuration file
+ * @param GUIFlag - pointer to a boolean to contain the value of spMinimalGUI that was set
+ * in the configuration file
+ *
+ * @returns false if failed in any stage of the operation, otherwise returns true
+ */
 bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag);
 
-//TODO - doc
+/*
+ * Verifies that the PCA file path and images files paths extracted from 'config' are valid
+ * and available
+ *
+ * @param config - the given configuration structure instance
+ * @param numOfImages - the number of images that was set in the configuration file
+ * @param extractFlag - a boolean containing the value of spExtractionFlag that was set in
+ * the configuration file
+ *
+ * @returns false if PCA file path or any of the images files paths are not valid or
+ * available, otherwise returns true
+ */
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag);
 
 #endif /* SPMAINAUX_H_ */

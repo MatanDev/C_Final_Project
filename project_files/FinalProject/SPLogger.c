@@ -9,8 +9,15 @@
 #define INFO_MSG  "---INFO---\n"
 #define DEBUG_MSG  "---DEBUG---\n"
 
-#define GENERAL_MESSAGE_SKELETON "%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
-#define SHORT_MESSAGE_SKELETON "%s- message: %s"
+#define GENERAL_MESSAGE_SKELETON	"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
+#define SHORT_MESSAGE_SKELETON		"%s- message: %s"
+#define CANT_OPEN_FILE_MSG			"SP_LOGGER_CANNOT_OPEN_FILE"
+#define INVALID_ARG_MSG				"SP_LOGGER_INVAlID_ARGUMENT"
+#define OUT_OF_MEMORY_MSG			"SP_LOGGER_OUT_OF_MEMORY"
+#define LOGGER_UNDEFINED_MSG		"SP_LOGGER_UNDIFINED"
+#define LOGGER_DEFINDED_MSG			"SP_LOGGER_DEFINED"
+#define LOGGER_WRITE_FAIL_MSG		"SP_LOGGER_WRITE_FAIL"
+#define LOGGER_SUCCESS_MSG			"SP_LOGGER_SUCCESS"
 
 //File open mode
 #define SP_LOGGER_OPEN_MODE "w"
@@ -204,4 +211,24 @@ SP_LOGGER_MSG spLoggerPrintDebug(const char* msg, const char* file,
 		const char* function, const int line) {
 	return spLoggerPrint(SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL, msg,file,
 			function,line);
+}
+
+const char* loggerMsgToStr(SP_LOGGER_MSG msg) {
+	switch(msg) {
+	case SP_LOGGER_CANNOT_OPEN_FILE:
+		return CANT_OPEN_FILE_MSG;
+	case SP_LOGGER_INVAlID_ARGUMENT:
+		return INVALID_ARG_MSG;
+	case SP_LOGGER_OUT_OF_MEMORY:
+		return OUT_OF_MEMORY_MSG;
+	case SP_LOGGER_UNDIFINED:
+		return LOGGER_UNDEFINED_MSG;
+	case SP_LOGGER_DEFINED:
+		return LOGGER_DEFINDED_MSG;
+	case SP_LOGGER_WRITE_FAIL:
+		return LOGGER_WRITE_FAIL_MSG;
+	case SP_LOGGER_SUCCESS:
+		return LOGGER_SUCCESS_MSG;
+	}
+	return NULL;
 }

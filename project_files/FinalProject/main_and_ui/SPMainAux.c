@@ -11,12 +11,13 @@
 
 //TODO - remove fflush(NULL) at production
 #define MAXLINE_LEN 											1024 //TODO - verify what this should be
+#define MAX_FILE_PATH_LENGTH									1024
 #define DEFAULT_CONFIG_FILE										"spcbir.config"
 #define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE 					"Please enter image path:\n"
 #define INVALID_CMD_LINE										"Invalid command line : use -c <config_filename>\n"
 #define STDOUT													"stdout"
-#define CLOSEST_IMAGES 											"The closest images are: " //TODO - dont forget to print output as requested
+#define CLOSEST_IMAGES 											"Best candidates for - %s - are:\n"
 #define EXITING 												"Exiting...\n"
 #define QUERY_IMAGE_DEFAULT_INDEX 								0
 #define QUERY_STRING_ERROR 										"Query is not in the correct format, or file is not available\n"
@@ -30,6 +31,11 @@
 #define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
 #define ERROR_AT_IMAGES_FEATURES_FILE_PATH 						"Error at images features file path, image does not exists or not available"
 #define ERROR_AT_PCA_FILE_PATH									"Error at PCA file path, does not exists or not available"
+#define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s"
+#define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s"
+#define ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG					"Failed to get logger level from configuration with message %s"
+#define ERROR_AT_CREATE_LOGGER									"Failed to create logger with message %s"
+#define ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG						"Failed to get image path from configuration"
 
 char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
@@ -92,18 +98,28 @@ void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 	spLoggerDestroy();
 }
 
-void presentSimilarImagesNoGUI(int* imagesIndexesArray, int imagesCount) {
+void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
+		int* imagesIndicesArray, int imagesCount) {
 	int i = 0;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	char tmpImagePath[MAX_FILE_PATH_LENGTH];
 
-	if (imagesIndexesArray == NULL || imagesCount < 0){
+	if (queryImagePath == NULL || config == NULL || imagesIndicesArray == NULL ||
+			imagesCount < 0) {
 		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__,__FUNCTION__, __LINE__);
 		return;
 	}
 
-	printf(CLOSEST_IMAGES);
+	printf(CLOSEST_IMAGES, queryImagePath);
 	fflush(NULL);
 	for (i = 0; i < imagesCount; i++) {
-		printf("%d%s", imagesIndexesArray[i], i == (imagesCount - 1) ? "\n" : ", ");
+		msg = spConfigGetImagePath(tmpImagePath, config, imagesIndicesArray[i]);
+		if (msg != SP_CONFIG_SUCCESS) {
+			spLoggerPrintError(ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG, __FILE__, __FUNCTION__,
+					__LINE__);
+			return;
+		}
+		printf("%s\n", tmpImagePath);
 		fflush(NULL);
 	}
 }
@@ -211,9 +227,9 @@ SPImageData initializeWorkingImage() {
 	return workingImage;
 }
 
-bool initializeKDTreeAndBPQueue(const SPConfig config, SPImageData** imagesDataList,
-		SPImageData* currentImageData, SPKDTreeNode* kdTree, SPBPQueue* bpq,
-		int numOfImages) {
+bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
+		SPImageData** imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
+		SPBPQueue* bpq, int numOfImages) {
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
 	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	int totalNumOfFeatures, knn;
@@ -308,29 +324,41 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag) {
 	char *configFilename, *loggerFilename;
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	SP_CONFIG_MSG configMsg = SP_CONFIG_SUCCESS;
 	SP_LOGGER_LEVEL loggerLevel;
+	SP_LOGGER_MSG loggerMsg;
 
 	if (!(configFilename = getConfigFilename(argc, argv))) {
 		printf(INVALID_CMD_LINE);
-		return false; //exit - maybe return something...
+		return false;
 	}
 
-	if (!(*config = getConfigFromFile(configFilename, &msg)) || msg != SP_CONFIG_SUCCESS)
-		return false; // TODO - maybe report relevant error (log still not initialized)
-
-	loggerFilename = spConfigGetLoggerFilename(*config, &msg);
-	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
-		return false; // TODO - maybe report relevant error (log still not initialized)
-
-	loggerLevel = spConfigGetLoggerLevel(*config, &msg);
-
-	if (msg != SP_CONFIG_SUCCESS)
+	if (!(*config = getConfigFromFile(configFilename, &configMsg)) ||
+			configMsg != SP_CONFIG_SUCCESS) {
+		printf(ERROR_AT_GET_CONFIG_FROM_FILE, configMsgToStr(configMsg));
 		return false;
+	}
 
-	if (spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
-			loggerLevel) != SP_LOGGER_SUCCESS)
-		return false;// TODO - maybe report relevant error (log not initialized)
+	loggerFilename = spConfigGetLoggerFilename(*config, &configMsg);
+	if (loggerFilename == NULL || configMsg != SP_CONFIG_SUCCESS) {
+		printf(ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG, configMsgToStr(configMsg));
+		return false;
+	}
+
+	loggerLevel = spConfigGetLoggerLevel(*config, &configMsg);
+
+	if (configMsg != SP_CONFIG_SUCCESS) {
+		printf(ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG, configMsgToStr(configMsg));
+		return false;
+	}
+
+	loggerMsg = spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
+			loggerLevel);
+
+	if (loggerMsg != SP_LOGGER_SUCCESS) {
+		printf(ERROR_AT_CREATE_LOGGER, loggerMsgToStr(loggerMsg));
+		return false;
+	}
 
 	//load relevant data from settings
 	if (loadRelevantSettingsData(*config, numOfImages, numOfSimilarImages, extractFlag,

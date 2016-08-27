@@ -104,7 +104,8 @@ void printErrorMessage(const char* filename, int lineNum,
  * @param value - pointer to a string to store the value in
  * @param isCommentOrEmpty - parameter to a boolean which is set to true iff the given
  * line is a comment line or an empty line
- * @param msg - pointer in which the msg returned by the function is stored
+ * @param msg - pointer in which the msg returned by the function is stored. if the line is
+ * invalid the msg would be SP_CONFIG_INVALID_STRING
  * @return true if the given line is valid, otherwise returns false
  */
 bool parseLine(const char* filename, int lineNum, char* line,
@@ -520,7 +521,7 @@ void spConfigDestroy(SPConfig config);
  * @param msg - the SP_CONFIG_MSG instance
  * @return the given SP_CONFIG_MSG instance as string
  */
-char* configMsgToStr(SP_CONFIG_MSG msg);
+const char* configMsgToStr(SP_CONFIG_MSG msg);
 
 /*
  * Returns a hard copy of a given string
