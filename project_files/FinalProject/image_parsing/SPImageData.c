@@ -13,6 +13,7 @@
 #define WARNING_IMAGE_DATA_NULL                    "Image data object is null when free is called"
 #define WARNING_IMAGES_DATA_NULL                   "Images data object is null when free is called"
 
+//TODO - make everyone work with this method
 SPImageData createImageData(int index){
 	SPImageData image = NULL;
 	spCalloc(image, sp_image_data, 1);
@@ -33,10 +34,11 @@ void freeFeatures(SPPoint* features, int numOfFeatures){
 	}
 }
 
-void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning){
+void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, bool freeInternalFeatures){
 	if (imageData != NULL){
 		if (imageData->featuresArray != NULL) {
-			freeFeatures(imageData->featuresArray,imageData->numOfFeatures);
+			if (freeInternalFeatures)
+				freeFeatures(imageData->featuresArray,imageData->numOfFeatures);
 			free(imageData->featuresArray);
 			imageData->featuresArray = NULL;
 		}
@@ -52,12 +54,12 @@ void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning){
 	}
 }
 
-void freeAllImagesData(SPImageData* imagesData, int size){
+void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatures){
 	assert(size>=0);
 	int i;
 	if (imagesData != NULL){
 		for (i=0;i<size;i++){
-			freeImageData(imagesData[i], false);
+			freeImageData(imagesData[i], false, freeInternalFeatures);
 		}
 		free(imagesData);
 		imagesData = NULL;

@@ -42,22 +42,24 @@ void freeFeatures(SPPoint* features, int numOfFeatures);
  *
  * @param imageData - the image data to destroy
  * @param suppressFeaturesArrayWarning - indicates if imageData->features = NULL should cause a warning
+ * @param freeInternalFeatures - indicates if the internal features (SPPoints) should be destroyed too
  *
  * @logger - prints a warning if image data is null
  */
-void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning);
+void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, bool freeInternalFeatures);
 
 /*
  * Deallocates an images data items array
  *
  * @param imagesData - the images data array that should be destryed
  * @param size - the size of the array
+ * @param freeInternalFeatures - indicates if the internal features (SPPoints) should be destroyed too
  *
  * @assert size >= 0
  *
  * @logger - prints a warning if images data is null
  */
-void freeAllImagesData(SPImageData* imagesData, int size);
+void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatures);
 
 
 #endif /* SPIMAGEDATA_H_ */

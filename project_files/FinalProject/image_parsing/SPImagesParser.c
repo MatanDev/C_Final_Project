@@ -376,7 +376,7 @@ SPImageData* loadAllImagesData(const SPConfig config, char* configSignature, boo
 			// rollback and exit
 			for (j=0;j<i;j++)
 			{
-				freeImageData(allImagesData[j], false);
+				freeImageData(allImagesData[j], false, true);
 				free(allImagesData);
 				allImagesData = NULL;
 			}
