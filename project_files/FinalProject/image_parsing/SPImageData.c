@@ -13,7 +13,6 @@
 #define WARNING_IMAGE_DATA_NULL                    "Image data object is null when free is called"
 #define WARNING_IMAGES_DATA_NULL                   "Images data object is null when free is called"
 
-//TODO - make everyone work with this method
 SPImageData createImageData(int index){
 	SPImageData image = NULL;
 	spCalloc(image, sp_image_data, 1);

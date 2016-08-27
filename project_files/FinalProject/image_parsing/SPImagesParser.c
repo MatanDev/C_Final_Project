@@ -529,12 +529,10 @@ SPImageData loadImageDataByPath(char* configSignature, char* imageDataPath,int i
 		return NULL;
 	}
 
-	resultImage = (SPImageData)malloc(sizeof(struct sp_image_data));
-
+	resultImage = createImageData(imageIndex);
 	if (resultImage == NULL){
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
-		*message =  SP_DP_MEMORY_FAILURE;
+		*message =  SP_DP_MEMORY_FAILURE; //should only occur when memory allocation failed
 		return NULL;
 	}
 

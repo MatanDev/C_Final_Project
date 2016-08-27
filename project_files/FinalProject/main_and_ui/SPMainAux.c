@@ -187,7 +187,7 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 }
 
 void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
-	int i,j;
+	int i;
 	*imagesDataList = (SPImageData*)calloc(numOfImages, sizeof(SPImageData));
 	if ((*imagesDataList) == NULL){
 		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
@@ -196,33 +196,25 @@ void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
 	}
 	for (i=0 ; i<numOfImages; i++){
 		//extract each relevant image data
-		(*imagesDataList)[i] = (SPImageData)calloc(1, sizeof(struct sp_image_data));
+		(*imagesDataList)[i] = createImageData(i);
 		if ((*imagesDataList)[i] == NULL){ //error allocating memory
-			spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
 			spLoggerPrintError(ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, __FILE__,__FUNCTION__, __LINE__);
 			//roll-back
-			for (j=0;j<i;j++){
-				free((*imagesDataList)[j]);
-			}
-			free((*imagesDataList));
+			freeAllImagesData(*imagesDataList,i,false); //false because features list is not yet allocated
 			(*imagesDataList) = NULL;
 			return;
 		}
-		(*imagesDataList)[i]->index = i;
 	}
 	setFeaturesMatrix(*imagesDataList);
 }
 
 SPImageData initializeWorkingImage() {
 	SPImageData workingImage = NULL;
-	workingImage = (SPImageData)calloc(1, sizeof(struct sp_image_data));
-	if (workingImage == NULL)
-	{
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__,__FUNCTION__, __LINE__);
+	workingImage = createImageData(QUERY_IMAGE_DEFAULT_INDEX);
+	if (workingImage == NULL) {
 		spLoggerPrintError(ERROR_AT_CREATEING_QUERY_IMAGE_ITEM, __FILE__,__FUNCTION__, __LINE__);
 		return NULL;
 	}
-	workingImage->index = QUERY_IMAGE_DEFAULT_INDEX;
 	return workingImage;
 }
 
