@@ -268,6 +268,7 @@ bool testHandler() {
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
 	msg = SP_CONFIG_SUCCESS;
 
+	// check that a valid int is according to the rules in the forum (next 4 tests)
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfImages", "014", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(config->spNumOfImages == 14);
@@ -279,6 +280,10 @@ bool testHandler() {
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "1.1", &msg));
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
+	msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "20 40", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
 	msg = SP_CONFIG_SUCCESS;
 

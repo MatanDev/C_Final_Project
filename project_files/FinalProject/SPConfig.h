@@ -130,6 +130,17 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		const char* value, SP_CONFIG_MSG* msg, bool isImagesSuffix);
 
 /*
+ * Checks if the 'strVal' is a valid integer according to the rules of the forum and
+ * if so stores it in *'intVal'
+ *
+ * @param strVal - the string to be checked
+ * @param intVal - pointer to the address to store the parsed integer in
+ *
+ * @return true if the given value is a valid integer, otherwise returns false
+ */
+bool isValidInt(char* strVal, int* intVal);
+
+/*
  * Checks if the given value is a positive integer and if so sets the given integer field
  * value to the given value
  *

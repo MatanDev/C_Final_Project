@@ -205,13 +205,19 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 	return *strField != NULL;
 }
 
+bool isValidInt(char* strVal, int* intVal) {
+	// we use check if the last parsed char is '\0' to know if we reached the end of the
+	// string in parsing (to avoid cases like floating point, white space after num, etc.)
+	char* endOfParse;
+	*intVal = strtol(strVal, &endOfParse, 10);
+	return *endOfParse == '\0';
+}
 
 bool handlePositiveIntField(int* posIntField, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+	//TODO - still some code repetition - take care of it?
 	int tmpInt;
-	// we use strchr because atoi doesn't return an error in case of floating point
-	// TODO - think about using strtol instead of atoi
-	if (strchr(value, '.') || (tmpInt = atoi(value)) <= 0) {
+	if (!isValidInt(value, &tmpInt) || tmpInt <= 0) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
@@ -224,8 +230,7 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
 bool handlePCADimension(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	// we use strchr because atoi doesn't return an error in case of floating point
-	if (strchr(value, '.') || (tmpInt = atoi(value)) < PCA_DIM_MIN_VALID_VAL ||
+	if (!isValidInt(value, &tmpInt) || tmpInt < PCA_DIM_MIN_VALID_VAL ||
 			tmpInt > PCA_DIM_MAX_VALID_VAL) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
@@ -276,9 +281,8 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 bool handleLoggerLevel(SPConfig config, const char* filename,
 		int lineNum, char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
-	// we use strchr because atoi doesn't return an error in case of floating point
-	if (strchr(value, '.') || ((tmpInt = atoi(value)) < LOG_LVL_MIN_VALID_VAL ||
-			tmpInt > LOG_LVL_MAX_VALID_VAL)) {
+	if (!isValidInt(value, &tmpInt) || tmpInt < LOG_LVL_MIN_VALID_VAL ||
+			tmpInt > LOG_LVL_MAX_VALID_VAL) {
 		*msg = SP_CONFIG_INVALID_INTEGER;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
