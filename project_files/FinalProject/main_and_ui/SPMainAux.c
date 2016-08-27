@@ -89,10 +89,10 @@ void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	if (image)
-		freeImageData(image, !oneImageWasSet);
+		freeImageData(image, !oneImageWasSet,true);
 	if (imagesList)
 		//TODO - for Matan to take care of logic of destroying
-		freeAllImagesData(imagesList,numOfImages);
+		freeAllImagesData(imagesList,numOfImages,true);
 	spKDTreeDestroy(kdTree);
 	spBPQueueDestroy(bpq);
 	spLoggerDestroy();
@@ -260,6 +260,7 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 	if (!(*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
 			splitMethod))) {
+		freeAllImagesData(*imagesDataList, numOfImages,false);
 		free(allFeaturesArray);
 		return false;
 	}
