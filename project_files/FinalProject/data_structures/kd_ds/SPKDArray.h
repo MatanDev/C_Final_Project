@@ -165,8 +165,7 @@ SPKDArray Init(SPPoint* arr, int size);
  * a new sp_kd_array structure instance 'ret' such that:
  * - dim(ret) = dim(source) (ret and source have the same dimension)
  * - size(ret) = size(source) (ret and source have the same size)
- * - every point in ret points array is a copy of the respective
- * point in source points array
+ * - every point in ret points array is the same point as in the source points array
  * - every entrance in the ret indices matrix is the same as the
  * repective entrance in source indices matrix
  *
