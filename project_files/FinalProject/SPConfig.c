@@ -63,6 +63,8 @@
 #define SIGNATURE_FORMAT		"==[%s][%d][%d][%d]==\n"
 #define ERROR_CREATING_SIGN     "Error creating config signature"
 #define ERROR_INVALID_CONF_ARG	"The given configuration instance is not valid"
+#define ERROR_INVALID_PATH_PTR	"The given path pointer is not valid"
+#define ERROR_OUT_OF_RANGE		"The given index is bigger than the number of images"
 #define PCA_DIM_MIN_VALID_VAL	10
 #define PCA_DIM_MAX_VALID_VAL	28
 #define LOG_LVL_MIN_VALID_VAL	1
@@ -148,6 +150,7 @@ void printErrorMessage(const char* filename, int lineNum,
 }
 
 //TODO - forum: what should msg be in case of error?
+//TODO 2 - http://moodle.tau.ac.il/mod/forum/discuss.php?d=78351 (empty value)
 bool parseLine(const char* filename, int lineNum, char* line,
 		char** varName, char** value, bool* isCommentOrEmpty,
 		SP_CONFIG_MSG* msg) {
@@ -307,6 +310,7 @@ bool handleLoggerLevel(SPConfig config, const char* filename,
 	return true;
 }
 
+//TODO - add error messages (http://moodle.tau.ac.il/mod/forum/discuss.php?d=78137)
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
@@ -457,6 +461,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line) {
 	//TODO - forum: what to do in case msg in NULL?
+	//(http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675)
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -512,11 +517,20 @@ char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
 
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		int index, bool isFeats) {
-	//TODO - log this mothafucka
-	if (imagePath == NULL || config == NULL)
+	if (imagePath == NULL) {
+		spLoggerPrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
-	if (index >= config->spNumOfImages)
+	}
+
+	if (config == NULL) {
+		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		return SP_CONFIG_INVALID_ARGUMENT;
+	}
+
+	if (index >= config->spNumOfImages) {
+		spLoggerPrintError(ERROR_OUT_OF_RANGE, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INDEX_OUT_OF_RANGE;
+	}
 
 	// TODO - forum: what should we return in case sprintf fails?
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
@@ -527,6 +541,7 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 	else
 		sprintf(imagePath, IMAGE_PATH_FORMAT, config->spImagesDirectory,
 				config->spImagesPrefix, index, config->spImagesSuffix);
+
 	return SP_CONFIG_SUCCESS;
 }
 
@@ -535,13 +550,18 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
 }
 
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
-	//TODO - log this mothafucka
-	if (pcaPath == NULL || config == NULL)
+	if (pcaPath == NULL) {
+		spLoggerPrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
+	}
+
+	if (config == NULL) {
+		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		return SP_CONFIG_INVALID_ARGUMENT;
+	}
 
 	// if config is valid, then so are config->spImagesDirectory and config->spPCAFilename
-	sprintf(pcaPath, PCA_PATH_FORMAT, config->spImagesDirectory,
-			config->spPCAFilename);
+	sprintf(pcaPath, PCA_PATH_FORMAT, config->spImagesDirectory, config->spPCAFilename);
 	return SP_CONFIG_SUCCESS;
 }
 
@@ -552,10 +572,10 @@ char* getSignature(const SPConfig config){
 
 	numOfImages = spConfigGetNumOfImages(config, &msg);
 	if (msg != SP_CONFIG_SUCCESS || numOfImages < 1) {
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
+
 	numOfFeatures = spConfigGetNumOfFeatures(config, &msg);
 	VALID_MSG_IN_SIGN;
 
@@ -565,7 +585,7 @@ char* getSignature(const SPConfig config){
 	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
 	VALID_MSG_IN_SIGN;
 
-	signature = (char*)calloc(MAX_PATH_LEN*2,sizeof(char));
+	signature = (char*)calloc(MAX_PATH_LEN*2, sizeof(char));
 	if (signature == NULL){
 		spLoggerPrintError(ALLOCATION_FAILED_MSG, __FILE__,
 				__FUNCTION__, __LINE__);
@@ -573,12 +593,11 @@ char* getSignature(const SPConfig config){
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
-	rsltFlag = sprintf(signature, SIGNATURE_FORMAT, lastImagePath,
-			numOfImages, numOfFeatures, PCADim);
-	if (rsltFlag<0){
+	rsltFlag = sprintf(signature, SIGNATURE_FORMAT, lastImagePath, numOfImages,
+			numOfFeatures, PCADim);
+	if (rsltFlag < 0) {
 		free(signature);
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 	return signature;
