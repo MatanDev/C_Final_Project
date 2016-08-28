@@ -51,6 +51,31 @@
                 } \
         } while (0)
 
+#define spVerifyArguments(toVerify, extendedErrorMessage, returnValue) do { \
+                if(!((toVerify))) { \
+                	spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(extendedErrorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					return returnValue; \
+                } \
+        } while (0)
+
+#define spVerifyArgumentsRn(toVerify, extendedErrorMessage) do { \
+                if(!((toVerify))) { \
+                	spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(extendedErrorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					return NULL; \
+                } \
+        } while (0)
+
+#define spVerifyArgumentsWcRn(toVerify, extendedErrorMessage, callBack) do { \
+                if(!((toVerify))) { \
+                	spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(extendedErrorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					callBack; \
+					return NULL; \
+                } \
+        } while (0)
+
 #define spCalloc(pointer, type, countOfItems)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
                 if(!(pointer)) { \
@@ -76,6 +101,15 @@
 					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
 					onError; \
 					return NULL;\
+                } \
+        } while (0)
+
+#define spCallocEr(pointer, type, countOfItems, errorMessage, toReturn)  do { \
+				pointer = (type*)calloc(countOfItems, sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					return toReturn;\
                 } \
         } while (0)
 
