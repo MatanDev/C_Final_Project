@@ -7,12 +7,6 @@
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
 #include "../general_utils/SPUtils.h"
 
-/*
- * this macro is used to run the given 'action' and if it fails print the given
- * 'errorMessage' to the log, end the control flow and return -1
- */
-#define verifyAction(action, errorMessage, RETURN_VALUE) spValWc(action,errorMessage, endControlFlow(config, \
-					currentImageData, imagesDataList, numOfImages, oneImageWasSet, kdTree, bpq), RETURN_VALUE)
 
 /*
  * Extracts the configuration filename from the command line arguments of the program
@@ -41,15 +35,13 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
  *
  * @param config - the config item to be freed
  * @param image - an image to be freed
- * @param imagesList - images array to be freed
- * @param numOfImages - number of images to free at images list
  * @param oneImageWasSet - indicates that image->features is not NULL
  * @param kdTree - the KDTree item to be freed
  * @param bpq - the priority queue item to be freed
  *
  */
-void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
-		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq);
+void endControlFlow(SPConfig config, SPImageData image,
+		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq);
 
 /*
  * The method prints a message to the console and gets an input from the user

@@ -33,13 +33,116 @@ extern "C" {
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
 #define QUERY_IMAGE_ERROR_RETURN_VALUE 				-3
 #define LOADING_IMAGE_FAILED_RETURN_VALUE 			-4
-#define SUCCESS_RETURN_VALUE 						-5
+#define SUCCESS_RETURN_VALUE 						0
+
+
+/*
+ * this macro is used to run the given 'action' and if it fails print the given
+ * 'errorMessage' to the log, end the control flow and return -1
+ */
+#define spMainAction(action, returnValue) do { \
+                if(!((action))) { \
+					endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq);\
+					delete imageProcObject;\
+					return returnValue; \
+                } \
+        } while (0)
 
 //TODO - remove asserts ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675
 //TODO - verify calloc args order
 //TODO - forum: what to do with logger write return value
 //TODO - expend to 3 methods - http://moodle.tau.ac.il/mod/forum/discuss.php?d=79730
+//TODO - should write main.h ?
 
+
+/*
+ * TODO - doc this
+ */
+int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
+		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag, SPBPQueue* bpq,
+		SPImageData* currentImageData, SPKDTreeNode* kdTree, sp::ImageProc** imageProcObject){
+	int i;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	char tempPath[MAX_PATH_LEN];
+	SPImageData *imagesDataList = NULL;
+
+	spVal((initConfigAndSettings(argc, argv, config, numOfImages,
+			numOfSimilarImages, extractFlag, GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE );
+
+	//TODO - maybe try catch?
+
+	//build features database
+	(*imageProcObject) = new sp::ImageProc(*config);
+
+	if (extractFlag) {
+		initializeImagesDataList(&imagesDataList, *numOfImages);
+		spVal(imagesDataList, ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
+		for (i = 0; i < *numOfImages; i++){
+			msg = spConfigGetImagePath(tempPath, *config, i);
+			spValWc((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH,
+					freeAllImagesData(imagesDataList, *numOfImages,true),
+					IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
+			imagesDataList[i]->featuresArray = (*imageProcObject)->getImageFeatures(tempPath,
+					i, &(imagesDataList[i]->numOfFeatures));
+		}
+	}
+
+	spValWc((initializeWorkingImageKDTreeAndBPQueue(*config, &imagesDataList,
+		currentImageData, kdTree, bpq, *numOfImages)), ERROR_INIT_KDTREE,
+			freeAllImagesData(imagesDataList, *numOfImages, true),
+			IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
+
+	freeAllImagesData(imagesDataList, *numOfImages, true);
+
+	return SUCCESS_RETURN_VALUE;
+}
+
+/*
+ * TODO - doc this
+ */
+int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
+		int numOfSimilarImages, SPBPQueue bpq, bool GUIFlag, sp::ImageProc** imageProcObject, bool* oneImageWasSet){
+	char workingImagePath[MAX_PATH_LEN], tempPath[MAX_PATH_LEN];
+	int *similarImagesIndices = NULL;
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	int i;
+
+	// first run must always happen
+	getQuery(workingImagePath);
+
+	// iterating until the user inputs "<>"
+	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
+		*oneImageWasSet = true;
+		//TODO - if not a good path ask again - http://moodle.tau.ac.il/mod/forum/discuss.php?d=77911
+		spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
+		if (currentImageData->featuresArray != NULL) {
+			free(currentImageData->featuresArray);
+		}
+		currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
+		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
+				numOfSimilarImages, bpq);
+
+		//TODO - check minimal gui at schrieber or at least at my linux vm
+		//TODO - maybe extract to another method
+		if (GUIFlag) {
+			for (i=0;i<numOfSimilarImages;i++) {
+				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);
+				spValWc((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH,
+						free(similarImagesIndices), LOADING_IMAGE_FAILED_RETURN_VALUE);
+				(*imageProcObject)->showImage(tempPath);
+			}
+		} else {
+			presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
+					numOfSimilarImages);
+		}
+
+		free(similarImagesIndices);
+		similarImagesIndices = NULL;
+
+		getQuery(workingImagePath);
+	}
+	return SUCCESS_RETURN_VALUE;
+}
 
 
 /*
@@ -62,76 +165,29 @@ extern "C" {
  * '0'  - success
  */
 int main(int argc, char** argv) {
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	int flowFlag;
 	SPConfig config = NULL;
-	int *similarImagesIndices = NULL, numOfSimilarImages, i, numOfImages = 0;
-	SPImageData currentImageData = NULL, *imagesDataList = NULL;
-	char workingImagePath[MAX_PATH_LEN], tempPath[MAX_PATH_LEN];
+	int numOfSimilarImages, numOfImages = 0;
+	SPImageData currentImageData = NULL;
 	bool extractFlag, GUIFlag, oneImageWasSet = false;
 	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
+	sp::ImageProc* imageProcObject = NULL;
 
-	verifyAction((initConfigAndSettings(argc, argv, &config, &numOfImages,
-		&numOfSimilarImages,&extractFlag, &GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE);
+	spMainAction(((flowFlag = spMainInitialize(argc, argv, &config, &numOfImages,
+			&numOfSimilarImages, &extractFlag, &GUIFlag, &bpq,
+			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
 
-	//TODO - maybe try catch?
+	spMainAction(((flowFlag = spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages,
+			 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &oneImageWasSet)) >= 0), flowFlag);
 
-	//build features database
-	sp::ImageProc imageProcObject(config);
-	//TODO - verify we don't need to clean this object.. http://moodle.tau.ac.il/mod/forum/discuss.php?d=79258
-
-	if (extractFlag) {
-		initializeImagesDataList(&imagesDataList,numOfImages);
-		verifyAction(imagesDataList, ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
-		for (i = 0; i < numOfImages; i++){
-			msg = spConfigGetImagePath(tempPath, config, i);
-			verifyAction((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
-			imagesDataList[i]->featuresArray = imageProcObject.getImageFeatures(tempPath,
-					i, &(imagesDataList[i]->numOfFeatures));
-		}
-	}
-
-	verifyAction((initializeWorkingImageKDTreeAndBPQueue(config, &imagesDataList,
-		&currentImageData, &kdTree, &bpq, numOfImages)), ERROR_INIT_KDTREE, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
-
-	// first run must always happen
-	getQuery(workingImagePath);
-
-	// iterating until the user inputs "<>"
-	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
-		oneImageWasSet = true;
-		//TODO - if not a good path ask again - http://moodle.tau.ac.il/mod/forum/discuss.php?d=77911
-		verifyAction((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
-		if (currentImageData->featuresArray != NULL) {
-			free(currentImageData->featuresArray);
-		}
-		currentImageData->featuresArray = imageProcObject.getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
-		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
-				numOfSimilarImages, bpq);
-
-		//TODO - check minimal gui at schrieber or at least at my linux vm
-		if (GUIFlag) {
-			for (i=0;i<numOfSimilarImages;i++) {
-				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);
-				verifyAction((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH, LOADING_IMAGE_FAILED_RETURN_VALUE);
-				imageProcObject.showImage(tempPath);
-			}
-		} else {
-			presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
-					numOfSimilarImages);
-		}
-
-		free(similarImagesIndices);
-		similarImagesIndices = NULL;
-
-		getQuery(workingImagePath);
-	}
 
 	// end control flow
-	endControlFlow(config, currentImageData, imagesDataList, numOfImages, oneImageWasSet,
-			kdTree, bpq);
+	endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq);
+	delete imageProcObject;
 	return SUCCESS_RETURN_VALUE;
 }
+
 
 /*
 int main() {

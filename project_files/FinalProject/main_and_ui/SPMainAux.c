@@ -86,17 +86,14 @@ void getAsString(const char* message, char* destination) {
 	fflush(NULL);
 }
 
-void endControlFlow(SPConfig config, SPImageData image, SPImageData* imagesList,
-		int numOfImages, bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq) {
+void endControlFlow(SPConfig config, SPImageData image,
+		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq) {
 	//TODO - add error as a parameter and if an error :
 	//printf("An error has been encountered, please check the log file for more information.\n");
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	if (image)
 		freeImageData(image, !oneImageWasSet,true);
-	if (imagesList)
-		//TODO - for Matan to take care of logic of destroying
-		freeAllImagesData(imagesList,numOfImages,true);
 	spKDTreeDestroy(kdTree);
 	spBPQueueDestroy(bpq);
 	spLoggerDestroy();
