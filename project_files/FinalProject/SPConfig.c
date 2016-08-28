@@ -455,12 +455,12 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 	return parameterSetCheck(config, msg, filename, lineNum, configFile);
 }
 
-bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
+bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line) {
 	//TODO - forum: what to do in case msg in NULL?
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, function, line);
 		return false;
 	}
 	*msg = SP_CONFIG_SUCCESS;
@@ -468,48 +468,51 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg) {
 }
 
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spExtractionMode : false;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spExtractionMode : false;
 }
 
 bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spMinimalGUI : false;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spMinimalGUI : false;
 }
 
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spNumOfImages : -1;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spNumOfImages : -1;
 }
 
 int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spNumOfFeatures : -1;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spNumOfFeatures : -1;
 }
 
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spPCADimension : -1;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spPCADimension : -1;
 }
 
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spNumOfSimilarImages : -1;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spNumOfSimilarImages :
+			-1;
 }
 
 int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spKNN : -1;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spKNN : -1;
 }
 
 SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spKDTreeSplitMethod : MAX_SPREAD;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spKDTreeSplitMethod :
+			MAX_SPREAD;
 }
 
 SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spLoggerLevel :
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spLoggerLevel :
 			SP_LOGGER_INFO_WARNING_ERROR_LEVEL;
 }
 
 char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
-	return isValid(config, msg) ? config->spLoggerFilename : NULL;
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spLoggerFilename : NULL;
 }
 
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		int index, bool isFeats) {
+	//TODO - log this mothafucka
 	if (imagePath == NULL || config == NULL)
 		return SP_CONFIG_INVALID_ARGUMENT;
 	if (index >= config->spNumOfImages)
@@ -532,6 +535,7 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
 }
 
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
+	//TODO - log this mothafucka
 	if (pcaPath == NULL || config == NULL)
 		return SP_CONFIG_INVALID_ARGUMENT;
 

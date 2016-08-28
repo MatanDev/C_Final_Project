@@ -268,11 +268,13 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
  * @assert msg != NULL
  * @param msg - pointer in which the msg returned by the function is stored
  * @return true if both config is not null, otherwise false
+ * @param function - the name of the function from which this function is called
+ * @param line - the line from which this function is called
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
  */
-bool isValid(const SPConfig config, SP_CONFIG_MSG* msg);
+bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line);
 
 /**
  * Creates a new system configuration struct. The configuration struct
