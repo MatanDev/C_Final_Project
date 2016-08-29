@@ -6,13 +6,14 @@
  * allocation and cleaning, checking actions and logging errors
  */
 
-//TODO - validate ?
+//TODO - validate / test ?
 
 #define ERROR_ALLOCATING_MEMORY 			"Could not allocate memory"
 #define ERROR_INVALID_ARGUMENT 				"Error Invalid argument"
 
 #define WARNING_FREE_NULL		 			"Trying to free a null pointer"
 #define MAX_PATH_LEN                        1025 // 1024 from project specs + 1 for '\0'
+#define epsilon 							0.0000000001 //used for double comparision
 
 
 /* -------------------------- General actions validation  -------------------------------
@@ -328,11 +329,11 @@
                 } \
         } while (0)
 
-/* -------------------------- Memory deallocations methods -------------------------------------
+/* -------------------------- Memory deallocations  -------------------------------------
  * Wrappers for memory cleanup.
  *
  * Safe  = report free(NULL) as warning
- * -------------------------------------------------------------------------------------------*/
+ * ------------------------------------------------------------------------------------*/
 
 /*
  * The wrapper is used for freeing a memory by its pointer and setting the pointer to NULL
