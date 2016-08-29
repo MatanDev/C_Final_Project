@@ -201,7 +201,7 @@
 
 /*
  * The wrapper is used for allocating memory, it reports memory allocation failure
- * to the logger ,and  return some value in case of failure.
+ * to the logger , and return some value in case of failure.
  *
  * @param pointer - a pointer for the allocated memory
  * @param type - the type of the memory allocation

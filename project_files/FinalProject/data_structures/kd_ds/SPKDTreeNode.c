@@ -7,6 +7,7 @@
 #define ERROR_POINT_COPY				"Error in copying point"
 #define ERROR_CREATING_KD_INNER_NODE 	"Could not create inner node for KD tree"
 #define ERROR_INITIALIZING_KD_TREE	 	"Could not create KD tree"
+#define WARNING_KDTREE_NODE_NULL		"KDTreeNode object is null when destroy is called"
 
 
 
@@ -35,6 +36,7 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
+	// TODO - should hard copy point here?
 	spValRCb((node->data = spPointCopy(array->pointsArray[0])), ERROR_POINT_COPY,
 			onErrorInInitKDTree(node));
 
@@ -137,6 +139,9 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 			kdTreeNode->data = NULL;
 		}
 		free(kdTreeNode);
+	}
+	else {
+		spLoggerPrintWarning(WARNING_KDTREE_NODE_NULL, __FILE__, __FUNCTION__, __LINE__);
 	}
 }
 

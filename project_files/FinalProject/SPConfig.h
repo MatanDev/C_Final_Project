@@ -20,7 +20,10 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_INVALID_STRING,
 	SP_CONFIG_INVALID_ARGUMENT,
 	SP_CONFIG_INDEX_OUT_OF_RANGE,
-	SP_CONFIG_SUCCESS
+	SP_CONFIG_SUCCESS,
+	SP_CONFIG_INVALID_LINE,
+	SP_CONFIG_INVALID_BOOLEAN,
+	SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD
 } SP_CONFIG_MSG;
 
 /*
@@ -105,7 +108,7 @@ void printErrorMessage(const char* filename, int lineNum,
  * @param isCommentOrEmpty - parameter to a boolean which is set to true iff the given
  * line is a comment line or an empty line
  * @param msg - pointer in which the msg returned by the function is stored. if the line is
- * invalid the msg would be SP_CONFIG_INVALID_STRING
+ * invalid the msg would be SP_CONFIG_INVALID_LINE
  * @return true if the given line is valid, otherwise returns false
  */
 bool parseLine(const char* filename, int lineNum, char* line,
@@ -504,12 +507,6 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
  *  - SP_CONFIG_SUCCESS - in case of success
  */
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config);
-
-/**
- * Frees the memory of *field and sets it to null in the end.
- * If *field == NULL nothing is done.
- */
-void freeAndSetToNull(char** field);
 
 /**
  * Frees all memory resources associate with config.

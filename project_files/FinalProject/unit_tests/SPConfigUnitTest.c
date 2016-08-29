@@ -158,12 +158,17 @@ bool testParseLine() {
 	strcpy(line, "		a ");
 	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
 			&isCommentOrEmpty, &msg) == false);
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_LINE);
 
 	strcpy(line, "this is a text with spaces\n");
 	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
 			&isCommentOrEmpty, &msg) == false);
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_LINE);
+
+	strcpy(line, "spImagesDirectory =    \n");
+	ASSERT_TRUE(parseLine("a", 1, line, &varName, &value,
+			&isCommentOrEmpty, &msg) == false);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_LINE);
 
 	return true;
 }
@@ -248,7 +253,7 @@ bool testHandler() {
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectori", "C:\\MyDocuments\\",
 			&msg));
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_LINE);
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectory", "C:\\My Documents\\",
@@ -308,15 +313,15 @@ bool testHandler() {
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spKDTreeSplitMethod", "something", &msg));
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD);
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spExtractionMode", "tru", &msg));
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_BOOLEAN);
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spMinimalGUI", "fal", &msg));
-	ASSERT_TRUE(msg == SP_CONFIG_INVALID_STRING);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_BOOLEAN);
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spImagesDirectory", "C:\\Documents\\",

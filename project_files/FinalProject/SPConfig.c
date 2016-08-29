@@ -46,7 +46,7 @@
 #define SP_LOGGER_LVL			"spLoggerLevel"
 #define SP_LOGGER_FILENAME		"spLoggerFilename"
 #define MAX_LINE_LENGTH			1025 // 1024 from project specs + 1 for '\0'
-//#define OPEN_FILE_READ_MODE		"r"
+#define OPEN_FILE_READ_MODE		"r"
 #define IMAGE_PATH_FORMAT		"%s%s%d%s"
 #define PCA_PATH_FORMAT			"%s%s"
 #define MISSING_DIR_MSG			"SP_CONFIG_MISSING_DIR"
@@ -60,6 +60,9 @@
 #define INVALID_ARG_MSG			"SP_CONFIG_INVALID_ARGUMENT"
 #define INDEX_OUT_OF_RANGE_MSG	"SP_CONFIG_INDEX_OUT_OF_RANGE"
 #define SUCCESS_MSG				"SP_CONFIG_SUCCESS"
+#define INVALID_LINE_MSG		"SP_CONFIG_INVALID_LINE"
+#define INVALID_BOOL_MSG		"SP_CONFIG_INVALID_BOOLEAN"
+#define INVALID_SPLIT_MTD_MSG	"SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD"
 #define SIGNATURE_FORMAT		"==[%s][%d][%d][%d]==\n"
 #define ERROR_CREATING_SIGN     "Error creating config signature"
 #define ERROR_INVALID_CONF_ARG	"The given configuration instance is not valid"
@@ -149,8 +152,6 @@ void printErrorMessage(const char* filename, int lineNum,
 	}
 }
 
-//TODO - forum: what should msg be in case of error?
-//TODO 2 - http://moodle.tau.ac.il/mod/forum/discuss.php?d=78351 (empty value)
 bool parseLine(const char* filename, int lineNum, char* line,
 		char** varName, char** value, bool* isCommentOrEmpty,
 		SP_CONFIG_MSG* msg) {
@@ -169,7 +170,7 @@ bool parseLine(const char* filename, int lineNum, char* line,
 	// the second case can happen only in the last line
 	if((tmpPtr = strchr(line + startIndex, ASSIGNMENT_SPECIFIER)) == NULL ||
 			tmpPtr == line + strlen(line) - 1) {
-		*msg = SP_CONFIG_INVALID_STRING;
+		*msg = SP_CONFIG_INVALID_LINE;
 		printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
 		return false;
 	}
@@ -191,6 +192,14 @@ bool parseLine(const char* filename, int lineNum, char* line,
 	// clear spaces from end of value
 	for (i = strlen(*value) - 1; i > 0 && isspace((*value)[i]); i--);
 	(*value)[i+1] = NULL_CHARACTER;
+
+	// TODO - in handleString we refer to this case, remove it from there? warning?
+	// in case what we have after '=' is an empty string or includes only spaces
+	if (!strcmp(*value, "")) { // TODO 2 - is it better to check with strlen?
+		*msg = SP_CONFIG_INVALID_LINE;
+		printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
+		return false;
+	}
 
 	return true;
 }
@@ -260,7 +269,7 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
 		*boolField = false;
 
 	else {
-		*msg = SP_CONFIG_INVALID_STRING;
+		*msg = SP_CONFIG_INVALID_BOOLEAN;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
@@ -280,7 +289,7 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 		config->spKDTreeSplitMethod = INCREMENTAL;
 
 	else {
-		*msg = SP_CONFIG_INVALID_STRING;
+		*msg = SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
 	}
@@ -310,7 +319,6 @@ bool handleLoggerLevel(SPConfig config, const char* filename,
 	return true;
 }
 
-//TODO - add error messages (http://moodle.tau.ac.il/mod/forum/discuss.php?d=78137)
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
@@ -366,7 +374,7 @@ bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		return handleStringField(&(config->spLoggerFilename), filename,
 				lineNum, value, msg, false);
 
-	*msg = SP_CONFIG_INVALID_STRING;
+	*msg = SP_CONFIG_INVALID_LINE;
 	printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
 	return false;
 }
@@ -425,7 +433,7 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 		return NULL;
 	}
 
-	configFile = fopen(filename, "r");
+	configFile = fopen(filename, OPEN_FILE_READ_MODE);
 	if (configFile == NULL) {
 		*msg = SP_CONFIG_CANNOT_OPEN_FILE;
 		return NULL;
@@ -603,20 +611,13 @@ char* getSignature(const SPConfig config){
 	return signature;
 }
 
-void freeAndSetToNull(char** field) {
-	if (*field != NULL) {
-		free(*field);
-		*field = NULL;
-	}
-}
-
 void spConfigDestroy(SPConfig config) {
 	if (config != NULL) {
-		freeAndSetToNull(&(config->spImagesDirectory));
-		freeAndSetToNull(&(config->spImagesPrefix));
-		freeAndSetToNull(&(config->spImagesSuffix));
-		freeAndSetToNull(&(config->spPCAFilename));
-		freeAndSetToNull(&(config->spLoggerFilename));
+		spFree(config->spImagesDirectory);
+		spFree(config->spImagesPrefix);
+		spFree(config->spImagesSuffix);
+		spFree(config->spPCAFilename);
+		spFree(config->spLoggerFilename);
 		free(config);
 	}
 }
@@ -645,6 +646,12 @@ const char* configMsgToStr(SP_CONFIG_MSG msg) {
 		return INDEX_OUT_OF_RANGE_MSG;
 	case SP_CONFIG_SUCCESS:
 		return SUCCESS_MSG;
+	case SP_CONFIG_INVALID_LINE:
+		return INVALID_LINE_MSG;
+	case SP_CONFIG_INVALID_BOOLEAN:
+		return INVALID_BOOL_MSG;
+	case SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD:
+		return INVALID_SPLIT_MTD_MSG;
 	}
 	return NULL;
 }
