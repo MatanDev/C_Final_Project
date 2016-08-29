@@ -67,9 +67,6 @@
                 } \
         } while (0)
 
-
-
-
 #define spVerifyArgumentsWcRn(toVerify, extendedErrorMessage, callBack) do { \
                 if(!((toVerify))) { \
                 	spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
@@ -95,7 +92,6 @@
 					return returnValue;\
                 } \
         } while (0)
-
 
 #define spCallocWc(pointer, type, countOfItems, onError)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
@@ -188,7 +184,6 @@
                 	spLoggerPrintWarning(warningMessage, __FILE__, __FUNCTION__, __LINE__); \
 				}\
         } while (0)
-
 
 
 #endif /* SPUTILS_H_ */

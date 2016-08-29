@@ -8,17 +8,19 @@
 extern "C" {
 #include "SPConfig.h"
 #include "SPLogger.h"
-#include "unit_tests/SPConfigUnitTest.h"
-#include "image_parsing/SPImagesParser.h"
 #include "SPPoint.h"
-#include "unit_tests/SPImagesParserUnitTest.h"
+#include "image_parsing/SPImagesParser.h"
 #include "main_and_ui/SPImageQuery.h"
 #include "main_and_ui/SPMainAux.h"
+#include "data_structures/bpqueue_ds/SPBPriorityQueue.h"
+#include "data_structures/kd_ds/SPKDTreeNode.h"
+
+#include "unit_tests/SPImagesParserUnitTest.h"
+#include "unit_tests/SPConfigUnitTest.h"
 #include "unit_tests/SPKDArrayUnitTest.h"
 #include "unit_tests/SPKDTreeNodeUnitTest.h"
-#include "data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "unit_tests/SPKDTreeNodeKNNUnitTest.h"
-#include "data_structures/kd_ds/SPKDTreeNode.h"
+
 }
 
 #define QUERY_EXIT_INPUT 							"<>"
@@ -26,7 +28,7 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH 					"Error creating image path"
 #define ERROR_INIT_CONFIG 							"Error initializing configurations and settings"
 #define ERROR_INIT_IMAGES 							"Error at initialize images data items process"
-#define ERROR_INIT_KDTREE 							"Error building the kd-tree data structure"
+#define ERROR_INIT_KDTREE 							"Error building the KD-tree data structure"
 #define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
 
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
