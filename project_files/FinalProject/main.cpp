@@ -34,8 +34,7 @@ extern "C" {
 
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
-#define QUERY_IMAGE_ERROR_RETURN_VALUE 				-3
-#define LOADING_IMAGE_FAILED_RETURN_VALUE 			-4
+#define LOADING_IMAGE_FAILED_RETURN_VALUE 			-3
 #define SUCCESS_RETURN_VALUE 						0
 
 
@@ -134,8 +133,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
  * 							this is needed for memory deallocation.
  *
  * @returns :
- * '-3' - failed to load query image
- * '-4' - failed to load image for GUI presentation
+ * '-3' - failed to load image for GUI presentation
  * '0'  - success
  */
 int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
