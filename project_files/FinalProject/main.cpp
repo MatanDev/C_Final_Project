@@ -53,7 +53,6 @@ extern "C" {
 
 //TODO - remove asserts ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675
 //TODO - forum: what to do with logger write return value
-//TODO - expend to 3 methods - http://moodle.tau.ac.il/mod/forum/discuss.php?d=79730
 //TODO - should write main.h ?
 
 

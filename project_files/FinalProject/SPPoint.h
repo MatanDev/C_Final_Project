@@ -115,6 +115,16 @@ double spPointL2SquaredDistance(SPPoint p, SPPoint q);
  * @return true iff both points are not NULL and contains the same values
  */
 bool spPointCompare(SPPoint p1, SPPoint p2);
-bool isEqual(double x, double y);//TODO - comment this or handle
+
+/*
+ * The method is used to compare two double points and
+ * return true iff they are equal up to a preselected epsilon
+ *
+ * @param x - first item
+ * @param y - second item
+ *
+ * @return true iff |x-y|<= epsilon
+ */
+bool isEqual(double x, double y);
 
 #endif /* SPPOINT_H_ */

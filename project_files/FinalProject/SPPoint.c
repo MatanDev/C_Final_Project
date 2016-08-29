@@ -7,7 +7,7 @@
 
 bool isEqual(double x,double y)
 {
-	return (0 <=(x-y) && (x-y) < epsilon) || (0<= (y-x) && (y-x) < epsilon);
+	return (0 <=(x-y) && (x-y) <= epsilon) || (0<= (y-x) && (y-x) <= epsilon);
 }
 
 
