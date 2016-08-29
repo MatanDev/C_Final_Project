@@ -26,8 +26,6 @@
 #define WARNING_CONFIG_ARG										"Warning, program is running with unknown arguments, did you mean -c ?"
 #define WARNING_ZERO_FEATURES_FROM_IMAGE						"Warning, some images have zero features"
 
-#define ERROR_ALLOCATING_MEMORY 								"Could not allocate memory"
-#define ERROR_INVALID_ARGUMENT 									"Error Invalid argument"
 #define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
@@ -219,7 +217,8 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 	spVal((allFeaturesArray = initializeAllFeaturesArray(*imagesDataList, numOfImages,
 			totalNumOfFeatures)), ERROR_CREATING_FEATURES_ARRAY, false);
 
-	spValWc((splitMethod = spConfigGetSplitMethod(config, &configMessage)) == SP_CONFIG_SUCCESS,
+	splitMethod = spConfigGetSplitMethod(config, &configMessage);
+	spValWc(configMessage == SP_CONFIG_SUCCESS,
 			ERROR_READING_SETTINGS, free(allFeaturesArray),false);
 
 	spValWc((*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
