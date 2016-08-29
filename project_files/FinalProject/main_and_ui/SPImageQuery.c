@@ -6,22 +6,20 @@
 #include "SPImageQuery.h"
 #include "../data_structures/kd_ds/SPKDTreeNodeKNN.h"
 #include "../SPLogger.h"
+#include "../general_utils/SPUtils.h"
 
-#define ERROR_ALLOCATING_MEMORY 					"Could not allocate memory"
 #define ERROR_EMPTY_QUEUE 							"Queue is empty"
 #define ERROR_K_NEAREST_NEIGHBORS 					"Error in kNearestNeighbors func"
 #define ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE 	\
 	"Error in getSimilarImagesIndicesToFeature func"
 #define ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE 		\
 	"Error in updateCounterArrayPerFeature func"
+#define ERROR_GENERATING_SIMILAR_IMAGES				"Error generating similar images"
 
 int* initializeCounterArray(int size) {
 	int i, *counterArray;
 
-	if (!(counterArray = (int*)calloc(size, sizeof(int)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spCalloc(counterArray, int, size);
 
 	// set up the counter array
 	for (i = 0; i < size; i++)
@@ -41,19 +39,11 @@ SP_BPQUEUE_MSG popFromQueueToIndicesArray(SPBPQueue bpq, int* indicesArray,
 int* createSimImagesToFeatureIndicesArray(SPBPQueue bpq, int originalQueueSize) {
 	int arrayIndex, *indicesArray;
 
-	if (!(indicesArray = (int*)calloc(originalQueueSize, sizeof(int)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spCalloc(indicesArray, int, originalQueueSize);
 
 	for (arrayIndex = 0; arrayIndex < originalQueueSize; arrayIndex++) {
-		if (popFromQueueToIndicesArray(bpq, indicesArray, arrayIndex)
-				!= SP_BPQUEUE_SUCCESS) {
-			// we assume bpq is not NULL
-			spLoggerPrintError(ERROR_EMPTY_QUEUE, __FILE__, __FUNCTION__, __LINE__);
-			free(indicesArray);
-			return NULL;
-		}
+		spValWcRn((popFromQueueToIndicesArray(bpq, indicesArray, arrayIndex)
+				== SP_BPQUEUE_SUCCESS), ERROR_EMPTY_QUEUE, free(indicesArray));
 	}
 
 	assert(spBPQueueIsEmpty(bpq));
@@ -63,11 +53,8 @@ int* createSimImagesToFeatureIndicesArray(SPBPQueue bpq, int originalQueueSize) 
 
 int* getSimilarImagesIndicesToFeature(SPPoint relevantFeature, SPKDTreeNode kdTree,
 		SPBPQueue bpq, int* finalQueueSize) {
-	if (!kNearestNeighbors(kdTree, bpq, relevantFeature)){
-		spLoggerPrintError(ERROR_K_NEAREST_NEIGHBORS, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
 
+	spValRn(kNearestNeighbors(kdTree, bpq, relevantFeature), ERROR_K_NEAREST_NEIGHBORS);
 	*finalQueueSize = spBPQueueSize(bpq);
 
 	return createSimImagesToFeatureIndicesArray(bpq, *finalQueueSize);
@@ -77,12 +64,8 @@ bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
 		SPKDTreeNode kdTree, SPBPQueue bpq) {
 	int j, finalQueueSize, *similarImagesIndices;
 
-	if (!(similarImagesIndices = getSimilarImagesIndicesToFeature(relevantFeature, kdTree,
-			bpq, &finalQueueSize))) {
-		spLoggerPrintError(ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE, __FILE__,
-				__FUNCTION__, __LINE__);
-		return false;
-	}
+	spVal((similarImagesIndices = getSimilarImagesIndicesToFeature(relevantFeature, kdTree,
+			bpq, &finalQueueSize)), ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE, false);
 
 	for (j = 0; j < finalQueueSize; j++)
 		counterArray[similarImagesIndices[j]]++;
@@ -96,10 +79,7 @@ bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
 int* getTopItems(int* counterArray, int counterArraySize, int retArraySize) {
 	int i, j, tempMaxIndex, *topItems;
 
-	if (!(topItems = (int*)calloc(retArraySize, sizeof(int)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spCalloc(topItems, int, retArraySize);
 
 	// TODO - forum: is best way?
 	for (j = 0; j < retArraySize; j++) {
@@ -121,24 +101,20 @@ int* getTopItems(int* counterArray, int counterArraySize, int retArraySize) {
 
 int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq) {
-	assert(workingImage != NULL && kdTree != NULL && bpq != NULL);
 	int i, *topItems, *counterArray;
+	spVerifyArguments(workingImage != NULL && kdTree != NULL && bpq != NULL,
+			ERROR_GENERATING_SIMILAR_IMAGES, NULL);
+
 
 	// create an index-counter array for the images
-	if (!(counterArray = initializeCounterArray(numOfImages))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spValRn((counterArray = initializeCounterArray(numOfImages)),
+			ERROR_GENERATING_SIMILAR_IMAGES);
 
 	for (i = 0; i < workingImage->numOfFeatures; i++) {
-		if (!updateCounterArrayPerFeature(counterArray, (workingImage->featuresArray)[i],
-				kdTree, bpq)) {
-			spLoggerPrintError(ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE, __FILE__,
-					__FUNCTION__, __LINE__);
-			// if we get here counterArray is not null
-			free(counterArray);
-			return NULL;
-		}
+		spValWcRn((updateCounterArrayPerFeature(counterArray, (workingImage->featuresArray)[i],
+				kdTree, bpq)),
+				ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE,
+				free(counterArray));
 	}
 
 	topItems = getTopItems(counterArray, numOfImages, numOfSimilarImages);
