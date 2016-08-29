@@ -309,7 +309,7 @@ SPImageData* loadAllImagesData(const SPConfig config, char* configSignature, boo
 		allImagesData[i] = currentImageData;
 	}
 
-	spFreeByPointer((&featuresMatrix));
+	spFree((featuresMatrix));
 
 	return allImagesData;
 }
