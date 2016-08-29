@@ -30,6 +30,7 @@ extern "C" {
 #define ERROR_INIT_IMAGES 							"Error at initialize images data items process"
 #define ERROR_INIT_KDTREE 							"Error building the KD-tree data structure"
 #define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
+#define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
 
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
@@ -151,8 +152,19 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
 		*oneImageWasSet = true;
-		//TODO - if not a good path ask again - http://moodle.tau.ac.il/mod/forum/discuss.php?d=77911
-		spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
+
+		while (strcmp(workingImagePath, QUERY_EXIT_INPUT) && !verifyPathAndAvailableFile(workingImagePath)){
+			spLoggerPrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
+			printf(REQUEST_QUERY_AGAIN);
+			fflush(NULL);
+			getQuery(workingImagePath);
+		}
+		if (!strcmp(workingImagePath, QUERY_EXIT_INPUT)){ // query == '<>'
+			break;
+		}
+
+		//spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
+
 		if (currentImageData->featuresArray != NULL) {
 			free(currentImageData->featuresArray);
 		}
