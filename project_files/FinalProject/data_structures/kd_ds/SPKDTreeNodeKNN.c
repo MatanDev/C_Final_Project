@@ -1,4 +1,5 @@
 #include "SPKDTreeNodeKNN.h"
+#include "../../general_utils/SPUtils.h"
 #include "assert.h"
 
 //we know its memory problem because the pushLeafToQueue pre assumes valid arguments
@@ -14,27 +15,20 @@ SPKDTreeNode getSecondChild(SPKDTreeNode tree, SPKDTreeNode firstChild){
 }
 
 bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
-	SPListElement elem;
+	SPListElement elem = NULL;
 	SP_BPQUEUE_MSG queueMessage;
-	elem = spListElementCreate(spPointGetIndex(currPoint), spPointL2SquaredDistance(currPoint, queryPoint));
 
-	if (elem == NULL){
-		spLoggerPrintError(ERROR_CREATING_LIST_ELEMENT, __FILE__,
-						__FUNCTION__, __LINE__);
-		return false;
-	}
+	spVal((elem = spListElementCreate(spPointGetIndex(currPoint), spPointL2SquaredDistance(currPoint, queryPoint))),
+			ERROR_CREATING_LIST_ELEMENT, false);
 
 	queueMessage = spBPQueueEnqueue(bpq, elem);
 	spListElementDestroy(elem);
 
-	if (queueMessage != SP_BPQUEUE_FULL && queueMessage != SP_BPQUEUE_SUCCESS)
-	//since we pre assume the arguments are not null, this case is only when queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY
-	{
-		assert(queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY);
-		spLoggerPrintError(ERROR_PUSHING_LIST_ELEMENT, __FILE__,
-							__FUNCTION__, __LINE__);
-		return false;
-	}
+	spValWc(queueMessage == SP_BPQUEUE_FULL  || queueMessage  == SP_BPQUEUE_SUCCESS,
+			ERROR_PUSHING_LIST_ELEMENT,
+			//since we pre assume the arguments are not null, this case is
+			//only when queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY
+			assert(queueMessage ==  SP_BPQUEUE_OUT_OF_MEMORY), false);
 
 	return true;
 }

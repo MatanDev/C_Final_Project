@@ -1,11 +1,14 @@
-#include "SPKDTreeNode.h"
 #include <stdlib.h>
 #include <time.h>
+#include "SPKDTreeNode.h"
+#include "../../general_utils/SPUtils.h"
 
-#define INVALID_DIM 			-1
-#define ERROR_INVALID_ARGUMENT	"Error Invalid argument"
-#define ERROR_ALLOCATING_MEMORY "Could not allocate memory"
-#define ERROR_POINT_COPY		"Error in copying point"
+#define INVALID_DIM 					-1
+#define ERROR_POINT_COPY				"Error in copying point"
+#define ERROR_CREATING_KD_INNER_NODE 	"Could not create inner node for KD tree"
+#define ERROR_INITIALIZING_KD_TREE	 	"Could not create KD tree"
+
+
 
 SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
 		SP_KDTREE_SPLIT_METHOD splitMethod) {
@@ -32,10 +35,8 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
-	if (!(node->data = spPointCopy(array->pointsArray[0]))) {
-		spLoggerPrintError(ERROR_POINT_COPY, __FILE__, __FUNCTION__, __LINE__);
-		return onErrorInInitKDTree(node);
-	}
+	spValRCb((node->data = spPointCopy(array->pointsArray[0])), ERROR_POINT_COPY,
+			onErrorInInitKDTree(node));
 
 	return node;
 }
@@ -64,18 +65,15 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 		return onErrorInInitKDTree(node);
 
 	node->dim = splitDim;
-
-	if (!(node->val = (double*)calloc(1, sizeof(double)))) {
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		spKDArrayPairDestroy(splitResPair);
-		return onErrorInInitKDTree(node);
-	}
+	//allocate node's value
+	spCallocErWcRCb((node->val), double, 1, ERROR_CREATING_KD_INNER_NODE,
+			spKDArrayPairDestroy(splitResPair), onErrorInInitKDTree(node));
 
 	*(node->val) = spPointGetAxisCoor(
 			array->pointsArray[array->indicesMatrix[splitDim][(array->size - 1) / 2]],
 			splitDim);
 
-	if (	!(node->kdtLeft = internalInitKDTree(splitResPair->kdLeft, splitMethod,
+	if (!(node->kdtLeft = internalInitKDTree(splitResPair->kdLeft, splitMethod,
 					(recDepth + 1) % array->dim)) ||
 
 	// valid cause we get here only if array->size > 1
@@ -97,16 +95,9 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 	SPKDTreeNode ret;
 	int splitDim;
 
-	if (!array) {
-		spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spVerifyArgumentsRn(array, ERROR_INITIALIZING_KD_TREE);
 
-	if (!(ret = (SPKDTreeNode)calloc(1, sizeof(struct sp_kd_tree_node))))
-	{
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spCalloc(ret, sp_kd_tree_node, 1);
 
 	if (array->size == 1)
 		return createLeaf(ret, array);
@@ -129,10 +120,7 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 
 void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 	if (kdTreeNode) {
-		if (kdTreeNode->val) {
-			free(kdTreeNode->val);
-			kdTreeNode->val = NULL;
-		}
+		spFree(kdTreeNode->val);
 
 		if (kdTreeNode->kdtLeft) {
 			spKDTreeDestroy(kdTreeNode->kdtLeft);

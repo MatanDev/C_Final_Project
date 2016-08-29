@@ -18,13 +18,13 @@
  * right son as 'kdtRight'
  * and relevant data as 'data'
  */
-struct sp_kd_tree_node {
+typedef struct sp_kd_tree_node {
 	int dim;
 	double* val;
 	struct sp_kd_tree_node* kdtLeft;
 	struct sp_kd_tree_node* kdtRight;
 	SPPoint data;
-};
+} sp_kd_tree_node;
 
 /*
  * A pointer to the sp_kd_tree_node structure

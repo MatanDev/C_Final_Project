@@ -44,7 +44,7 @@
                 } \
         } while (0)
 
-#define spValRCb(action, errorMessage, callBack, returnValue) do { \
+#define spValRCb(action, errorMessage, callBack) do { \
                 if(!((action))) { \
 					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
 					return callBack; \
@@ -87,6 +87,16 @@
                 } \
         } while (0)
 
+//Wr stands for with return value
+#define spCallocWr(pointer, type, countOfItems, returnValue)  do { \
+				pointer = (type*)calloc(countOfItems, sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					return returnValue;\
+                } \
+        } while (0)
+
+
 #define spCallocWc(pointer, type, countOfItems, onError)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
                 if(!(pointer)) { \
@@ -104,6 +114,16 @@
 					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
 					onError; \
 					return NULL;\
+                } \
+        } while (0)
+
+#define spCallocErWcRCb(pointer, type, countOfItems, errorMessage, onError, callBack)  do { \
+				pointer = (type*)calloc(countOfItems, sizeof(type)); \
+                if(!(pointer)) { \
+					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
+					spLoggerPrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					onError; \
+					return callBack;\
                 } \
         } while (0)
 
@@ -134,14 +154,16 @@
         } while (0)
 
 #define spFree(pointer)  do { \
-                if(!(pointer)) { \
+                if((pointer)) { \
 					free(pointer);\
+					pointer = NULL;\
                 } \
         } while (0)
 
 #define spSafeFree(pointer, warningMessage)  do { \
-                if(!(pointer)) { \
+                if((pointer)) { \
 					free(pointer);\
+					pointer = NULL;\
                 } \
                 else {\
 					spLoggerPrintWarning(WARNING_FREE_NULL, __FILE__, __FUNCTION__, __LINE__); \
@@ -150,14 +172,14 @@
         } while (0)
 
 #define spFreeByPointer(pointerToPointer)  do { \
-                if(!(*(pointerToPointer))) { \
+                if((*(pointerToPointer))) { \
 					free(*(pointerToPointer));\
 					*pointerToPointer = NULL;\
                 } \
         } while (0)
 
 #define spSafeFreeByPointer(pointerToPointer, warningMessage)  do { \
-               if(!(*(pointerToPointer))) { \
+               if((*(pointerToPointer))) { \
 					free(*(pointerToPointer));\
 					*pointerToPointer = NULL;\
                 } \

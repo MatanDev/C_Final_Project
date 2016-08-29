@@ -9,12 +9,12 @@
  * A structure used to represent the KDArray,
  * contains indices matrix, dim as 'd' and size as 'n'
  */
-struct sp_kd_array {
+typedef struct sp_kd_array {
 	SPPoint* pointsArray;
 	int size;
 	int dim;
 	int** indicesMatrix;
-};
+} sp_kd_array;
 
 /*
  * A pointer to the sp_kd_array structure
@@ -26,10 +26,10 @@ typedef struct sp_kd_array* SPKDArray;
  * A structure for representing a pair of KDArrays,
  * used for the result of the function 'Split'
  */
-struct sp_kd_array_pair {
+typedef struct sp_kd_array_pair {
 	SPKDArray kdLeft;
 	SPKDArray kdRight;
-} ;
+} sp_kd_array_pair;
 
 /*
  * A pointer to the sp_kd_array_pair structure
