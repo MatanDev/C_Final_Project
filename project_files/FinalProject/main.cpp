@@ -42,7 +42,7 @@ extern "C" {
  */
 #define spMainAction(action, returnValue) do { \
                 if(!((action))) { \
-					endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq);\
+					endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq, returnValue);\
 					delete imageProcObject;\
 					return returnValue; \
                 } \
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
 
 
 	// end control flow
-	endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq);
+	endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq, SUCCESS_RETURN_VALUE);
 	delete imageProcObject;
 	return SUCCESS_RETURN_VALUE;
 }

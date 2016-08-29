@@ -67,6 +67,9 @@
                 } \
         } while (0)
 
+
+
+
 #define spVerifyArgumentsWcRn(toVerify, extendedErrorMessage, callBack) do { \
                 if(!((toVerify))) { \
                 	spLoggerPrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \

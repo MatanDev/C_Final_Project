@@ -31,17 +31,20 @@ char* getConfigFilename(int argc, char** argv);
 SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg);
 
 /*
- * The method prints exiting string and free's all relevant allocated memory
+ * The method prints exiting string (inform in case of error at program run)
+ *  and free's all relevant allocated memory
  *
  * @param config - the config item to be freed
  * @param image - an image to be freed
  * @param oneImageWasSet - indicates that image->features is not NULL
  * @param kdTree - the KDTree item to be freed
  * @param bpq - the priority queue item to be freed
+ * @param returnValue - an integer that indicates if the program finished its work
+ * 						Successfully
  *
  */
 void endControlFlow(SPConfig config, SPImageData image,
-		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq);
+		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue);
 
 /*
  * The method prints a message to the console and gets an input from the user

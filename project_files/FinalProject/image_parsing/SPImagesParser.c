@@ -10,6 +10,7 @@
 
 #define BREAKLINE_NO_CR							   '\n'
 #define BREAKLINE                                  "\r\n"
+#define END_OF_STRING							   '\0'
 #define DEF_LINE_LEN                               512
 
 #define HEADER_STRING_FORMAT                       "%d,%d\r\n"
@@ -49,7 +50,7 @@
 
 
 //TODO - '\r\n' on nova
-//TODO - verify we can use a global http://moodle.tau.ac.il/mod/forum/discuss.php?d=77431
+//TODO - forum - verify we can use a global http://moodle.tau.ac.il/mod/forum/discuss.php?d=77431
 //global variable for holding the features matrix
 SPImageData* featuresMatrix = NULL;
 
@@ -125,7 +126,7 @@ double getFloatingNumberFromSubString(char* myString, int* start){
 		i++;
 		(*start)++;
 	}
-	rsltAsString[i] = '\0';
+	rsltAsString[i] = END_OF_STRING;
 	return atof(rsltAsString);
 }
 
@@ -184,7 +185,7 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 	spCallocErWc(tempString, char, size, ERROR_CONVERTING_POINT_TO_STRING,*message = SP_DP_MEMORY_FAILURE);
 	spCallocErWc(secondTempString, char, size, ERROR_CONVERTING_POINT_TO_STRING,*message = SP_DP_MEMORY_FAILURE);
 
-	tempString[0] = '\0';
+	tempString[0] = END_OF_STRING;
 
 	//create internal string data
 	for (i = spPointGetDimension(point) -1 ;i>=0;i--){
