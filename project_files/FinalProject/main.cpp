@@ -51,14 +51,32 @@ extern "C" {
         } while (0)
 
 //TODO - remove asserts ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675
-//TODO - verify calloc args order
 //TODO - forum: what to do with logger write return value
 //TODO - expend to 3 methods - http://moodle.tau.ac.il/mod/forum/discuss.php?d=79730
 //TODO - should write main.h ?
 
 
 /*
- * TODO - doc this
+ * The method initializes the project, loads the settings, the logger, the images data and build's
+ * the KD data structure with the images data, it loads the data into the pointers that are
+ * given as parameters
+ *
+ * @param argc - the count of arguments from the main method
+ * @param argv - the arguments from the main method
+ * @param config - a pointer to the config item
+ * @param numOfImages - a pointer to the number of images integer
+ * @param numOfSimilarImages - a pointer to the number of similar images integer
+ * @param extractFlag - a pointer to the extraction flag
+ * @param GUIFlag - a pointer to the GUI flag
+ * @param bpq - a pointer for the priority queue
+ * @param currentImageData - a pointer for an image data that needs to be allocated
+ * @param kdTree - a pointer to the kd-tree
+ * @param imageProbObject - a pointer to the image proc object pointer
+ *
+ * @returns :
+ * '-1' - configuration and setting initialization failed
+ * '-2' - extracting images data, and loading images logic failed
+ * '0'  - success
  */
 int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag, SPBPQueue* bpq,
@@ -100,7 +118,25 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 }
 
 /*
- * TODO - doc this
+ * The method is used for the user interaction process, it receives the relevant data that is loaded
+ * and asks the user for image queries and handles them accordingly.
+ *
+ *
+ * @param config - the configuration data
+ * @param currentImageData - a pre-allocated image data to work with
+ * @param kdTree - the KD tree of the current images database
+ * @param numOfImages - the number of images in the database
+ * @param numOfSimilarImages - the number of similar images to present for each user query
+ * @param bpq - a pre-allocated priority queue
+ * @param GUIFlag - a flag that indicates if the program runs at minimal gui mode
+ * @param imageProbObject - a pointer to the image proc object pointer
+ * @param oneImageWasSet - a pointer to a flag that indicates that one image query was loaded,
+ * 							this is needed for memory deallocation.
+ *
+ * @returns :
+ * '-3' - failed to load query image
+ * '-4' - failed to load image for GUI presentation
+ * '0'  - success
  */
 int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq, bool GUIFlag, sp::ImageProc** imageProcObject, bool* oneImageWasSet){
