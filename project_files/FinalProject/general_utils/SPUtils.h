@@ -13,7 +13,7 @@
 
 #define WARNING_FREE_NULL		 			"Trying to free a null pointer"
 #define MAX_PATH_LEN                        1025 // 1024 from project specs + 1 for '\0'
-#define epsilon 							0.0000000001 //used for double comparision
+#define epsilon 							0.0000000001 //used for double comparison
 
 
 /* -------------------------- General actions validation  -------------------------------
