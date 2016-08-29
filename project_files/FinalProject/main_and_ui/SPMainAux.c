@@ -44,7 +44,7 @@
 #define ERROR_CREATING_FEATURES_ARRAY 							"Failed to create features array"
 #define ERROR_CREATING_KD_TREE 									"Failed to create the KD-tree"
 #define ERROR_INITIALIZING_BP_QUEUE 							"Failed to initialize priority queue"
-
+#define MAIN_RETURNED_ERROR										"An error has been encountered, please check the log file for more information.\n"
 
 
 char* getConfigFilename(int argc, char** argv) {
@@ -93,7 +93,7 @@ void getAsString(const char* message, char* destination) {
 void endControlFlow(SPConfig config, SPImageData image,
 		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
 	if (returnValue < 0){
-		printf("An error has been encountered, please check the log file for more information.\n");
+		printf(MAIN_RETURNED_ERROR);
 	}
 	printf("%s", EXITING);
 	spConfigDestroy(config);
