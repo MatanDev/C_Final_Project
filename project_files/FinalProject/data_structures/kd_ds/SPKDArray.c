@@ -67,8 +67,7 @@ bool checkInitArgs(SPPoint* arr, int size) {
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size) {
 	int i;
 
-	spVerifyArguments(dst && src && size > 0,
-			ERROR_AT_COPYING_POINTS_ARRAY, false);
+	spVerifyArguments(dst && src && size > 0, ERROR_AT_COPYING_POINTS_ARRAY, false);
 
 	spCallocWr((*dst), SPPoint, size, false);
 
@@ -82,7 +81,7 @@ bool allocateKDArrayIndicesMatrix(SPKDArray arr) {
 	int j;
 	spVerifyArguments(arr, ERROR_ALLOCATING_INDICES, false);
 
-	spCallocWr((arr->indicesMatrix), int* ,arr->dim,  false);
+	spCallocWr((arr->indicesMatrix), int* ,arr->dim, false);
 
 	for (j = 0; j < arr->dim; j++) {
 		spCallocWr((arr->indicesMatrix[j]), int, arr->size, false);
@@ -177,8 +176,7 @@ SPKDArray spKDArrayCopy(SPKDArray source) {
 	return ret;
 }
 
-SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
-		int* map1, int* map2) {
+SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr, int* map1, int* map2) {
 	if (xArr)
 		free(xArr);
 	if (map1)
@@ -202,8 +200,7 @@ bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor) {
 	return true;
 }
 
-bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
-		SPKDArray kdArr, int* xArr) {
+bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair, SPKDArray kdArr, int* xArr) {
 	int i, kdLeftIndex = 0, kdRightIndex = 0;
 
 	spCallocWr(kdArrPair->kdLeft->pointsArray, SPPoint, kdArrPair->kdLeft->size, false);
@@ -219,8 +216,7 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
 	return true;
 }
 
-bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
-		int* xArr) {
+bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr, int* xArr) {
 	int i, kdLeftIndex = 0,	kdRightIndex = 0;
 	bool isFirstArrayindex;
 
@@ -240,7 +236,8 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
 		SPKDArray kdArr, int* xArr, int* map1, int* map2) {
 	int i, j, indexInOrig, kdLeftIndex, kdRightIndex;
 
-	spValRCb(allocateKDArrayIndicesMatrix(kdArrPair->kdLeft) && allocateKDArrayIndicesMatrix(kdArrPair->kdRight),
+	spValRCb(allocateKDArrayIndicesMatrix(kdArrPair->kdLeft) &&
+			allocateKDArrayIndicesMatrix(kdArrPair->kdRight),
 			ERROR_PAIR_INDICES_MATRIX, onErrorInSplit(kdArrPair, xArr, map1, map2));
 
 	for (j = 0; j < kdArr->dim; j++) {
@@ -266,7 +263,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 	SPKDArrayPair ret = NULL;
 	int *xArr = NULL, *map1 = NULL, *map2 = NULL;
 
-	spVerifyArgumentsRn(kdArr && coor>=0, ERROR_SPLITTING_KD_ARRAY);
+	spVerifyArgumentsRn(kdArr && coor >= 0, ERROR_SPLITTING_KD_ARRAY);
 
 	spCallocEr(ret, sp_kd_array_pair, 1, ERROR_SPLITTING_KD_ARRAY,
 			onErrorInSplit(ret, xArr, map1, map2));

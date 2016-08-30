@@ -194,8 +194,7 @@ SPKDArray spKDArrayCopy(SPKDArray source);
  *
  * @returns NULL
  */
-SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr,
-		int* map1, int* map2);
+SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr, int* map1, int* map2);
 
 /*
  * The method creates and fills the an array X, such that X[i] = 0
@@ -232,8 +231,7 @@ bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor);
  * in case of any type of failure the relevant error is logged to the
  * logger
  */
-bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
-		SPKDArray kdArr, int* xArr);
+bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair, SPKDArray kdArr, int* xArr);
 
 /*
  * The method creates and fills the two integer arrays, such that
@@ -255,8 +253,7 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair,
  * in case of any type of failure the relevant error is logged to the
  * logger
  */
-bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr,
-		int* xArr);
+bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr, int* xArr);
 
 /*
  * The method creates and fills the two kd-arrays indices matrices

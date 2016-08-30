@@ -1,7 +1,6 @@
 //TODO - check params in inner functions (convention) - as warning (for all files)
 //TODO - logger documentation in inner functions (convention)
 //TODO - add more logs
-//TODO - check documentation where spPointCopy takes place
 
 #ifndef SPKDTREENODE_H_
 #define SPKDTREENODE_H_
@@ -44,15 +43,15 @@ typedef struct sp_kd_tree_node* SPKDTreeNode;
  *	 recursive depth.
  * @returns -
  *  NULL if :
- *   - array is NULL
- *   - memory allocation failed
- *   - //TODO - verify no other errors in this process
+ *  - pointsArray is NULL or
+ *  - size <= 0 or
+ *  - not all points in pointsArray have the same dimension or
+ *  - memory allocation failed
  *   otherwise returns a pointer to the root of the
- *   kd-tree that is built by the given array and split method.
+ *   kd-tree that is built by the given points array and split method.
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
 		SP_KDTREE_SPLIT_METHOD splitMethod);
@@ -72,13 +71,11 @@ SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
  *  NULL if :
  *   - array is NULL
  *   - memory allocation failed
- *   - //TODO - verify no other errors in this process
  *   otherwise returns a pointer to the root of the
  *   kd-tree that is built by the given array and split method.
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod);
 
@@ -93,18 +90,15 @@ SPKDTreeNode onErrorInInitKDTree(SPKDTreeNode node);
 
 /*
  * The method is called when the size of the SPKDArray 'array' is 1,
- * and returns a leaf whose data is the single point in 'array' points-
- * array
+ * and returns a leaf whose data is the single point in 'array' points-array
  *
  * @param node - the previously initiated SPKDTreeNode instance
  * @param array - the relevant kd-array to work by
  *
- * @returns NULL if memory allocation failed otherwise returns a leaf
- * whose data is the single point in 'array' points-array
+ * @returns a leaf whose data is the single point in 'array' points-array
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array);
 
@@ -160,13 +154,11 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
  *  NULL if :
  *   - array is NULL
  *   - memory allocation failed
- *   - //TODO - verify no other errors in this process
  *   otherwise returns a pointer to the root of the
  *   kd-tree that is built by the given array and split method.
  *
  * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * in case of any type of failure the relevant error is logged to the logger
  */
 SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod,
 		int recDepth);

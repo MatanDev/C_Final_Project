@@ -95,7 +95,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 	//build features database
 	(*imageProcObject) = new sp::ImageProc(*config);
 
-	if (extractFlag) {
+	if (*extractFlag) {
 		initializeImagesDataList(&imagesDataList, *numOfImages);
 		spVal(imagesDataList, ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 		for (i = 0; i < *numOfImages; i++){
@@ -113,7 +113,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 			freeAllImagesData(imagesDataList, *numOfImages, true),
 			IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 
-	freeAllImagesData(imagesDataList, *numOfImages, true);
+	freeAllImagesData(imagesDataList, *numOfImages, false);
 
 	return SUCCESS_RETURN_VALUE;
 }
@@ -246,11 +246,11 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	//RunImagesParserTests(config);
-	//runConfigTests();
+	RunImagesParserTests(config);
+	runConfigTests();
 	runKDArrayTests();
-	//runKDTreeNodeTests();
-	//runKDTreeNodeKNNTests();
+	runKDTreeNodeTests();
+	runKDTreeNodeKNNTests();
 	spConfigDestroy(config);
 	spLoggerDestroy();
 	return 0;

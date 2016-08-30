@@ -4,7 +4,6 @@
 #include "../../general_utils/SPUtils.h"
 
 #define INVALID_DIM 					-1
-#define ERROR_POINT_COPY				"Error in copying point"
 #define ERROR_CREATING_KD_INNER_NODE 	"Could not create inner node for KD tree"
 #define ERROR_INITIALIZING_KD_TREE	 	"Could not create KD tree"
 #define WARNING_KDTREE_NODE_NULL		"KDTreeNode object is null when destroy is called"
@@ -21,8 +20,7 @@ SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
 	return ret;
 }
 
-SPKDTreeNode InitKDTree(SPKDArray array,
-		SP_KDTREE_SPLIT_METHOD splitMethod) {
+SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
 	return internalInitKDTree(array, splitMethod, 0);
 }
 
@@ -36,9 +34,8 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
-	// TODO - should hard copy point here?
-	spValRCb((node->data = spPointCopy(array->pointsArray[0])), ERROR_POINT_COPY,
-			onErrorInInitKDTree(node));
+	// TODO - make sure array->pointsArray cannot be NULL
+	node->data = array->pointsArray[0];
 
 	return node;
 }
@@ -132,11 +129,6 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
 		if (kdTreeNode->kdtRight) {
 			spKDTreeDestroy(kdTreeNode->kdtRight);
 			kdTreeNode->kdtRight = NULL;
-		}
-
-		if (kdTreeNode->data) {
-			spPointDestroy(kdTreeNode->data);
-			kdTreeNode->data = NULL;
 		}
 		free(kdTreeNode);
 	}

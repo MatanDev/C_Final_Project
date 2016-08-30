@@ -188,18 +188,17 @@ bool parseLine(const char* filename, int lineNum, char* line,
 	isspace((*value)[startIndex]); startIndex++);
 	*value = (*value) + startIndex;
 
-	// TODO - forum: should clear only \n?
-	// clear spaces from end of value
-	for (i = strlen(*value) - 1; i > 0 && isspace((*value)[i]); i--);
-	(*value)[i+1] = NULL_CHARACTER;
-
-	// TODO - in handleString we refer to this case, remove it from there? warning?
 	// in case what we have after '=' is an empty string or includes only spaces
-	if (!strcmp(*value, "")) { // TODO 2 - is it better to check with strlen?
+	if ((*value)[0] == NULL_CHARACTER) {
 		*msg = SP_CONFIG_INVALID_LINE;
 		printErrorMessage(filename, lineNum, INVALID_CONF_FILE, NULL);
 		return false;
 	}
+
+	// TODO - forum: should clear only \n?
+	// clear spaces from end of value
+	for (i = strlen(*value) - 1; i > 0 && isspace((*value)[i]); i--);
+	(*value)[i+1] = NULL_CHARACTER;
 
 	return true;
 }
@@ -221,10 +220,9 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		}
 	}
 
-	if (strlen(value) == 0 ||
-			(isImagesSuffix && strcmp(value, JPG_FILE_EXTENSION) &&
-					strcmp(value, PNG_FILE_EXTENSION) && strcmp(value, BMP_FILE_EXTENSION)
-					&& strcmp(value, GIF_FILE_EXTENSION))) {
+	if (	isImagesSuffix && strcmp(value, JPG_FILE_EXTENSION) &&
+			strcmp(value, PNG_FILE_EXTENSION) && strcmp(value, BMP_FILE_EXTENSION) &&
+			strcmp(value, GIF_FILE_EXTENSION)	) {
 		*msg = SP_CONFIG_INVALID_STRING;
 		printErrorMessage(filename, lineNum, INVALID_VALUE, NULL);
 		return false;
@@ -321,6 +319,8 @@ bool handleLoggerLevel(SPConfig config, const char* filename,
 
 bool handleVariable(SPConfig config, const char* filename, int lineNum,
 		char *varName, char *value, SP_CONFIG_MSG* msg) {
+	assert(value[0] != NULL_CHARACTER); // value is not an empty string
+
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
 		return handleStringField(&(config->spImagesDirectory), filename,
 				lineNum, value, msg, false);

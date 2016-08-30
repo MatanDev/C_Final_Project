@@ -16,7 +16,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(config->spPCADimension == 20);
 	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
 	ASSERT_TRUE(config->spNumOfFeatures == 100);
-	ASSERT_TRUE(config->spExtractionMode == false);
+	ASSERT_TRUE(config->spExtractionMode == true);
 	ASSERT_TRUE(config->spMinimalGUI == false);
 	ASSERT_TRUE(config->spNumOfSimilarImages == 5);
 	ASSERT_TRUE(config->spKNN == 5);
@@ -24,7 +24,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(config->spLoggerLevel == SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
 	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
 
-	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg) == false);
+	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg) == true);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
 	ASSERT_TRUE(spConfigIsExtractionMode(NULL, &msg) == false);
