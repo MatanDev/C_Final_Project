@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "SPConfig.h"
-#include "general_utils\SPUtils.h"
+#include "general_utils/SPUtils.h"
 
 #define DEFAULT_PCA_DIMENSION	20
 #define DEFAULT_PCA_FILENAME	"pca.yml"

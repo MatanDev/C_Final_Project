@@ -9,12 +9,11 @@
 #define DOUBLE_PRECISION 6
 
 #define BREAKLINE_NO_CR							   '\n'
-#define BREAKLINE                                  "\r\n"
 #define END_OF_STRING							   '\0'
 #define DEF_LINE_LEN                               512
 
-#define HEADER_STRING_FORMAT                       "%d,%d\r\n"
-#define POINT_STRING_FORMAT                        "%d%s\r\n"
+#define HEADER_STRING_FORMAT                       "%d,%d\n"
+#define POINT_STRING_FORMAT                        "%d%s\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
 #define CREATE_IF_NOT_EXISTS_FILE_MODE		       "ab+"
 
@@ -38,7 +37,7 @@
 #define ERROR_WRITING_IMAGES_DATA                  "Error at writing images data"
 #define ERROR_WRITING_IMAGE_DATA                   "Error at writing an image data"
 #define ERROR_AT_IMAGE_PARSING_PROCESS             "Error at image parsing process"
-#define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \r\n Description : %s"
+#define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \n Description : %s"
 #define ERROR_NOT_MATCHING_CONFIG				   "Error loading image data, configuration data does not match"
 
 #define WARNING_WRONG_POINT_SIZE_CALC              "Wrong point CSV size calculation"
@@ -158,7 +157,7 @@ int getPointCSVSize(SPPoint point){
 		spLoggerPrintWarning(WARNING_WRONG_DIGITS_CALC, __FILE__,__FUNCTION__, __LINE__);
 	}
 
-	rslt = digits + 4; // +4 stands for "," + "\r\n" + "\0"
+	rslt = digits + 3; // +4 stands for "," + "\n" + "\0"
 	for (i= 0; i<spPointGetDimension(point);i++){
 		rslt += DOUBLE_PRECISION + 3; // +2 stands for the ".", "," and possible "-"
 		rslt += getNumOfDigits((int)spPointGetAxisCoor(point,i));
@@ -256,7 +255,7 @@ SPPoint parsePointFromString(char* pointdata, int index, SP_DP_MESSAGES* message
 
 char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 	char *rslt = NULL;
-	int stringLen = 4; // for : ',' + '\r\n\ + '\0\'
+	int stringLen = 3; // for : ',' + '\n' + '\0\'
 
 	spVerifyArgumentsRn(imageData != NULL, ERROR_CREATING_IMAGE_STRING_HEADER);
 

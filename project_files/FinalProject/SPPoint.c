@@ -2,7 +2,7 @@
 #include "SPLogger.h"
 #include <stdlib.h>
 #include <assert.h>
-#include "general_utils\SPUtils.h"
+#include "general_utils/SPUtils.h"
 
 
 bool isEqual(double x,double y)

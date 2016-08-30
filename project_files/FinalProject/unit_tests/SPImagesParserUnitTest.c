@@ -51,7 +51,7 @@ static bool pointToStringTests(){
 	SPPoint point1 = spPointCreate(data, 4, 7);
 
 	csvLine = pointToString(point1, &msg);
-	rslt = strcmp(csvLine,"4,-5.000000,6.000000,0.434343,6.700000\r\n");
+	rslt = strcmp(csvLine,"4,-5.000000,6.000000,0.434343,6.700000\n");
 	ASSERT_TRUE(rslt == 0);
 	ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
@@ -71,7 +71,7 @@ static bool stringToPoint(){
 	double data[4] = { -5,6,0.434343,6.7};
 	SPPoint point1 = spPointCreate(data, dim, index), point2;
 
-	point2 = parsePointFromString("4,-5.000000,6.000000,0.434343,6.700000\r\n", index, &msg);
+	point2 = parsePointFromString("4,-5.000000,6.000000,0.434343,6.700000\n", index, &msg);
 
 	ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
@@ -109,7 +109,7 @@ static bool testGetImageHeaderAsString(){
 		header = getImageStringHeader(imageData ,&msg);
 
 		ASSERT_TRUE(msg == SP_DP_SUCCESS);
-		ASSERT_TRUE(strcmp(header,"5,14\r\n")== 0);
+		ASSERT_TRUE(strcmp(header,"5,14\n")== 0);
 
 		free(header);
 		free(imageData);
@@ -127,7 +127,7 @@ static bool testLoadImageDataFromHeader(){
 	imageData->featuresArray = NULL;
 	ASSERT_TRUE(imageData != NULL);
 	if (imageData != NULL){
-		msg = loadImageDataFromHeader("5,14\r\n",imageData);
+		msg = loadImageDataFromHeader("5,14\n",imageData);
 
 
 		ASSERT_TRUE(msg == SP_DP_SUCCESS);
