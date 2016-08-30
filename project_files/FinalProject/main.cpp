@@ -32,6 +32,8 @@ extern "C" {
 #define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
 
+#define RUN_ACTION									false
+
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
 #define LOADING_IMAGE_FAILED_RETURN_VALUE 			-3
@@ -44,7 +46,7 @@ extern "C" {
  */
 #define spMainAction(action, returnValue) do { \
                 if(!((action))) { \
-					endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq, returnValue);\
+					endControlFlow(config, currentImageData, isCurrentImageFeaturesArrayAllocated, kdTree, bpq, returnValue);\
 					delete imageProcObject;\
 					return returnValue; \
                 } \
@@ -137,7 +139,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
  * '0'  - success
  */
 int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
-		int numOfSimilarImages, SPBPQueue bpq, bool GUIFlag, sp::ImageProc** imageProcObject, bool* oneImageWasSet){
+		int numOfSimilarImages, SPBPQueue bpq, bool GUIFlag, sp::ImageProc** imageProcObject, bool* isCurrentImageFeaturesArrayAllocated){
 	char workingImagePath[MAX_PATH_LEN], tempPath[MAX_PATH_LEN];
 	int *similarImagesIndices = NULL;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -148,7 +150,8 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
 
 	// iterating until the user inputs "<>"
 	while (strcmp(workingImagePath, QUERY_EXIT_INPUT)) {
-		*oneImageWasSet = true;
+		resetImageData(currentImageData);
+		*isCurrentImageFeaturesArrayAllocated = false; //indicate we should not free currentImageData->features again
 
 		while (strcmp(workingImagePath, QUERY_EXIT_INPUT) && !verifyPathAndAvailableFile(workingImagePath)){
 			spLoggerPrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
@@ -157,19 +160,18 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
 			getQuery(workingImagePath);
 		}
 		if (!strcmp(workingImagePath, QUERY_EXIT_INPUT)){ // query == '<>'
-			break;
+
+			return SUCCESS_RETURN_VALUE;
 		}
 
 		//spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
 
-		if (currentImageData->featuresArray != NULL) {
-			free(currentImageData->featuresArray);
-		}
 		currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
+		*isCurrentImageFeaturesArrayAllocated = true;
 		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
 				numOfSimilarImages, bpq);
 
-		//TODO - check minimal gui at schrieber or at least at my linux vm
+		//TODO - check minimal gui at schrieber [verified on my home linux]
 		//TODO - maybe extract to another method
 		if (GUIFlag) {
 			for (i=0;i<numOfSimilarImages;i++) {
@@ -216,7 +218,7 @@ int main(int argc, char** argv) {
 	SPConfig config = NULL;
 	int numOfSimilarImages, numOfImages = 0;
 	SPImageData currentImageData = NULL;
-	bool extractFlag, GUIFlag, oneImageWasSet = false;
+	bool extractFlag, GUIFlag, isCurrentImageFeaturesArrayAllocated = false;
 	SPKDTreeNode kdTree = NULL;
 	SPBPQueue bpq = NULL;
 	sp::ImageProc* imageProcObject = NULL;
@@ -226,13 +228,11 @@ int main(int argc, char** argv) {
 			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
 
 	spMainAction(((flowFlag = spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages,
-			 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &oneImageWasSet)) >= 0), flowFlag);
+			 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &isCurrentImageFeaturesArrayAllocated)) >= 0), flowFlag);
 
 
 	// end control flow
-	endControlFlow(config, currentImageData, oneImageWasSet, kdTree, bpq, SUCCESS_RETURN_VALUE);
-	delete imageProcObject;
-	return SUCCESS_RETURN_VALUE;
+	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
 
 

@@ -91,13 +91,13 @@ void getAsString(const char* message, char* destination) {
 }
 
 void endControlFlow(SPConfig config, SPImageData image,
-		bool oneImageWasSet, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
+		bool isCurrentImageFeaturesArrayAllocated, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
 	if (returnValue < 0){
 		printf(MAIN_RETURNED_ERROR);
 	}
 	printf("%s", EXITING);
 	spConfigDestroy(config);
-	freeImageData(image, !oneImageWasSet, true);
+	freeImageData(image, !isCurrentImageFeaturesArrayAllocated, true);
 	spKDTreeDestroy(kdTree);
 	spBPQueueDestroy(bpq);
 	spLoggerDestroy();

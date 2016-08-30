@@ -12,6 +12,7 @@
 #define WARNING_IMAGE_DATA_POINTS_ARRAY_NULL       "Image data array is null when free is called"
 #define WARNING_IMAGE_DATA_NULL                    "Image data object is null when free is called"
 #define WARNING_IMAGES_DATA_NULL                   "Images data object is null when free is called"
+#define WARNING_IMAGES_DATA_NULL_ON_RESET		   "Images data object is null when reset is called"
 
 SPImageData createImageData(int index){
 	SPImageData image = NULL;
@@ -65,5 +66,18 @@ void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatu
 	}
 	else {
 		spLoggerPrintWarning(WARNING_IMAGES_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
+	}
+}
+
+void resetImageData(SPImageData image){
+	if (image != NULL){
+		if (image->featuresArray != NULL) {
+			freeFeatures(image->featuresArray,image->numOfFeatures);
+			free(image->featuresArray);
+		}
+		image->numOfFeatures = 0;
+	}
+	else {
+		spLoggerPrintWarning(WARNING_IMAGES_DATA_NULL_ON_RESET, __FILE__,__FUNCTION__, __LINE__);
 	}
 }

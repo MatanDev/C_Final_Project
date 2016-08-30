@@ -61,5 +61,13 @@ void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, boo
  */
 void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatures);
 
+/*
+ * Resets an image data, free's its features and sets its number of features to 0.
+ *
+ * @param image - the image to reset
+ *
+ * @logger - reports warning if image is null
+ */
+void resetImageData(SPImageData image);
 
 #endif /* SPIMAGEDATA_H_ */
