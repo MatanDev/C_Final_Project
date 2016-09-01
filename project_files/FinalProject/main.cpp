@@ -31,12 +31,12 @@ extern "C" {
 #define ERROR_INIT_KDTREE 							"Error building the KD-tree data structure"
 #define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
+#define	ERROR_SEARCHING_IMAGES						"An error encountered during querying the database, thus similar images could not be found"
 
 #define RUN_ACTION									false
 
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
-#define LOADING_IMAGE_FAILED_RETURN_VALUE 			-3
 #define SUCCESS_RETURN_VALUE 						0
 
 
@@ -88,8 +88,6 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 	spVal((initConfigAndSettings(argc, argv, config, numOfImages,
 			numOfSimilarImages, extractFlag, GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE );
 
-	//TODO - maybe try catch?
-
 	//build features database
 	(*imageProcObject) = new sp::ImageProc(*config);
 
@@ -116,6 +114,49 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 	return SUCCESS_RETURN_VALUE;
 }
 
+
+/*
+ * The method gets a pre-validated query for an image path, requests the data layer i.e. the KD data-structure
+ * for the similar images and presents them.
+ * In case of a problem at presenting a specific image, a warning will be logged and a relevant message will
+ * be shown, yet the process will keep running and try to present the next image.
+ *
+ * @param config - the configuration data
+ * @param currentImageData - a pre-allocated image data to work with
+ * @param imageProbObject - a pointer to the image proc object pointer
+ * @param kdTree - the KD tree of the current images database
+ * @param numOfImages - the number of images in the database
+ * @param numOfSimilarImages - the number of similar images to present for each user query
+ * @param bpq - a pre-allocated priority queue
+ * @param GUIFlag - a flag that indicates if the program runs at minimal gui mode
+ *
+ */
+void proccessQueryAndPresentImages(SPConfig config, SPImageData currentImageData, sp::ImageProc** imageProcObject,
+		SPKDTreeNode kdTree, int numOfImages, int numOfSimilarImages, SPBPQueue bpq, char* workingImagePath, bool GUIFlag){
+	int *similarImagesIndices = NULL, i;
+	char tempPath[MAX_PATH_LEN];
+
+	currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
+
+	spVal((similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
+			numOfSimilarImages, bpq)) != NULL , ERROR_SEARCHING_IMAGES, ); //on error returns
+
+	if (GUIFlag) {
+		for (i = 0; i< numOfSimilarImages; i++) {
+			spValWarning(spConfigGetImagePath(tempPath, config, similarImagesIndices[i]) == SP_CONFIG_SUCCESS,
+									WARNING_COULD_NOT_LOAD_IMAGE_PATH,
+									printf(RELEVANT_IMAGE_INDEX_IS, similarImagesIndices[i]),
+									(*imageProcObject)->showImage(tempPath););
+
+		}
+	} else {
+		presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
+				numOfSimilarImages);
+	}
+
+	spFree(similarImagesIndices);
+}
+
 /*
  * The method is used for the user interaction process, it receives the relevant data that is loaded
  * and asks the user for image queries and handles them accordingly.
@@ -131,17 +172,11 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
  * @param imageProbObject - a pointer to the image proc object pointer
  * @param oneImageWasSet - a pointer to a flag that indicates that one image query was loaded,
  * 							this is needed for memory deallocation.
- *
- * @returns :
- * '-3' - failed to load image for GUI presentation
- * '0'  - success
  */
-int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
+void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPKDTreeNode kdTree,int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq, bool GUIFlag, sp::ImageProc** imageProcObject, bool* isCurrentImageFeaturesArrayAllocated){
-	char workingImagePath[MAX_PATH_LEN], tempPath[MAX_PATH_LEN];
-	int *similarImagesIndices = NULL;
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	int i;
+	char workingImagePath[MAX_PATH_LEN];
+
 
 	// first run must always happen
 	getQuery(workingImagePath);
@@ -159,35 +194,16 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
 		}
 		if (!strcmp(workingImagePath, QUERY_EXIT_INPUT)){ // query == '<>'
 
-			return SUCCESS_RETURN_VALUE;
+			return;
 		}
 
 		//spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
-
-		currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
 		*isCurrentImageFeaturesArrayAllocated = true;
-		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
-				numOfSimilarImages, bpq);
-
-		//TODO - maybe extract to another method
-		if (GUIFlag) {
-			for (i=0;i<numOfSimilarImages;i++) {
-				msg = spConfigGetImagePath(tempPath, config, similarImagesIndices[i]);
-				spValWc((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH,
-						free(similarImagesIndices), LOADING_IMAGE_FAILED_RETURN_VALUE);
-				(*imageProcObject)->showImage(tempPath);
-			}
-		} else {
-			presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
-					numOfSimilarImages);
-		}
-
-		free(similarImagesIndices);
-		similarImagesIndices = NULL;
+		proccessQueryAndPresentImages(config, currentImageData, imageProcObject, kdTree, numOfImages,
+				numOfSimilarImages, bpq, workingImagePath, GUIFlag);
 
 		getQuery(workingImagePath);
 	}
-	return SUCCESS_RETURN_VALUE;
 }
 
 
@@ -206,8 +222,6 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
  * @returns :
  * '-1' - configuration and setting initialization failed
  * '-2' - extracting images data, and loading images logic failed
- * '-3' - failed to load query image
- * '-4' - failed to load image for GUI presentation
  * '0'  - success
  */
 int main(int argc, char** argv) {
@@ -224,8 +238,8 @@ int main(int argc, char** argv) {
 			&numOfSimilarImages, &extractFlag, &GUIFlag, &bpq,
 			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
 
-	spMainAction(((flowFlag = spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages,
-			 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &isCurrentImageFeaturesArrayAllocated)) >= 0), flowFlag);
+	spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages,
+				 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &isCurrentImageFeaturesArrayAllocated);
 
 
 	// end control flow

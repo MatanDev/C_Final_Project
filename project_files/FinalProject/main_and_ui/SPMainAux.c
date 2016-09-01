@@ -26,6 +26,7 @@
 #define WARNING_CONFIG_ARG										"Warning, program is running with unknown arguments, did you mean -c ?"
 #define WARNING_ZERO_FEATURES_FROM_IMAGE						"Warning, some images have zero features"
 
+
 #define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
@@ -114,10 +115,11 @@ void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
 
 	printf(CLOSEST_IMAGES, queryImagePath);
 	fflush(NULL);
-	for (i = 0; i < imagesCount; i++) { //TODO - if fails maybe print warning and continue ?
-		spVal((msg = spConfigGetImagePath(tmpImagePath, config, imagesIndicesArray[i])) == SP_CONFIG_SUCCESS,
-				ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG,); //returns;
-		printf("%s\n", tmpImagePath);
+	for (i = 0; i < imagesCount; i++) {
+		spValWarning((msg = spConfigGetImagePath(tmpImagePath, config, imagesIndicesArray[i])) == SP_CONFIG_SUCCESS,
+				WARNING_COULD_NOT_LOAD_IMAGE_PATH,
+				printf(RELEVANT_IMAGE_INDEX_IS, imagesIndicesArray[i]),
+				printf("%s\n", tmpImagePath));
 		fflush(NULL);
 	}
 }
@@ -145,8 +147,6 @@ SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numO
 			k++;
 		}
 	}
-	//TODO - all points dimension needs to be the same, can assume ? maybe just warning ?
-	//http://moodle.tau.ac.il/mod/forum/discuss.php?d=78631
 
 	return featuresArray;
 }

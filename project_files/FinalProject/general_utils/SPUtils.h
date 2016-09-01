@@ -27,6 +27,25 @@
  *
  * ------------------------------------------------------------------------------------*/
 
+/*
+ * The wrapper is used for running 'action' that can fail at our logic,
+ * in case the action fails, it reports a warning and run some callback,
+ * otherwise it runs a success callback
+ *
+ * @param action - the action to verify
+ * @param warningOnError - the warning message to log when action = false
+ * @param onError - the callback code to run in case of error
+ * @param onSuccess - the callback code to run in case of success
+ */
+#define spValWarning(action, warningOnError, onError, onSuccess) do { \
+                if(!((action))) { \
+					spLoggerPrintWarning(warningOnError, __FILE__, __FUNCTION__, __LINE__); \
+					onError; \
+                } \
+                else {\
+					onSuccess;\
+				}\
+        } while (0)
 
 /*
  * The wrapper is used for running 'action' , verifying that its value is true,

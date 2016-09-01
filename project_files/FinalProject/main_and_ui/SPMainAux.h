@@ -7,6 +7,9 @@
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
 #include "../general_utils/SPUtils.h"
 
+//these macros are required at SPMainAux and at main.cpp
+#define WARNING_COULD_NOT_LOAD_IMAGE_PATH						"Warning, could not load image path"
+#define RELEVANT_IMAGE_INDEX_IS									"Could not present image properly, image index is %d\n"
 
 /*
  * Extracts the configuration filename from the command line arguments of the program
