@@ -379,7 +379,6 @@ SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPI
 }
 
 
-//TODO - create flag
 SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex, SPImageData* allImagesData){
 	char* filePath;
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
