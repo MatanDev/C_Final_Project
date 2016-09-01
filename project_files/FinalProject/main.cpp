@@ -52,9 +52,7 @@ extern "C" {
                 } \
         } while (0)
 
-//TODO - remove asserts ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675
-//TODO - forum: what to do with logger write return value
-//TODO - forum: should write main.h ?
+//TODO - forum: what to do with logger write return value - if fails quit
 
 
 /*
@@ -171,7 +169,6 @@ int spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SPK
 		similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
 				numOfSimilarImages, bpq);
 
-		//TODO - check minimal gui at schrieber [verified on my home linux]
 		//TODO - maybe extract to another method
 		if (GUIFlag) {
 			for (i=0;i<numOfSimilarImages;i++) {

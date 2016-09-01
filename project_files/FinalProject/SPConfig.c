@@ -195,7 +195,6 @@ bool parseLine(const char* filename, int lineNum, char* line,
 		return false;
 	}
 
-	// TODO - forum: should clear only \n?
 	// clear spaces from end of value
 	for (i = strlen(*value) - 1; i > 0 && isspace((*value)[i]); i--);
 	(*value)[i+1] = NULL_CHARACTER;
@@ -468,7 +467,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 }
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line) {
-	//TODO - forum: what to do in case msg in NULL?
 	//(http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675)
 	assert(msg != NULL);
 	if (config == NULL) {
@@ -540,7 +538,6 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		return SP_CONFIG_INDEX_OUT_OF_RANGE;
 	}
 
-	// TODO - forum: what should we return in case sprintf fails?
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
 	if (isFeats)
