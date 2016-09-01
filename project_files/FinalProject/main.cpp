@@ -53,7 +53,7 @@ extern "C" {
         } while (0)
 
 //TODO - forum: what to do with logger write return value - if fails quit
-
+//TODO - log - info + debug
 
 /*
  * The method initializes the project, loads the settings, the logger, the images data and build's
@@ -81,22 +81,22 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag, SPBPQueue* bpq,
 		SPImageData* currentImageData, SPKDTreeNode* kdTree, sp::ImageProc** imageProcObject){
 	int i;
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	char tempPath[MAX_PATH_LEN];
-	SPImageData *imagesDataList = NULL;
+	SPImageData* imagesDataList = NULL;
 
 	spVal((initConfigAndSettings(argc, argv, config, numOfImages,
 			numOfSimilarImages, extractFlag, GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE );
 
+
+	spVal(imagesDataList = initializeImagesDataList(*numOfImages),
+			ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
+
 	//build features database
 	(*imageProcObject) = new sp::ImageProc(*config);
-
 	if (*extractFlag) {
-		initializeImagesDataList(&imagesDataList, *numOfImages);
-		spVal(imagesDataList, ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 		for (i = 0; i < *numOfImages; i++){
-			msg = spConfigGetImagePath(tempPath, *config, i);
-			spValWc((msg == SP_CONFIG_SUCCESS), ERROR_LOADING_IMAGE_PATH,
+			spValWc((spConfigGetImagePath(tempPath, *config, i) == SP_CONFIG_SUCCESS),
+					ERROR_LOADING_IMAGE_PATH,
 					freeAllImagesData(imagesDataList, *numOfImages,true),
 					IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 			imagesDataList[i]->featuresArray = (*imageProcObject)->getImageFeatures(tempPath,
@@ -104,7 +104,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 		}
 	}
 
-	spValWc((initializeWorkingImageKDTreeAndBPQueue(*config, &imagesDataList,
+	spValWc((initializeWorkingImageKDTreeAndBPQueue(*config, imagesDataList,
 		currentImageData, kdTree, bpq, *numOfImages)), ERROR_INIT_KDTREE,
 			freeAllImagesData(imagesDataList, *numOfImages, true),
 			IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);

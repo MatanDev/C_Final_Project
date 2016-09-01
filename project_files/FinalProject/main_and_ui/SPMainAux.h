@@ -116,14 +116,18 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 		int* numOfSimilar, bool* extractFlag, bool* GUIFlag);
 
 /*
- * The method gets a pointer to images data array and initialize it, allocated memory and indexes values.
+ * The method initializes an images data array, allocated memory and indexes values.
  *
- * @param imagesDataList - pointer to images data array
  * @param numOfImages - the count of images
  *
- * in case of error, it would be logged and *imagesDataList will be NULL
+ * @return
+ * 	NULL -
+ *	if memory allocation fails
+ *	otherwise an images data array
+ *
+ * @logger - relevant errors will be logged
  */
-void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages);
+SPImageData* initializeImagesDataList(int numOfImages);
 
 /*
  * The method initialize an image data item.
@@ -189,7 +193,7 @@ SPPoint* initializeAllFeaturesArray(SPImageData* workingImagesDatabase, int numO
  * true
  */
 bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
-		SPImageData** imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
+		SPImageData* imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
 		SPBPQueue* bpq, int numOfImages);
 
 /*

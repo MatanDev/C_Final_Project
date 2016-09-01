@@ -7,7 +7,6 @@
 #include "../SPConfig.h"
 #include "SPImageData.h"
 
-//TODO - logger !!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /*
  * This macro is used to generate safe calloc action
@@ -119,12 +118,6 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size);
  */
 char* getLine(FILE* fp);
 
-/*
- * The method sets the value of the features matrix
- *
- * @param features - the input features
- */
-void setFeaturesMatrix(SPImageData* features);
 
 /*
  * The method returns the number of characters required to store the point's data as a CSV
@@ -243,28 +236,26 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image);
 
 /*
- * The method loads the images data, and creates an ImageData array containing the features data.
+ * The method loads the images data into allImagesData, thus fills the ImageData array containing the features data.
  * in case of failure no data will be created,
  * and all the images data that has been created so far would be destroyed.
- * the createFlag flag indicates if the image data should be processed or not
  *
  * @param config - the configurations data
  * @param configSignature - a string signature of the config file
- * @param createFlag - true iff the image data should be created from the image file (processed).
- * @param message - a pointer to a message enum
+ * @param allImagesData - a pre allocated images data array
  *
  * @return -
- * NULL if :
- * 	- config or configSignature is NULL [message = SP_DP_INVALID_ARGUMENT],
- * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
- * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
- * 	- could not read from file [message = SP_DP_FILE_READ_ERROR]
- *  - the features extraction failed [message = SP_DP_FEATURE_EXTRACTION_ERROR]
- * 	otherwise returns an array of SPImageData representing the images data [message = SP_DP_SUCCESS]
+ *
+ * 	- SP_DP_INVALID_ARGUMENT - config or configSignature or allImagesData is NULL
+ * 	- SP_DP_MEMORY_FAILURE - memory allocation failure
+ * 	- SP_DP_FORMAT_ERROR - could not parse the image due to wrong format issues
+ * 	- SP_DP_FILE_READ_ERROR - could not read from file
+ *  - SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
+ * 	- SP_DP_SUCCESS - otherwise fully allocates allImagesData with the relevant data from the images
  *
  * @logger - Prints relevant errors to the logger.
  */
-SPImageData* loadAllImagesData(const SPConfig config,char* configSignature, bool createFlag, SP_DP_MESSAGES* message);
+SP_DP_MESSAGES loadAllImagesData(const SPConfig config, char* configSignature, SPImageData* allImagesData);
 
 /*
  * The method loads image data into an allocated SPImageData structure by an opened file
@@ -280,21 +271,6 @@ SPImageData* loadAllImagesData(const SPConfig config,char* configSignature, bool
  * SP_DP_SUCCESS - image data created successfully
  */
 SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData);
-
-/*
- * The method loads image data given the image index, the data is pre-loaded
- * from the image path at the main method and at this method
- * into an allocated SPImageData structure -  processing the data
- *
- * @param imageData - an allocated SPImageData item to which the data will be written
- *
- * @return -
- * SP_DP_MEMORY_FAILURE - memory allocation failure
- * SP_DP_FILE_READ_ERROR - error reading from file
- * SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
- * SP_DP_SUCCESS - image data created successfully
- */
-SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData);
 
 /*
  * The method loads image data given the image path
@@ -329,53 +305,27 @@ SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SP
  */
 SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPImageData imageData);
 
-/*
- * The method loads a specific image and creates a SPImageData item containing its features data.
- * the createFlag flag indicates if the image data should be processed or not
- *
- * @param configSignature - a string representing the config file relevant settings
- * @param imageDataPath - the path of the requested image
- * @param imageIndex - the index of the requested image
- * @param createFlag - true iff the image data should be created from the image file (processed).
- * @param message - a pointer to a message enum
- *
- * @return -
- * NULL if :
- * 	- configSignature is NULL or filePath is NULL or message is NULL [message = SP_DP_INVALID_ARGUMENT],
- * 	- imageIndex out of range [message = SP_DP_INVALID_ARGUMENT],
- * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
- * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
- * 	- could not read from file [message = SP_DP_FILE_READ_ERROR]
- *  - the features extraction failed [message = SP_DP_FEATURE_EXTRACTION_ERROR]
- * 	otherwise returns a SPImageData representing the image data [message = SP_DP_SUCCESS]
- *
- * @logger - Prints relevant errors to the logger.
- */
-SPImageData loadImageDataByPath(char* configSignature, char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
 
 /*
- * The method loads a specific image and creates a SPImageData item containing its features data.
- * the createFlag flag indicates if the image data should be processed or not
+ * The method loads a specific image and fills its SPImageData item containing its features data at allImagesData.
  *
  * @param config - the configurations data
  * @param configSignature - a string representing the config file relevant settings
  * @param imageIndex - the index of the requested image
- * @param createFlag - true iff the image data should be created from the image file (processed).
- * @param message - a pointer to a message enum
+ * @param allImagesData - a pointer to pre allocated images database
  *
  * @return -
- * NULL if :
- * 	- config is NULL or index < 0 or configSignature is NULL [message = SP_DP_INVALID_ARGUMENT],
- * 	- imageIndex out of range [message = SP_DP_INVALID_ARGUMENT],
- * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
- * 	- could not parse the image due to wrong format issues [message = SP_DP_FORMAT_ERROR],
- * 	- could not read from file [message = SP_DP_FILE_READ_ERROR]
- *  - the features extraction failed [message = SP_DP_FEATURE_EXTRACTION_ERROR]
- * 	otherwise returns a SPImageData representing the image data [message = SP_DP_SUCCESS]
+ * 	- SP_DP_INVALID_ARGUMENT - config is NULL or index < 0 or configSignature or allImagesData is NULL
+ * 	- SP_DP_INVALID_ARGUMENT - imageIndex out of range
+ * 	- SP_DP_MEMORY_FAILURE - memory allocation failure
+ * 	- SP_DP_FORMAT_ERROR - could not parse the image due to wrong format issues
+ * 	- SP_DP_FILE_READ_ERROR - could not read from file
+ *  - SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
+ * 	- SP_DP_SUCCESS - otherwise fills the relevant image data
  *
  * @logger - Prints relevant errors to the logger.
  */
-SPImageData loadImageData(const SPConfig config,char* configSignature, int imageIndex, bool createFlag, SP_DP_MESSAGES* message);
+SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex, SPImageData* allImagesData);
 
 /*
  * The method gets an opened file pointer and an image data item and writes the image data to the file.
@@ -433,20 +383,19 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
  * The main method that starts and loads all the images data according to the configurations
  *
  * @param config - the config file
- * @param msg - a message that represent the outcome of the process
+ * @imagesData - a list of images data, the method will fill all the relevant data into it
  *
  * @returns :
- * NULL if:
  * 	    SP_DP_INVALID_ARGUMENT - config is NULL,
  * 		SP_DP_MEMORY_FAILURE - memory allocation failure
  * 		SP_DP_FILE_WRITE_ERROR - error writing to file
  *	    SP_DP_FILE_READ_ERROR - error reading from a file
  *	    SP_DP_FORMAT_ERROR - some file was in the wrong format
  *	    SP_DP_FEATURE_EXTRACTION_ERROR - could not extract features
- * SPImage data array of the images data and msg = SP_DP_SUCCESS if all actions done successfully
+ *	    SP_DP_SUCCESS - if all actions done successfully
  *
  */
-SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESSAGES* msg);
+SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageData* imagesData);
 
 
 #endif /* SPIMAGESPARSER_H_ */

@@ -176,20 +176,20 @@ SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 	return rslt;
 }
 
-void initializeImagesDataList(SPImageData** imagesDataList, int numOfImages) {
+SPImageData* initializeImagesDataList(int numOfImages) {
+	SPImageData* imagesDataList = NULL;
 	int i;
-	spCallocEr((*imagesDataList), SPImageData, numOfImages,
-			ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS,); //returns;
+	spCallocEr(imagesDataList, SPImageData, numOfImages,
+			ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, NULL); //returns;
 
 	for (i=0 ; i<numOfImages; i++){
 		//extract each relevant image data
-		spValWc(((*imagesDataList)[i] = createImageData(i)) != NULL,
+		spValWcRn(((imagesDataList)[i] = createImageData(i)) != NULL,
 				ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS,
 				//roll-back
-				freeAllImagesData(*imagesDataList,i,false); //false because features list is not yet allocated
-				(*imagesDataList) = NULL ,); //returns;
+				freeAllImagesData(imagesDataList,i,false)); //false because features list is not yet allocated
 	}
-	setFeaturesMatrix(*imagesDataList);
+	return imagesDataList;
 }
 
 SPImageData initializeWorkingImage() {
@@ -200,21 +200,20 @@ SPImageData initializeWorkingImage() {
 }
 
 bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
-		SPImageData** imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
+		SPImageData* imagesDataList, SPImageData* currentImageData, SPKDTreeNode* kdTree,
 		SPBPQueue* bpq, int numOfImages) {
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
-	SP_DP_MESSAGES parserMessage = SP_DP_SUCCESS;
 	int totalNumOfFeatures, knn;
 	SPPoint* allFeaturesArray;
 	SP_KDTREE_SPLIT_METHOD splitMethod;
 
-	spVal((*imagesDataList = spImagesParserStartParsingProcess(config, &parserMessage)), ERROR_PARSING_IMAGES_DATA, false);
+	spVal(spImagesParserStartParsingProcess(config, imagesDataList) == SP_DP_SUCCESS, ERROR_PARSING_IMAGES_DATA, false);
 
 	spVal((*currentImageData = initializeWorkingImage()), ERROR_INITIALIZING_QUERY_IMAGE, false);
 
-	totalNumOfFeatures = calculateTotalNumOfFeatures(*imagesDataList, numOfImages);
+	totalNumOfFeatures = calculateTotalNumOfFeatures(imagesDataList, numOfImages);
 
-	spVal((allFeaturesArray = initializeAllFeaturesArray(*imagesDataList, numOfImages,
+	spVal((allFeaturesArray = initializeAllFeaturesArray(imagesDataList, numOfImages,
 			totalNumOfFeatures)), ERROR_CREATING_FEATURES_ARRAY, false);
 
 	splitMethod = spConfigGetSplitMethod(config, &configMessage);
@@ -223,7 +222,6 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 	spValWc((*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
 			splitMethod)), ERROR_CREATING_KD_TREE,
-			freeAllImagesData(*imagesDataList, numOfImages,false);
 			free(allFeaturesArray), false);
 
 	free(allFeaturesArray);

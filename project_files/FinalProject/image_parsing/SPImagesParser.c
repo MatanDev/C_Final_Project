@@ -48,10 +48,6 @@
 
 
 
-//TODO - forum - verify we can use a global http://moodle.tau.ac.il/mod/forum/discuss.php?d=77431
-//global variable for holding the features matrix
-SPImageData* featuresMatrix = NULL;
-
 bool isAFullLine(char* line){
 	return line[strlen(line)-1] == BREAKLINE_NO_CR;
 }
@@ -141,12 +137,6 @@ int getNumOfDigits(int x){
 	return digits;
 }
 
-void setFeaturesMatrix(SPImageData* features){
-	if (features == NULL){
-		spLoggerPrintWarning(WARNING_TRY_TO_SET_NULL_FEATURES, __FILE__,__FUNCTION__, __LINE__);
-	}
-	featuresMatrix = features;
-}
 
 int getPointCSVSize(SPPoint point){
 	int rslt, digits, i;
@@ -273,9 +263,8 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 }
 
 SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
-	int i = 0;
-
-	spVal((image->index = (int)getFloatingNumberFromSubString(header,&i))>= 0,
+	int i = 0, index;
+	spVal((index = (int)getFloatingNumberFromSubString(header,&i))>= 0 && index == image->index,
 			ERROR_STRING_PARSING_WRONG_FORMAT, SP_DP_FORMAT_ERROR);
 
 	i++;
@@ -285,33 +274,25 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
 	return SP_DP_SUCCESS;
 }
 
-SPImageData* loadAllImagesData(const SPConfig config, char* configSignature, bool createFlag, SP_DP_MESSAGES* message){
-	SPImageData *allImagesData = NULL, currentImageData = NULL;
+SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SPImageData* allImagesData){
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
+	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 	int i, numOfImages;
 
-	spVerifyArgumentsRn(config != NULL && configSignature != NULL, ERROR_LOADING_IMAGES_DATA);
+	spVerifyArguments(allImagesData != NULL && config != NULL && configSignature != NULL,
+			ERROR_LOADING_IMAGES_DATA, SP_DP_INVALID_ARGUMENT);
 
 	numOfImages = spConfigGetNumOfImages(config,&configMessage);
 
-	spValWcRn(configMessage == SP_CONFIG_SUCCESS, ERROR_LOADING_IMAGES_DATA, *message =  SP_DP_INVALID_ARGUMENT);
-
-	spCallocErWc(allImagesData, SPImageData, numOfImages,
-			ERROR_LOADING_IMAGES_DATA, *message = SP_DP_MEMORY_FAILURE);
+	spVal(configMessage == SP_CONFIG_SUCCESS, ERROR_LOADING_IMAGES_DATA, SP_DP_INVALID_ARGUMENT);
 
 	for (i = 0 ;i < numOfImages ; i++) {
-		currentImageData = loadImageData(config, configSignature, i ,createFlag, message);
-		spValWcRn(*message == SP_DP_SUCCESS, ERROR_LOADING_IMAGES_DATA,
-					freeAllImagesData(allImagesData, i, true);
-					allImagesData = NULL);
-		allImagesData[i] = currentImageData;
+		spVal((message = loadImageData(config, configSignature, i , allImagesData)) == SP_DP_SUCCESS,
+				ERROR_LOADING_IMAGES_DATA,
+				message);
 	}
 
-	if (featuresMatrix){
-		freeAllImagesData(featuresMatrix, numOfImages, false);
-	}
-
-	return allImagesData;
+	return SP_DP_SUCCESS;
 }
 
 SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
@@ -346,17 +327,6 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 
 	return message;
 
-}
-
-
-SP_DP_MESSAGES createImageDataByPreloadedPath(SPImageData imageData){
-	spVerifyArguments(imageData->index >= 0 && featuresMatrix[imageData->index] != NULL,
-			ERROR_ANALYZING_FEATURES, SP_DP_FEATURE_EXTRACTION_ERROR);
-
-	imageData->featuresArray = featuresMatrix[imageData->index]->featuresArray;
-	imageData->numOfFeatures = featuresMatrix[imageData->index]->numOfFeatures;
-
-	return SP_DP_SUCCESS;
 }
 
 SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SPImageData imageData){
@@ -408,43 +378,26 @@ SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPI
 	return message;
 }
 
-SPImageData loadImageDataByPath(char* configSignature, char* imageDataPath,int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
-	SPImageData resultImage = NULL;
-	spVerifyArgumentsWcRn( imageDataPath != NULL && message != NULL && configSignature != NULL,
-			ERROR_LOADING_IMAGE_DATA, *message =  SP_DP_INVALID_ARGUMENT);
 
-	spValWcRn((resultImage = createImageData(imageIndex)) != NULL, ERROR_LOADING_IMAGE_DATA,
-			*message =  SP_DP_MEMORY_FAILURE);
-
-	if (createFlag){
-		*message = createImageDataByPreloadedPath(resultImage);
-	}
-	else{
-		*message = loadKnownImageData(configSignature, imageDataPath, resultImage);
-	}
-
-	spValWcRn(*message == SP_DP_SUCCESS, ERROR_LOADING_IMAGE_DATA, free(resultImage));
-
-	return resultImage;
-}
-
-SPImageData loadImageData(const SPConfig config, char* configSignature, int imageIndex, bool createFlag, SP_DP_MESSAGES* message){
-	SPImageData image;
+//TODO - create flag
+SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex, SPImageData* allImagesData){
 	char* filePath;
+	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 
-	spVerifyArgumentsWcRn( config != NULL && imageIndex >= 0 && configSignature != NULL,
-			ERROR_LOADING_IMAGE_DATA, *message =  SP_DP_INVALID_ARGUMENT);
+	spVerifyArguments( config != NULL && imageIndex >= 0 && configSignature != NULL && allImagesData != NULL,
+			ERROR_LOADING_IMAGE_DATA, SP_DP_INVALID_ARGUMENT);
 
-	filePath = getImagePath(config, imageIndex, !createFlag, message);
-	if (*message == SP_DP_SUCCESS) {
-		image = loadImageDataByPath(configSignature, filePath,imageIndex, createFlag,  message);
+	filePath = getImagePath(config, imageIndex, true , &message);
+
+	if (message == SP_DP_SUCCESS) {
+		message = loadKnownImageData(configSignature, filePath, allImagesData[imageIndex]);
 	}
 	else{
 		spLoggerPrintError(ERROR_LOADING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 	}
 
 	free(filePath);
-	return image;
+	return message;
 }
 
 SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char* configSignature){
@@ -546,43 +499,36 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
 	return outputMessage;
 }
 
-SPImageData* spImagesParserStartParsingProcess(const SPConfig config, SP_DP_MESSAGES* msg){
-	*msg = SP_DP_SUCCESS;
+SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageData* allImagesData){
+	SP_DP_MESSAGES msg = SP_DP_SUCCESS;
 	SP_CONFIG_MSG configMsg = SP_CONFIG_SUCCESS;
-	SPImageData* allImagesData = NULL;
 	char* configSignature = NULL;
 	bool createDatabase;
 
-	spVerifyArgumentsWcRn(config != NULL, ERROR_AT_IMAGE_PARSING_PROCESS,
-			 *msg = SP_DP_INVALID_ARGUMENT);
+	spVerifyArguments(config != NULL, ERROR_AT_IMAGE_PARSING_PROCESS, SP_DP_INVALID_ARGUMENT);
 
 	createDatabase = spConfigIsExtractionMode(config, &configMsg);
 
-	spValWcRn(configMsg == SP_CONFIG_SUCCESS, ERROR_INVALID_ARGUMENT,
+	spValWc(configMsg == SP_CONFIG_SUCCESS, ERROR_INVALID_ARGUMENT,
 			spLoggerPrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
 			spLoggerPrintWarning(WARNING_CONFIG_SHOULD_NOT_BE_NULL,
-					__FILE__,__FUNCTION__, __LINE__);*msg = SP_DP_INVALID_ARGUMENT);
+					__FILE__,__FUNCTION__, __LINE__), SP_DP_INVALID_ARGUMENT);
 
 
 	configSignature = getSignature(config);
-	spValWcRn(configSignature != NULL, ERROR_AT_IMAGE_PARSING_PROCESS, *msg = SP_DP_INVALID_ARGUMENT);
+	spVal(configSignature != NULL, ERROR_AT_IMAGE_PARSING_PROCESS, SP_DP_INVALID_ARGUMENT);
 
-
-	if (createDatabase && featuresMatrix == NULL){
-		spLoggerPrintWarning(WARNING_FEATURES_NULL_PRE_DATABASE,
-				__FILE__,__FUNCTION__, __LINE__);
+	if (!createDatabase) {
+		msg = loadAllImagesData(config, configSignature, allImagesData);
+	} else {
+		// already loaded allImagesData at main
+		msg = saveAllImagesData(config, configSignature, allImagesData);
 	}
+	spVal(msg == SP_DP_SUCCESS, ERROR_AT_IMAGE_PARSING_PROCESS, msg);
 
-	allImagesData = loadAllImagesData(config, configSignature, createDatabase, msg);
-
-	if (*msg == SP_DP_SUCCESS && createDatabase){
-		*msg = saveAllImagesData(config, configSignature, allImagesData);
-	}
-	if (*msg != SP_DP_SUCCESS){
-		spLoggerPrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
-	}
 	free(configSignature);
-	return allImagesData;
+
+	return SP_DP_SUCCESS;
 }
 
 
