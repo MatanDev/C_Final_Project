@@ -8,6 +8,8 @@
 bool testGivenConfFile() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("spcbir.config", &msg);
+	char imagePath[100];
+
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(!strcmp(config->spImagesDirectory, "./images/"));
 	ASSERT_TRUE(!strcmp(config->spImagesPrefix, "img"));
@@ -60,7 +62,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(spConfigGetNumOfSimilarImages(NULL, &msg) == -1);
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
 
-	char imagePath[100];
+
 	ASSERT_TRUE(spConfigGetImagePath(imagePath, config, 13) == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(!strcmp(imagePath, "./images/img13.png"));
 

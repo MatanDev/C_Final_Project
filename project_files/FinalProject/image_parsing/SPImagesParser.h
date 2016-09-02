@@ -84,7 +84,7 @@ void onGetLineError(char* s1, char* s2);
  * the file pointer will point to the beginning of the next line after the
  * method is invoked
  *
- * pre assumptions - fp != NULL and min_buffer_size > 0
+ * pre assumptions - fp != NULL and min_buffer_size > 0 and min_buffer_size must be even
  *
  * @param fp - a pointer to a pre-allocated file at read mode
  * @param min_buffer_size - a positive integer used for the

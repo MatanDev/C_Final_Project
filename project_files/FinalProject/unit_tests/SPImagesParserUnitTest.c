@@ -123,22 +123,18 @@ static bool testLoadImageDataFromHeader(){
 	SPImageData imageData = NULL;
 	SP_DP_MESSAGES msg = SP_DP_SUCCESS;
 
-	imageData = (SPImageData)malloc(sizeof(struct sp_image_data));
+	imageData = createImageData(5);
 	imageData->featuresArray = NULL;
 	ASSERT_TRUE(imageData != NULL);
-	if (imageData != NULL){
-		msg = loadImageDataFromHeader("5,14\n",imageData);
 
+	msg = loadImageDataFromHeader("5,14\n",imageData);
 
-		ASSERT_TRUE(msg == SP_DP_SUCCESS);
-		ASSERT_TRUE(imageData->index == 5);
-		ASSERT_TRUE(imageData->numOfFeatures == 14);
+	ASSERT_TRUE(msg == SP_DP_SUCCESS);
+	ASSERT_TRUE(imageData->index == 5);
+	ASSERT_TRUE(imageData->numOfFeatures == 14);
 
-		free(imageData);
-		return true;
-	}
-
-	return false;
+	free(imageData);
+	return true;
 }
 
 static bool testSaveImageData(){
@@ -244,6 +240,7 @@ bool testGetLineBySize(int size){
 	ASSERT_TRUE(strcmp(line5,"") == 0);
 	ASSERT_TRUE(strcmp(line5,"") == 0);
 
+	free(line0);
 	free(line1);
 	free(line2);
 	free(line3);
@@ -257,8 +254,8 @@ bool testGetLineBySize(int size){
 
 bool testGetLine(){
 	int i;
-	for (i = 1 ; i <= 2048 ; i++){
-		if (!testGetLineBySize(i)){
+	for (i = 1 ; i <= 1024 ; i++){
+		if (!testGetLineBySize(2*i)){
 			return false;
 		}
 	}

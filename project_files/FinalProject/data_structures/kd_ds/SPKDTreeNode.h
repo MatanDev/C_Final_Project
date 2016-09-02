@@ -168,8 +168,10 @@ SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMet
  * If kdTreeNode == NULL nothing is done.
  *
  * @param kdTreeNode - the SPKDTreeNode instance to destroy
+ * @param freePointsData - indicates if the points data (at the leafs)
+ * 							should be freed also
  */
-void spKDTreeDestroy(SPKDTreeNode kdTreeNode);
+void spKDTreeDestroy(SPKDTreeNode kdTreeNode, bool freePointsData);
 
 /*
  * Returns true iff the given node is a leaf in a kd-tree

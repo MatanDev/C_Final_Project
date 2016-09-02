@@ -99,7 +99,7 @@ void endControlFlow(SPConfig config, SPImageData image,
 	printf("%s", EXITING);
 	spConfigDestroy(config);
 	freeImageData(image, !isCurrentImageFeaturesArrayAllocated, true);
-	spKDTreeDestroy(kdTree);
+	spKDTreeDestroy(kdTree, true);
 	spBPQueueDestroy(bpq);
 	spLoggerDestroy();
 }

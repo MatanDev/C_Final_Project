@@ -168,7 +168,7 @@ bool verifyKNN(SPBPQueue rsltQueue, int k,SPPoint* pointsArray,SPPoint queryPoin
 }
 
 void destroyCaseData(SPKDTreeNode tree,SPKDArray kdArr,SPPoint* pointsArray,int size,SPBPQueue queue,SPPoint queryPoint){
-	if (tree) spKDTreeDestroy(tree);
+	if (tree) spKDTreeDestroy(tree, false);
 	if (kdArr) spKDArrayDestroy(kdArr);
 	if (pointsArray) destroyPointsArray(pointsArray,size);
 	if (queue) spBPQueueDestroy(queue);

@@ -351,7 +351,7 @@ bool runRandomKDTreeTest(){
 
 
 	if (pointsArray == NULL){
-		spKDTreeDestroy(tree);
+		spKDTreeDestroy(tree, false);
 		spKDArrayDestroy(kdArr);
 		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
@@ -363,7 +363,7 @@ bool runRandomKDTreeTest(){
 	kdArr = Init(pointsArray,size);
 
 	if (kdArr == NULL){
-		spKDTreeDestroy(tree);
+		spKDTreeDestroy(tree, false);
 		destroyPointsArray(pointsArray,size);
 		spLoggerPrintError(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
@@ -387,7 +387,7 @@ bool runRandomKDTreeTest(){
 
 	successFlag = testKDTree( tree,  maxDim, splitMethod,  pointsArray,  size);
 
-	spKDTreeDestroy(tree);
+	spKDTreeDestroy(tree, false);
 	spKDArrayDestroy(kdArr);
 	destroyPointsArray(pointsArray,size);
 
@@ -403,7 +403,7 @@ bool verifyNullArgument(){
 
 	ASSERT_TRUE(tree == NULL);
 	if (tree != NULL){
-		spKDTreeDestroy(tree);
+		spKDTreeDestroy(tree, false);
 		return false;
 	}
 	return true;
@@ -485,7 +485,7 @@ void destroyTestCase1(){
 	destroyPointsArray(testCase1Points,testCase1Size);
 	testCase1Points = NULL;
 
-	spKDTreeDestroy(testCase1Tree);
+	spKDTreeDestroy(testCase1Tree, false);
 	testCase1Tree = NULL;
 }
 
@@ -614,7 +614,7 @@ void destroyTestCase2(){
 	destroyPointsArray(testCase2Points,testCase2Size);
 	testCase2Points = NULL;
 
-	spKDTreeDestroy(testCase2Tree);
+	spKDTreeDestroy(testCase2Tree, false);
 	testCase2Tree = NULL;
 }
 
@@ -674,7 +674,7 @@ void destroyEdgeTestCase1(){
 	destroyPointsArray(edgeTestCase1Points,edgeTestCase1Size);
 	edgeTestCase1Points = NULL;
 
-	spKDTreeDestroy(edgeTestCase1Tree);
+	spKDTreeDestroy(edgeTestCase1Tree, false);
 	edgeTestCase1Tree = NULL;
 }
 

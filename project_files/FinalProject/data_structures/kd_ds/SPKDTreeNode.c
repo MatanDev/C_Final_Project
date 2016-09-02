@@ -25,7 +25,7 @@ SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
 }
 
 SPKDTreeNode onErrorInInitKDTree(SPKDTreeNode node) {
-	spKDTreeDestroy(node);
+	spKDTreeDestroy(node, false);
 	return NULL;
 }
 
@@ -117,17 +117,20 @@ SPKDTreeNode internalInitKDTree(SPKDArray array,
 	return createInnerNode(ret, array, splitMethod, recDepth, splitDim);
 }
 
-void spKDTreeDestroy(SPKDTreeNode kdTreeNode) {
+void spKDTreeDestroy(SPKDTreeNode kdTreeNode, bool freePointsData) {
 	if (kdTreeNode) {
 		spFree(kdTreeNode->val);
-
+		if (freePointsData && kdTreeNode->data){
+			spPointDestroy(kdTreeNode->data);
+			kdTreeNode->data = NULL;
+		}
 		if (kdTreeNode->kdtLeft) {
-			spKDTreeDestroy(kdTreeNode->kdtLeft);
+			spKDTreeDestroy(kdTreeNode->kdtLeft, freePointsData);
 			kdTreeNode->kdtLeft = NULL;
 		}
 
 		if (kdTreeNode->kdtRight) {
-			spKDTreeDestroy(kdTreeNode->kdtRight);
+			spKDTreeDestroy(kdTreeNode->kdtRight, freePointsData);
 			kdTreeNode->kdtRight = NULL;
 		}
 		free(kdTreeNode);

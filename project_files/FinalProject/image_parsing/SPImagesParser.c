@@ -39,17 +39,18 @@
 #define ERROR_AT_IMAGE_PARSING_PROCESS             "Error at image parsing process"
 #define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \n Description : %s"
 #define ERROR_NOT_MATCHING_CONFIG				   "Error loading image data, configuration data does not match"
+#define ERROR_READING_A_LINE_FROM_FILE		   	   "Error reading a line from file"
 
 #define WARNING_WRONG_POINT_SIZE_CALC              "Wrong point CSV size calculation"
 #define WARNING_WRONG_DIGITS_CALC                  "Wrong digits calculation"
 #define WARNING_TRY_TO_SET_NULL_FEATURES           "Features data is set to NULL"
 #define WARNING_CONFIG_SHOULD_NOT_BE_NULL		   "Warning, could not extract config data, when config should not be null"
 #define WARNING_FEATURES_NULL_PRE_DATABASE		   "Warning, features matrix is null pre database creation"
-
+#define WARNING_VERY_LONG_LINE 			   	   	   "Warning : A very long line is being read from a features file\n"
 
 
 bool isAFullLine(char* line){
-	return line[strlen(line)-1] == BREAKLINE_NO_CR;
+	return strlen(line) > 0 && line[strlen(line)-1] == BREAKLINE_NO_CR;
 }
 
 void onGetLineError(char* s1, char* s2){
@@ -61,6 +62,9 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
 	int buffer_size = min_buffer_size;
 	char *line = NULL, *tempLine = NULL, *rslt = NULL;
 
+	spVerifyArgumentsRn(fp != NULL && min_buffer_size > 0 && min_buffer_size % 2 == 0,
+			ERROR_READING_A_LINE_FROM_FILE);
+
 	spSafeCalloc(line, char, buffer_size, onGetLineError(line,tempLine));
 
 	rslt = fgets(line,buffer_size,fp);
@@ -70,23 +74,28 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
 		return NULL;
 	}
 
-	while (!feof(fp) && ! isAFullLine(line)){
+	while (!feof(fp) && ! isAFullLine(line)) {
 		spSafeCalloc(tempLine, char, buffer_size,onGetLineError(line,tempLine));
 		strcpy(tempLine,line);
 
 		buffer_size <<= 1; // buffer *= 2
 
+		if (buffer_size > 2048) {
+			spLoggerPrintWarning(WARNING_VERY_LONG_LINE,
+					__FILE__, __FUNCTION__, __LINE__);
+		}
+
 		spSafeRealloc(line, char, buffer_size , onGetLineError(line,tempLine));
 
-		rslt = fgets(tempLine,buffer_size >> 1,fp);
+		rslt = fgets(tempLine,buffer_size >> 1,fp); //this is why min_buffer_size must be even
 
-		if (!feof(fp) && rslt == NULL){
+		if (!feof(fp) && rslt == NULL) {
 			onGetLineError(line,tempLine);
 			return NULL;
 		}
 		strcat(line,tempLine);
+		free(tempLine);
 	}
-	free(tempLine);
 	return line;
 }
 

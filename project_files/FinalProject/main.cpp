@@ -186,11 +186,9 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 			getQuery(workingImagePath);
 		}
 		if (!strcmp(workingImagePath, QUERY_EXIT_INPUT)){ // query == '<>'
-
 			return;
 		}
 
-		//spVal((verifyPathAndAvailableFile(workingImagePath)), ERROR_USER_QUERY, QUERY_IMAGE_ERROR_RETURN_VALUE);
 		*isCurrentImageFeaturesArrayAllocated = true;
 		proccessQueryAndPresentImages(config, currentImageData, imageProcObject, kdTree, numOfImages,
 				numOfSimilarImages, bpq, workingImagePath, GUIFlag);
@@ -217,6 +215,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '-2' - extracting images data, and loading images logic failed
  * '0'  - success
  */
+
 int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
@@ -231,10 +230,11 @@ int main(int argc, char** argv) {
 			&numOfSimilarImages, &extractFlag, &GUIFlag, &bpq,
 			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
 
-	spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages,
-				 numOfSimilarImages,  bpq,  GUIFlag,  &imageProcObject, &isCurrentImageFeaturesArrayAllocated);
+	spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages, numOfSimilarImages,
+			bpq, GUIFlag, &imageProcObject, &isCurrentImageFeaturesArrayAllocated);
 
 
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
+

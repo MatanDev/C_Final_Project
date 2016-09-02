@@ -3,25 +3,26 @@
 #include <cstdio>
 #include <cctype>
 #include <cstdlib>
-#include "SPImageProc.h"
+#include "../SPImageProc.h"
 
 extern "C" {
-#include "SPConfig.h"
-#include "SPLogger.h"
-#include "SPPoint.h"
-#include "image_parsing/SPImagesParser.h"
-#include "main_and_ui/SPImageQuery.h"
-#include "main_and_ui/SPMainAux.h"
-#include "data_structures/bpqueue_ds/SPBPriorityQueue.h"
-#include "data_structures/kd_ds/SPKDTreeNode.h"
+#include "../SPConfig.h"
+#include "../SPLogger.h"
+#include "../SPPoint.h"
+#include "../image_parsing/SPImagesParser.h"
+#include "../main_and_ui/SPImageQuery.h"
+#include "../main_and_ui/SPMainAux.h"
+#include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
+#include "../data_structures/kd_ds/SPKDTreeNode.h"
 
-#include "unit_tests/SPImagesParserUnitTest.h"
-#include "unit_tests/SPConfigUnitTest.h"
-#include "unit_tests/SPKDArrayUnitTest.h"
-#include "unit_tests/SPKDTreeNodeUnitTest.h"
-#include "unit_tests/SPKDTreeNodeKNNUnitTest.h"
+#include "SPImagesParserUnitTest.h"
+#include "SPConfigUnitTest.h"
+#include "SPKDArrayUnitTest.h"
+#include "SPKDTreeNodeUnitTest.h"
+#include "SPKDTreeNodeKNNUnitTest.h"
 
 }
+//TODO - testers contains a lot of static vars!!!!!
 
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
