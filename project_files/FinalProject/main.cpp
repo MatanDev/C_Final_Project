@@ -14,13 +14,6 @@ extern "C" {
 #include "main_and_ui/SPMainAux.h"
 #include "data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "data_structures/kd_ds/SPKDTreeNode.h"
-
-#include "unit_tests/SPImagesParserUnitTest.h"
-#include "unit_tests/SPConfigUnitTest.h"
-#include "unit_tests/SPKDArrayUnitTest.h"
-#include "unit_tests/SPKDTreeNodeUnitTest.h"
-#include "unit_tests/SPKDTreeNodeKNNUnitTest.h"
-
 }
 
 #define QUERY_EXIT_INPUT 							"<>"
@@ -42,7 +35,7 @@ extern "C" {
 
 /*
  * this macro is used to run the given 'action' and if it fails print the given
- * 'errorMessage' to the log, end the control flow and return -1
+ * 'errorMessage' to the log, end the control flow and return a given return value
  */
 #define spMainAction(action, returnValue) do { \
                 if(!((action))) { \
@@ -245,25 +238,3 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
-
-
-/*
-int main() {
-	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
-	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
-	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
-		return -1;
-
-	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
-			spConfigGetLoggerLevel(config, &msg));
-	RunImagesParserTests(config);
-	runConfigTests();
-	runKDArrayTests();
-	runKDTreeNodeTests();
-	runKDTreeNodeKNNTests();
-	spConfigDestroy(config);
-	spLoggerDestroy();
-	return 0;
-}
-*/
