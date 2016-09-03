@@ -1,6 +1,8 @@
 #ifndef SPUTILS_H_
 #define SPUTILS_H_
 
+#include "../SPLogger.h"
+
 /*
  * This file is used to for general utilities, to wrap common actions such as memory
  * allocation and cleaning, checking actions and logging errors
@@ -152,6 +154,35 @@
                 if(!((toVerify))) { \
                 	spLoggerSafePrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
 					spLoggerSafePrintError(extendedErrorMessage, __FILE__, __FUNCTION__, __LINE__); \
+					return returnValue; \
+                } \
+        } while (0)
+
+/*
+ * The wrapper is used for checking arguments , verifying that the condition is true,
+ * and if it is not true, pushing to log in invalid argument error,
+ * and returning NULL
+ * minimal stands for no additional error message
+ * @param toVerify - the arguments verification condition
+ */
+#define spMinimalVerifyArgumentsRn(toVerify) do { \
+                if(!((toVerify))) { \
+                	spLoggerSafePrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
+					return NULL; \
+                } \
+        } while (0)
+
+/*
+ * The wrapper is used for checking arguments , verifying that the condition is true,
+ * and if it is not true, pushing to log in invalid argument error,
+ * and returning a relevant return value
+ *minimal stands for no additional error message
+ * @param toVerify - the arguments verification condition
+ * @param returnValue - a return value for when the arguments condition fails
+ */
+#define spMinimalVerifyArguments(toVerify, returnValue) do { \
+                if(!((toVerify))) { \
+                	spLoggerSafePrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
 					return returnValue; \
                 } \
         } while (0)

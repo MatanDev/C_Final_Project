@@ -525,20 +525,10 @@ char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
 
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		int index, bool isFeats) {
-	if (imagePath == NULL) {
-		spLoggerSafePrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
-		return SP_CONFIG_INVALID_ARGUMENT;
-	}
+	spVerifyArguments(imagePath != NULL, ERROR_INVALID_PATH_PTR, SP_CONFIG_INVALID_ARGUMENT);
+	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
 
-	if (config == NULL) {
-		spLoggerSafePrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
-		return SP_CONFIG_INVALID_ARGUMENT;
-	}
-
-	if (index >= config->spNumOfImages) {
-		spLoggerSafePrintError(ERROR_OUT_OF_RANGE, __FILE__, __FUNCTION__, __LINE__);
-		return SP_CONFIG_INDEX_OUT_OF_RANGE;
-	}
+	spVal(index < config->spNumOfImages, ERROR_OUT_OF_RANGE, SP_CONFIG_INDEX_OUT_OF_RANGE);
 
 	// if config is valid, then so are config->spImagesDirectory, config->spImagesPrefix
 	// and config->spImagesSuffix
@@ -557,15 +547,8 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
 }
 
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
-	if (pcaPath == NULL) {
-		spLoggerSafePrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
-		return SP_CONFIG_INVALID_ARGUMENT;
-	}
-
-	if (config == NULL) {
-		spLoggerSafePrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
-		return SP_CONFIG_INVALID_ARGUMENT;
-	}
+	spVerifyArguments(pcaPath != NULL, ERROR_INVALID_PATH_PTR, SP_CONFIG_INVALID_ARGUMENT);
+	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
 
 	// if config is valid, then so are config->spImagesDirectory and config->spPCAFilename
 	sprintf(pcaPath, PCA_PATH_FORMAT, config->spImagesDirectory, config->spPCAFilename);
@@ -574,14 +557,11 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 
 char* getSignature(const SPConfig config){
 	char lastImagePath[MAX_PATH_LEN],*signature = NULL;
-	int PCADim,numOfImages,numOfFeatures, rsltFlag;
+	int PCADim,numOfImages,numOfFeatures;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	numOfImages = spConfigGetNumOfImages(config, &msg);
-	if (msg != SP_CONFIG_SUCCESS || numOfImages < 1) {
-		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spValRn(msg == SP_CONFIG_SUCCESS && numOfImages >= 1, ERROR_CREATING_SIGN);
 
 	numOfFeatures = spConfigGetNumOfFeatures(config, &msg);
 	VALID_MSG_IN_SIGN;
@@ -592,21 +572,11 @@ char* getSignature(const SPConfig config){
 	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
 	VALID_MSG_IN_SIGN;
 
-	signature = (char*)calloc(MAX_PATH_LEN*2, sizeof(char));
-	if (signature == NULL){
-		spLoggerSafePrintError(ALLOCATION_FAILED_MSG, __FILE__,
-				__FUNCTION__, __LINE__);
-		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__,
-				__FUNCTION__, __LINE__);
-		return NULL;
-	}
-	rsltFlag = sprintf(signature, SIGNATURE_FORMAT, lastImagePath, numOfImages,
-			numOfFeatures, PCADim);
-	if (rsltFlag < 0) {
-		free(signature);
-		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
-		return NULL;
-	}
+	spCallocEr(signature, char, (MAX_PATH_LEN*2), ERROR_CREATING_SIGN, NULL);
+
+	spValRn(sprintf(signature, SIGNATURE_FORMAT, lastImagePath, numOfImages,
+			numOfFeatures, PCADim) >= 0, ERROR_CREATING_SIGN);
+
 	return signature;
 }
 
@@ -660,10 +630,8 @@ char* duplicateString(const char *str)
 	char* duplicated;
     int len = 1; // for '\0'
     len += strlen(str);
-    duplicated = (char*)calloc(len, sizeof(char));
-    if (duplicated != NULL) {
-        strcpy(duplicated, str);
-    }
+    spCalloc(duplicated, char, len);
+    strcpy(duplicated, str);
     return duplicated;
 }
 

@@ -2,6 +2,7 @@
 #include "SPList.h"
 #include <stdlib.h>
 #include <assert.h>
+#include "../../general_utils/SPUtils.h"
 
 #define DEFAULT_INVALID_NUMBER -1
 
@@ -11,24 +12,19 @@
  * capacity - an integer representing a size limit for the queue
  * queue - a list used to store the queue items
  */
-struct sp_bp_queue_t {
+typedef struct sp_bp_queue_t {
 	SPListElement maxElement;
 	int capacity;
 	SPList queue;
-};
+} sp_bp_queue_t;
 
 
 
 SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool createNewList) {
 	SPBPQueue newQueue;
+	spMinimalVerifyArgumentsRn(maxSize > 0);
 
-	if (maxSize <= 0)
-		return NULL;
-
-	newQueue = (SPBPQueue)calloc(1,sizeof(struct sp_bp_queue_t));
-
-	if (newQueue == NULL) //allocation error
-		return NULL;
+	spCalloc(newQueue, sp_bp_queue_t, 1);
 
 	newQueue->capacity = maxSize;
 
@@ -50,15 +46,13 @@ SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool creat
 }
 
 SPBPQueue spBPQueueCreate(int maxSize) {
-	if (maxSize <= 0)
-		return NULL;
+	spMinimalVerifyArgumentsRn(maxSize > 0);
 
 	return spBPQueueCreateWrapper(maxSize, NULL, true);
 }
 
 SPBPQueue spBPQueueCopy(SPBPQueue source) {
-	if (source == NULL)
-		return NULL;
+	spMinimalVerifyArgumentsRn(source != NULL);
 
 	return spBPQueueCreateWrapper(source->capacity, source , false);
 }
@@ -85,14 +79,13 @@ void spBPQueueClear(SPBPQueue source) {
 }
 
 int spBPQueueSize(SPBPQueue source) {
-	if(source == NULL || source->queue == NULL)
-		return DEFAULT_INVALID_NUMBER;
+	spMinimalVerifyArguments(source != NULL && source->queue != NULL,
+			DEFAULT_INVALID_NUMBER);
 	return spListGetSize(source->queue);
 }
 
 int spBPQueueGetMaxSize(SPBPQueue source) {
-	if (source == NULL)
-		return DEFAULT_INVALID_NUMBER;
+	spMinimalVerifyArguments(source != NULL,DEFAULT_INVALID_NUMBER);
 	return source->capacity;
 }
 
@@ -189,8 +182,8 @@ SP_BPQUEUE_MSG spBPQueueInsertNotEmpty(SPBPQueue source, SPListElement newElemen
 }
 
 SP_BPQUEUE_MSG spBPQueueEnqueue(SPBPQueue source, SPListElement element) {
-	if (source == NULL || source->queue == NULL || element == NULL)
-		return SP_BPQUEUE_INVALID_ARGUMENT;
+	spMinimalVerifyArguments(source != NULL && source->queue != NULL && element != NULL,
+			SP_BPQUEUE_INVALID_ARGUMENT);
 
 	if (spBPQueueGetMaxSize(source) == 0)
 		return SP_BPQUEUE_FULL;
@@ -212,8 +205,7 @@ SP_BPQUEUE_MSG spBPQueueDequeue(SPBPQueue source) {
 	SPListElement first;
 	SP_LIST_MSG actionStatus;
 
-	if (source == NULL)
-		return SP_BPQUEUE_INVALID_ARGUMENT;
+	spMinimalVerifyArguments(source != NULL, SP_BPQUEUE_INVALID_ARGUMENT);
 
 	if (spBPQueueIsEmpty(source))
 		return SP_BPQUEUE_EMPTY;
@@ -238,9 +230,7 @@ SP_BPQUEUE_MSG spBPQueueDequeue(SPBPQueue source) {
 
 SPListElement spBPQueuePeek(SPBPQueue source) {
 	SPListElement first;
-
-	if (source == NULL)
-		return NULL;
+	spMinimalVerifyArgumentsRn(source != NULL);
 
 	first = spListGetFirst(source->queue);
 
@@ -248,8 +238,7 @@ SPListElement spBPQueuePeek(SPBPQueue source) {
 }
 
 SPListElement spBPQueuePeekLast(SPBPQueue source) {
-	if (source == NULL)
-		return NULL;
+	spMinimalVerifyArgumentsRn(source != NULL);
 	return spListElementCopy(source->maxElement);
 }
 
@@ -257,9 +246,7 @@ SPListElement spBPQueuePeekLast(SPBPQueue source) {
 double returnValueFrom(SPBPQueue source, SPListElement (*func)(SPBPQueue)) {
 	SPListElement item;
 	double returnValue;
-
-	if (source == NULL)
-		return DEFAULT_INVALID_NUMBER;
+	spMinimalVerifyArguments(source != NULL, DEFAULT_INVALID_NUMBER);
 
 	item = (*func)(source);
 	returnValue = spListElementGetValue(item);

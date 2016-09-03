@@ -19,11 +19,11 @@ bool isEqual(double x,double y)
  * dim - an integer representing the dimension of the point
  * index -  an integer representing the image index related to the point
  */
-struct sp_point_t {
+typedef struct sp_point_t {
 	double* data;
 	int dim;
 	int index;
-};
+} sp_point_t;
 
 /*
  * creates a new double array with the same values of the given array
@@ -36,14 +36,9 @@ struct sp_point_t {
 double* copyData(double* data, int size) {
 	int i;
 	double* newData;
+	spMinimalVerifyArgumentsRn(data != NULL && size >= 0);
 
-	if (data == NULL || size < 0)
-		return NULL;
-
-	newData = (double*)calloc(size, sizeof(double));
-
-	if (newData == NULL)
-		return NULL;
+	spCalloc(newData, double, size);
 
 	for (i = 0; i < size; i++)
 		newData[i] = data[i];
@@ -52,18 +47,10 @@ double* copyData(double* data, int size) {
 }
 
 SPPoint spPointCreate(double* data, int dim, int index) {
-	if (data == NULL) //data is null
-		return NULL;
+	spMinimalVerifyArgumentsRn(data != NULL && index >= 0 && dim >0);
+	SPPoint item = NULL;
 
-	if (dim <= 0) //dimension illegal
-		return NULL;
-
-	if (index < 0) //index illegal
-		return NULL;
-
-	SPPoint item = (SPPoint)calloc(1,sizeof(struct sp_point_t));
-	if (item == NULL) // allocation error
-		return NULL;
+	spCalloc(item, sp_point_t, 1);
 
 	item->data = copyData(data,dim);
 	if (item->data == NULL)
@@ -77,15 +64,14 @@ SPPoint spPointCreate(double* data, int dim, int index) {
 
 SPPoint spPointCopy(SPPoint source) {
 	assert (source != NULL);
-	if (source->data == NULL)
-		return NULL;
+	spMinimalVerifyArgumentsRn(source->data != NULL);
 	return spPointCreate(source->data,source->dim,source->index);
 }
 
 bool spPointCompare(SPPoint p1, SPPoint p2){
 	int i;
-	if (p1 == NULL || p2 == NULL)
-		return false;
+	spMinimalVerifyArguments(p1 != NULL && p2 != NULL, false);
+
 	if (p1->dim != p2->dim)
 		return false;
 	if (p1->index != p2->index)
@@ -100,11 +86,7 @@ bool spPointCompare(SPPoint p1, SPPoint p2){
 
 void spPointDestroy(SPPoint point) {
 	if (point != NULL) {
-		if (point->data != NULL) {
-			free(point->data);
-			point->data = NULL;
-		}
-
+		spFree(point->data);
 		free(point);
 		point = NULL;
 	}

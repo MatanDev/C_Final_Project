@@ -1,5 +1,6 @@
 #include "SPList.h"
 #include <stdlib.h>
+#include "../../general_utils/SPUtils.h"
 
 typedef struct node_t {
 	SPListElement data;
@@ -10,12 +11,12 @@ typedef struct node_t {
 Node createNode(Node previous, Node next, SPListElement element);
 void destroyNode(Node node);
 
-struct sp_list_t {
+typedef struct sp_list_t {
 	Node head;
 	Node tail;
 	Node current;
 	int size;
-};
+} sp_list_t;
 
 Node createNode(Node previous, Node next, SPListElement element) {
 	SPListElement newElement = spListElementCopy(element);
@@ -44,38 +45,33 @@ void destroyNode(Node node) {
 }
 
 SPList spListCreate() {
-	SPList list = (SPList) malloc(sizeof(*list));
-	if (list == NULL) {
+	SPList list = NULL;
+	spCalloc(list, sp_list_t , 1);
+	list->head = (Node) malloc(sizeof(*list->head));
+	if (list->head == NULL) {
+		free(list);
 		return NULL;
-	} else {
-		list->head = (Node) malloc(sizeof(*list->head));
-		if (list->head == NULL) {
-			free(list);
-			return NULL;
-		}
-		list->tail = (Node) malloc(sizeof(*list->tail));
-		if (list->tail == NULL) {
-			free(list->head);
-			free(list);
-			return NULL;
-		}
-		list->head->data = NULL;
-		list->head->next = list->tail;
-		list->head->previous = NULL;
-		list->tail->data = NULL;
-		list->tail->next = NULL;
-		list->tail->previous = list->head;
-		list->current = NULL;
-		list->size = 0;
-		return list;
-
 	}
+	list->tail = (Node) malloc(sizeof(*list->tail));
+	if (list->tail == NULL) {
+		free(list->head);
+		free(list);
+		return NULL;
+	}
+	list->head->data = NULL;
+	list->head->next = list->tail;
+	list->head->previous = NULL;
+	list->tail->data = NULL;
+	list->tail->next = NULL;
+	list->tail->previous = list->head;
+	list->current = NULL;
+	list->size = 0;
+	return list;
 }
 
 SPList spListCopy(SPList list) {
-	if (list == NULL) {
-		return NULL;
-	}
+	spMinimalVerifyArgumentsRn(list != NULL);
+
 	SPList copyList = spListCreate();
 	if (copyList == NULL) {
 		return NULL;
@@ -99,7 +95,8 @@ int spListGetSize(SPList list) {
 }
 
 SPListElement spListGetFirst(SPList list) {
-	if (list == NULL || spListGetSize(list) == 0) {
+	spMinimalVerifyArgumentsRn(list != NULL);
+	if (spListGetSize(list) == 0){
 		return NULL;
 	} else {
 		list->current = list->head->next;
@@ -108,7 +105,8 @@ SPListElement spListGetFirst(SPList list) {
 }
 
 SPListElement spListGetNext(SPList list) {
-	if (list == NULL || spListGetSize(list) == 0 || list->current == NULL) {
+	spMinimalVerifyArgumentsRn(list != NULL);
+	if (spListGetSize(list) == 0 || list->current == NULL) {
 		return NULL;
 	} else {
 		if (list->current->next == list->tail) {
@@ -122,7 +120,8 @@ SPListElement spListGetNext(SPList list) {
 }
 
 SPListElement spListGetCurrent(SPList list) {
-	if (list == NULL || spListGetSize(list) == 0 || list->current == NULL) {
+	spMinimalVerifyArgumentsRn(list != NULL);
+	if (spListGetSize(list) == 0 || list->current == NULL) {
 		return NULL;
 	} else {
 		return list->current->data;
@@ -130,11 +129,13 @@ SPListElement spListGetCurrent(SPList list) {
 }
 
 SP_LIST_MSG spListInsertFirst(SPList list, SPListElement element) {
-	if (list == NULL || element == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL && element != NULL,
+			SP_LIST_NULL_ARGUMENT);
+
 	Node newNode = createNode(list->head, list->head->next, element);
 	if (newNode == NULL) {
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,
+				__FILE__, __FUNCTION__, __LINE__);
 		return SP_LIST_OUT_OF_MEMORY;
 	}
 	list->head->next->previous = newNode;
@@ -144,11 +145,13 @@ SP_LIST_MSG spListInsertFirst(SPList list, SPListElement element) {
 }
 
 SP_LIST_MSG spListInsertLast(SPList list, SPListElement element) {
-	if (list == NULL || element == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL && element != NULL,
+			SP_LIST_NULL_ARGUMENT);
+
 	Node newNode = createNode(list->tail->previous, list->tail, element);
 	if (newNode == NULL) {
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,
+				__FILE__, __FUNCTION__, __LINE__);
 		return SP_LIST_OUT_OF_MEMORY;
 	}
 	list->tail->previous->next = newNode;
@@ -158,14 +161,16 @@ SP_LIST_MSG spListInsertLast(SPList list, SPListElement element) {
 }
 
 SP_LIST_MSG spListInsertBeforeCurrent(SPList list, SPListElement element) {
-	if (list == NULL || element == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL && element != NULL,
+			SP_LIST_NULL_ARGUMENT);
+
 	if (list->current == NULL) {
 		return SP_LIST_INVALID_CURRENT;
 	}
 	Node newNode = createNode(list->current->previous, list->current, element);
 	if (newNode == NULL) {
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,
+				__FILE__, __FUNCTION__, __LINE__);
 		return SP_LIST_OUT_OF_MEMORY;
 	}
 	list->current->previous->next = newNode;
@@ -175,9 +180,9 @@ SP_LIST_MSG spListInsertBeforeCurrent(SPList list, SPListElement element) {
 }
 
 SP_LIST_MSG spListInsertAfterCurrent(SPList list, SPListElement element) {
-	if (list == NULL || element == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL && element != NULL,
+			SP_LIST_NULL_ARGUMENT);
+
 	if (list->current == NULL) {
 		return SP_LIST_INVALID_CURRENT;
 	} else if (list->current == list->tail->previous) {
@@ -192,9 +197,8 @@ SP_LIST_MSG spListInsertAfterCurrent(SPList list, SPListElement element) {
 }
 
 SP_LIST_MSG spListRemoveCurrent(SPList list) {
-	if (list == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL,	SP_LIST_NULL_ARGUMENT);
+
 	if (list->current == NULL) {
 		return SP_LIST_INVALID_CURRENT;
 	}
@@ -207,9 +211,8 @@ SP_LIST_MSG spListRemoveCurrent(SPList list) {
 }
 
 SP_LIST_MSG spListClear(SPList list) {
-	if (list == NULL) {
-		return SP_LIST_NULL_ARGUMENT;
-	}
+	spMinimalVerifyArguments(list != NULL,	SP_LIST_NULL_ARGUMENT);
+
 	while (spListGetFirst(list)) {
 		spListRemoveCurrent(list);
 	}
