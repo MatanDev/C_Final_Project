@@ -7,8 +7,9 @@
 
 bool testGivenConfFile() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("spcbir.config", &msg);
+	SPConfig config = spConfigCreate("spcbir.config", &msg); //TODO - this should be another file so it wont mess up other stuff
 	char imagePath[100];
+	char pcaPath[100];
 
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(!strcmp(config->spImagesDirectory, "./images/"));
@@ -71,7 +72,7 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(spConfigGetImagePath(imagePath, NULL, 1) == SP_CONFIG_INVALID_ARGUMENT);
 	ASSERT_TRUE(spConfigGetImagePath(NULL, NULL, 1) == SP_CONFIG_INVALID_ARGUMENT);
 
-	char pcaPath[100];
+
 	ASSERT_TRUE(spConfigGetPCAPath(pcaPath, config) == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(!strcmp(pcaPath, "./images/pca.yml"));
 

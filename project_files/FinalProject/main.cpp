@@ -239,7 +239,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * @returns :
  * '-1' - configuration and setting initialization failed
  * '-2' - extracting images data, and loading images logic failed
- * '-3' - in case of error using the logger file
+ * '-3' - in case of error at the logger
  * '0'  - success
  */
 
