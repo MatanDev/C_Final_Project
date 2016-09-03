@@ -235,5 +235,23 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
  */
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag);
 
+/*
+* Verifies that num of images >= num of similar images (i.e images to present),
+* otherwise prints a warning and treats num of similar as num of images to the rest
+* of the software's run
+*
+*
+* @param config - the given configuration structure instance
+* @param numOfImages - the number of images that was set in the configuration file
+* @param numOfSimilarImages - a pointer to the number of similar images that was set in the
+* 								configuration file
+*
+* @returns:
+* 	false - wrong arguments, or failure at cropping num of similar to num of images size
+* 	true - either num of images >= num of similar or the cropping action was successful
+*/
+bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimilarImages);
+
+
 #endif /* SPMAINAUX_H_ */
 

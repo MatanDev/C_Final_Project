@@ -25,7 +25,8 @@
 
 #define WARNING_CONFIG_ARG										"Warning, program is running with unknown arguments, did you mean -c ?"
 #define WARNING_ZERO_FEATURES_FROM_IMAGE						"Warning, some images have zero features"
-
+#define WARNING_IMAGES_COUNT_CROPPED							\
+	"Warning - the number of similar > number of images, only 'number of images' similar images will be presented when querying"
 
 #define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
@@ -45,6 +46,8 @@
 #define ERROR_CREATING_FEATURES_ARRAY 							"Failed to create features array"
 #define ERROR_CREATING_KD_TREE 									"Failed to create the KD-tree"
 #define ERROR_INITIALIZING_BP_QUEUE 							"Failed to initialize priority queue"
+#define ERROR_AT_IMAGES_COUNTS									"Error at verifying images counts numbers limits (from settings)"
+
 #define MAIN_RETURNED_ERROR										"An error has been encountered, please check the log file for more information.\n"
 
 
@@ -264,6 +267,25 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 	return true;
 }
 
+bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimilarImages){
+	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	spVerifyArguments(config != NULL && numOfImages > 0 && numOfSimilarImages != NULL &&
+			*numOfSimilarImages > 0,
+			ERROR_AT_IMAGES_COUNTS, false);
+
+	if (*numOfSimilarImages > numOfImages){
+		spVal((msg = spConfigCropSimilarImages(config)) == SP_CONFIG_SUCCESS ,
+				ERROR_AT_IMAGES_COUNTS, false);
+		spLoggerPrintWarning(WARNING_IMAGES_COUNT_CROPPED,
+						__FILE__, __FUNCTION__, __LINE__);
+		*numOfSimilarImages = numOfImages;
+	}
+
+	return true;
+}
+
+
 bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
 		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag) {
 	char *configFilename, *loggerFilename;
@@ -309,6 +331,7 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
 		return false;
 	}
 
-	return verifyImagesFiles(*config, *numOfImages, *extractFlag);
+	return verifyImagesNumbersLimits(*config, *numOfImages, numOfSimilarImages) &&
+			verifyImagesFiles(*config, *numOfImages, *extractFlag);
 }
 

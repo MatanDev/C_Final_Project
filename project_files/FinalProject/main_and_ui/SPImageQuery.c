@@ -81,7 +81,6 @@ int* getTopItems(int* counterArray, int counterArraySize, int retArraySize) {
 
 	spCalloc(topItems, int, retArraySize);
 
-	// TODO - forum: is best way?
 	for (j = 0; j < retArraySize; j++) {
 		tempMaxIndex = 0;
 

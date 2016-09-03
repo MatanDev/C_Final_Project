@@ -549,4 +549,16 @@ char* duplicateString(const char* str);
  */
 char* getSignature(const SPConfig config); //TODO - (matan) need to add tests for this..
 
+/*
+ * The method crop's the size of similar images to the size of images.
+ *
+ *  @param config - the configurations item
+ *
+ * @returns
+ * SP_CONFIG_INVALID_ARGUMENT - in case config is NULL
+ * SP_CONFIG_SUCCESS - otherwise
+ *
+ * @logger - the method logs relevant errors
+ */
+SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
 #endif /* SPCONFIG_H_ */

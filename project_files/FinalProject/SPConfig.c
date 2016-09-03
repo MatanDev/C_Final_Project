@@ -68,6 +68,7 @@
 #define ERROR_INVALID_CONF_ARG	"The given configuration instance is not valid"
 #define ERROR_INVALID_PATH_PTR	"The given path pointer is not valid"
 #define ERROR_OUT_OF_RANGE		"The given index is bigger than the number of images"
+#define WARNING_CROP_NOT_NEEDED "Warning - crop similar images is called while not needed"
 #define PCA_DIM_MIN_VALID_VAL	10
 #define PCA_DIM_MAX_VALID_VAL	28
 #define LOG_LVL_MIN_VALID_VAL	1
@@ -88,6 +89,7 @@
 					return NULL; \
 				} \
         } while (0)
+
 
 /**
  * A data-structure which is used for configuring the system.
@@ -663,4 +665,14 @@ char* duplicateString(const char *str)
         strcpy(duplicated, str);
     }
     return duplicated;
+}
+
+SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config){
+	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
+	if (config->spNumOfSimilarImages <= config->spNumOfImages){
+		spLoggerPrintWarning(WARNING_CROP_NOT_NEEDED,
+				__FILE__, __FUNCTION__, __LINE__);
+	}
+	config->spNumOfSimilarImages = config->spNumOfImages;
+	return SP_CONFIG_SUCCESS;
 }

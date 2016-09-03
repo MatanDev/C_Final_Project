@@ -3,7 +3,6 @@
 
 #include "../../SPPoint.h"
 
-// TODO - add logs
 
 /*
  * A structure used to represent the KDArray,
