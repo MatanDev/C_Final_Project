@@ -53,19 +53,19 @@ void initializePointsArrayCase1(){
 	SPPoint p1,p2;
 	case1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE1_NUM_OF_POINTS);
 	if (case1PointsArray == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,CASE1_DIM,1);
 	if (p1 == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,CASE1_DIM,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -78,26 +78,26 @@ void initializePointsArrayCase2(){
 	SPPoint p1,p2,p3,p4,p5;
 	case2PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE2_NUM_OF_POINTS);
 	if (case2PointsArray == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,CASE2_DIM,1);
 	if (p1 == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,CASE2_DIM,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p3 = spPointCreate(data3,CASE2_DIM,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p4 = spPointCreate(data4,CASE2_DIM,4);
@@ -105,7 +105,7 @@ void initializePointsArrayCase2(){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
 		spPointDestroy(p3);
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p5 = spPointCreate(data5,CASE2_DIM,5);
@@ -114,7 +114,7 @@ void initializePointsArrayCase2(){
 		spPointDestroy(p2);
 		spPointDestroy(p3);
 		spPointDestroy(p4);
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	case2PointsArray[0] = p1;
@@ -129,13 +129,13 @@ void initializePointsArrayEdgeCase1(){
 	SPPoint p1;
 	edgeCase1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),EDGE_CASE1_NUM_OF_POINTS);
 	if (edgeCase1PointsArray == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,EDGE_CASE1_DIM,1);
 	if (p1 == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -158,7 +158,7 @@ SPPoint generateRandomPoint(int dim, int index) {
 	SPPoint p;
 	double* data = (double*)calloc(dim, sizeof(double));
 	if (data == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	for (i = 0; i < dim; i++) {
@@ -175,7 +175,7 @@ SPPoint* generateRandomPointsArray(int dim, int size){
 	arr = (SPPoint*)calloc(sizeof(SPPoint),size);
 
 	if (arr == NULL){
-		spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	for (i = 0 ; i< size ; i++){
@@ -186,7 +186,7 @@ SPPoint* generateRandomPointsArray(int dim, int size){
 				spPointDestroy(arr[j]);
 			}
 			free(arr);
-			spLoggerPrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
+			spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 			return NULL;
 		}
 	}
@@ -589,7 +589,7 @@ static bool testSplitCase2(){
 void logRandomTestSettings(int dim,int size,int splitting_dim){
 	char message[MSG_MAX_SIZE];
 	sprintf(message , DEBUG_LOG_FORMAT_RANDOM_TEST_SETTINGS, dim,size,splitting_dim);
-	spLoggerPrintMsg(message);
+	spLoggerSafePrintMsg(message);
 }
 
 char* pointsArrayToString(SPPoint* points,int size){
@@ -614,7 +614,7 @@ void logPointsArray(SPPoint* points, int size){
 	char message[MSG_MAX_SIZE*RANDOM_TESTS_SIZE_RANGE*RANDOM_TESTS_DIM_RANGE], *tempMsg;
 	tempMsg = pointsArrayToString(points,size);
 	sprintf(message, "Generated Points are :\n %s",tempMsg);
-	spLoggerPrintMsg(message);
+	spLoggerSafePrintMsg(message);
 	free(tempMsg);
 }
 
@@ -641,29 +641,29 @@ void logKDArray(SPKDArray kdArr) {
 	char* tempString;
 	if (kdArr != NULL) {
 		sprintf(buf, "kdArr pointer: %p", (void *)kdArr);
-		spLoggerPrintMsg(buf);
+		spLoggerSafePrintMsg(buf);
 		sprintf(buf, "dim: %d", kdArr->dim);
-		spLoggerPrintMsg(buf);
+		spLoggerSafePrintMsg(buf);
 		sprintf(buf, "size: %d", kdArr->size);
-		spLoggerPrintMsg(buf);
+		spLoggerSafePrintMsg(buf);
 		if (kdArr->pointsArray != NULL) {
 			tempString = pointsArrayToString(kdArr->pointsArray,kdArr->size);
 			sprintf(buf, "points array:\n %s",tempString);
-			spLoggerPrintMsg(buf);
+			spLoggerSafePrintMsg(buf);
 			free(tempString);
 		}
 		else
-			spLoggerPrintMsg("points array: NULL");
+			spLoggerSafePrintMsg("points array: NULL");
 		if (kdArr->indicesMatrix != NULL) {
 			sprintf(buf, "indices matrix:\n %s",
 					indicesMatrixToString(kdArr));
-			spLoggerPrintMsg(buf);
+			spLoggerSafePrintMsg(buf);
 		}
 		else
-			spLoggerPrintMsg("indices matrix: NULL");
+			spLoggerSafePrintMsg("indices matrix: NULL");
 	}
 	else {
-		spLoggerPrintMsg("kd array is null");
+		spLoggerSafePrintMsg("kd array is null");
 	}
 }
 
@@ -671,22 +671,22 @@ void logKDPair(SPKDArrayPair kdArrPair) {
 	char buf[1024];
 	if (kdArrPair != NULL) {
 		sprintf(buf, "kdArrPair pointer: %p", (void *)kdArrPair);
-		spLoggerPrintMsg(buf);
+		spLoggerSafePrintMsg(buf);
 		if (kdArrPair->kdLeft != NULL){
-			spLoggerPrintMsg("Left kd array : \n");
+			spLoggerSafePrintMsg("Left kd array : \n");
 			logKDArray(kdArrPair->kdLeft);
 		}
 		else
-			spLoggerPrintMsg("kdArrPair->kdLeft: NULL");
+			spLoggerSafePrintMsg("kdArrPair->kdLeft: NULL");
 		if (kdArrPair->kdRight != NULL){
-			spLoggerPrintMsg("Right kd array : \n");
+			spLoggerSafePrintMsg("Right kd array : \n");
 			logKDArray(kdArrPair->kdRight);
 		}
 		else
-			spLoggerPrintMsg("kdArrPair->kdRight: NULL");
+			spLoggerSafePrintMsg("kdArrPair->kdRight: NULL");
 	}
 	else {
-		spLoggerPrintMsg("kd pair is null");
+		spLoggerSafePrintMsg("kd pair is null");
 	}
 }
 
@@ -698,7 +698,7 @@ bool commitRandomTest(){
 	SPKDArrayPair rsltPair = NULL;
 	if (enableLoggingOnRandomTests){
 		sprintf(startMessage, DEBUG_LOG_FORMAT_RANDOM_TEST_START, randomTestsIndex+1);
-		spLoggerPrintMsg(startMessage);
+		spLoggerSafePrintMsg(startMessage);
 	}
 
 
@@ -747,7 +747,7 @@ bool commitRandomTest(){
 	spKDArrayDestroy(kdArr);
 	spKDArrayPairDestroy(rsltPair);
 	if (enableLoggingOnRandomTests)
-		spLoggerPrintMsg(DEBUG_LOG_FORMAT_RANDOM_TEST_END);
+		spLoggerSafePrintMsg(DEBUG_LOG_FORMAT_RANDOM_TEST_END);
 
 	return true;
 

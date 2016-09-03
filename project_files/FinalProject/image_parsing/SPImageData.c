@@ -30,7 +30,7 @@ void freeFeatures(SPPoint* features, int numOfFeatures){
 		}
 	}
 	else {
-		spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
@@ -44,13 +44,13 @@ void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, boo
 		}
 		else {
 			if (!suppressFeaturesArrayWarning)
-				spLoggerPrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
+				spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
 		}
 		free(imageData);
 		imageData = NULL;
 	}
 	else {
-		spLoggerPrintWarning(WARNING_IMAGE_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
@@ -65,7 +65,7 @@ void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatu
 		imagesData = NULL;
 	}
 	else {
-		spLoggerPrintWarning(WARNING_IMAGES_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
@@ -78,6 +78,6 @@ void resetImageData(SPImageData image){
 		image->numOfFeatures = 0;
 	}
 	else {
-		spLoggerPrintWarning(WARNING_IMAGES_DATA_NULL_ON_RESET, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL_ON_RESET, __FILE__,__FUNCTION__, __LINE__);
 	}
 }

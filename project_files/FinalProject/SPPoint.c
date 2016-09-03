@@ -109,7 +109,7 @@ void spPointDestroy(SPPoint point) {
 		point = NULL;
 	}
 	else {
-		spLoggerPrintWarning(WARNING_POINT_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_POINT_NULL, __FILE__,__FUNCTION__, __LINE__);
 	}
 }
 

@@ -223,4 +223,54 @@ SP_LOGGER_MSG spLoggerPrintMsg(const char* msg);
  */
 const char* loggerMsgToStr(SP_LOGGER_MSG msg);
 
+
+//these are wrapers for the main logger methods,
+//as we were instructed when asking, that if the logger fails the program should terminate
+
+/*
+ * The method acts as 'spLoggerPrintError' besides it does not
+ * returns any value, in case of any type of failure the program will exit
+ *
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintError'
+ */
+void spLoggerSafePrintError(const char* msg, const char* file,
+		const char* function, const int line);
+
+/*
+ * The method acts as 'spLoggerPrintWarning' besides it does not
+ * returns any value, in case of any type of failure the program
+ * will exit with return value -3
+ *
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintWarning'
+ */
+void spLoggerSafePrintWarning(const char* msg, const char* file,
+		const char* function, const int line);
+
+/*
+ * The method acts as 'spLoggerPrintInfo' besides it does not
+ * returns any value, in case of any type of failure the program
+ * will exit with return value -3
+ *
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintInfo'
+ */
+void spLoggerSafePrintInfo(const char* msg);
+
+/*
+ * The method acts as 'spLoggerPrintDebug' besides it does not
+ * returns any value, in case of any type of failure the program
+ * will exit with return value -3
+ *
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintDebug'
+ */
+void spLoggerSafePrintDebug(const char* msg, const char* file,
+		const char* function, const int line);
+
+/*
+ * The method acts as 'spLoggerPrintMsg' besides it does not
+ * returns any value, in case of any type of failure the program
+ * will exit with return value -3
+ *
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintMsg'
+ */
+void spLoggerSafePrintMsg(const char* msg);
 #endif

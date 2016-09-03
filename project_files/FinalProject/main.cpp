@@ -180,7 +180,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 		*isCurrentImageFeaturesArrayAllocated = false; //indicate we should not free currentImageData->features again
 
 		while (strcmp(workingImagePath, QUERY_EXIT_INPUT) && !verifyPathAndAvailableFile(workingImagePath)){
-			spLoggerPrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
+			spLoggerSafePrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
 			printf(REQUEST_QUERY_AGAIN);
 			fflush(NULL);
 			getQuery(workingImagePath);
@@ -213,6 +213,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * @returns :
  * '-1' - configuration and setting initialization failed
  * '-2' - extracting images data, and loading images logic failed
+ * '-3' - in case of error using the logger file
  * '0'  - success
  */
 

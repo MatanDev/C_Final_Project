@@ -48,7 +48,7 @@ void indexWithCoorValueArrDestroy(IndexWithCoorValue* indexWithCoorValueArr, int
 		free(indexWithCoorValueArr);
 	}
 	else {
-		spLoggerPrintWarning(WARNING_IDX_COOR_ARR_NULL, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IDX_COOR_ARR_NULL, __FILE__, __FUNCTION__, __LINE__);
 	}
 }
 
@@ -270,7 +270,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor) {
 
 	// This condition should never be true in the way we build the KDTree, but just in case
 	if (kdArr->size == 1) {
-		spLoggerPrintWarning(WARNING_ARR_SIZE_1, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_ARR_SIZE_1, __FILE__, __FUNCTION__, __LINE__);
 
 		spValRCb((ret->kdLeft = spKDArrayCopy(kdArr)),
 				ERROR_SPLITTING_KD_ARRAY, onErrorInSplit(ret, xArr, map1, map2));
@@ -315,13 +315,13 @@ void spKDArrayDestroy(SPKDArray kdArr) {
 			kdArr->indicesMatrix = NULL;
 		}
 		else {
-			spLoggerPrintWarning(WARNING_KDARR_INDS_MAT_NULL, __FILE__, __FUNCTION__,
+			spLoggerSafePrintWarning(WARNING_KDARR_INDS_MAT_NULL, __FILE__, __FUNCTION__,
 								__LINE__);
 		}
 		free(kdArr);
 	}
 	else {
-		spLoggerPrintWarning(WARNING_KDARR_NULL, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_KDARR_NULL, __FILE__, __FUNCTION__, __LINE__);
 	}
 }
 
@@ -334,7 +334,7 @@ void spKDArrayPairDestroy(SPKDArrayPair kdArrPair) {
 		free(kdArrPair);
 	}
 	else {
-		spLoggerPrintWarning(WARNING_KDARR_PAIR_NULL, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_KDARR_PAIR_NULL, __FILE__, __FUNCTION__, __LINE__);
 	}
 }
 

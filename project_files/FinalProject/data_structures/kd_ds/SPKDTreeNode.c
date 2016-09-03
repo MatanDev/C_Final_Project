@@ -136,7 +136,7 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode, bool freePointsData) {
 		free(kdTreeNode);
 	}
 	else {
-		spLoggerPrintWarning(WARNING_KDTREE_NODE_NULL, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_KDTREE_NODE_NULL, __FILE__, __FUNCTION__, __LINE__);
 	}
 }
 

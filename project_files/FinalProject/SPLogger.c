@@ -4,23 +4,23 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
-#define ERROR_MSG "---ERROR---\n"
-#define WARNING_MSG  "---WARNING---\n"
-#define INFO_MSG  "---INFO---\n"
-#define DEBUG_MSG  "---DEBUG---\n"
+#define ERROR_MSG 									"---ERROR---\n"
+#define WARNING_MSG  								"---WARNING---\n"
+#define INFO_MSG  									"---INFO---\n"
+#define DEBUG_MSG  									"---DEBUG---\n"
 
-#define GENERAL_MESSAGE_SKELETON	"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
-#define SHORT_MESSAGE_SKELETON		"%s- message: %s"
-#define CANT_OPEN_FILE_MSG			"SP_LOGGER_CANNOT_OPEN_FILE"
-#define INVALID_ARG_MSG				"SP_LOGGER_INVAlID_ARGUMENT"
-#define OUT_OF_MEMORY_MSG			"SP_LOGGER_OUT_OF_MEMORY"
-#define LOGGER_UNDEFINED_MSG		"SP_LOGGER_UNDIFINED"
-#define LOGGER_DEFINDED_MSG			"SP_LOGGER_DEFINED"
-#define LOGGER_WRITE_FAIL_MSG		"SP_LOGGER_WRITE_FAIL"
-#define LOGGER_SUCCESS_MSG			"SP_LOGGER_SUCCESS"
-
+#define GENERAL_MESSAGE_SKELETON					"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
+#define SHORT_MESSAGE_SKELETON						"%s- message: %s"
+#define CANT_OPEN_FILE_MSG							"SP_LOGGER_CANNOT_OPEN_FILE"
+#define INVALID_ARG_MSG								"SP_LOGGER_INVAlID_ARGUMENT"
+#define OUT_OF_MEMORY_MSG							"SP_LOGGER_OUT_OF_MEMORY"
+#define LOGGER_UNDEFINED_MSG						"SP_LOGGER_UNDIFINED"
+#define LOGGER_DEFINDED_MSG							"SP_LOGGER_DEFINED"
+#define LOGGER_WRITE_FAIL_MSG						"SP_LOGGER_WRITE_FAIL"
+#define LOGGER_SUCCESS_MSG							"SP_LOGGER_SUCCESS"
+#define ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM 	"Error printing to logger, exiting program.\n"
 //File open mode
-#define SP_LOGGER_OPEN_MODE "w"
+#define SP_LOGGER_OPEN_MODE 						"w"
 
 // Global variable holding the logger
 SPLogger logger = NULL;
@@ -122,6 +122,7 @@ const char* getLoggerNameFromType(enum sp_logger_level_t logType) {
 			return NULL;
 	}
 }
+
 
 
 /*
@@ -231,4 +232,53 @@ const char* loggerMsgToStr(SP_LOGGER_MSG msg) {
 		return LOGGER_SUCCESS_MSG;
 	}
 	return NULL;
+}
+
+
+void spLoggerSafePrintError(const char* msg, const char* file,
+		const char* function, const int line) {
+	SP_LOGGER_MSG message = spLoggerPrintError(msg,file,function,line);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
+}
+
+void spLoggerSafePrintWarning(const char* msg, const char* file,
+		const char* function, const int line) {
+	SP_LOGGER_MSG message = spLoggerPrintWarning(msg,file,function,line);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
+}
+
+void spLoggerSafePrintInfo(const char* msg) {
+	SP_LOGGER_MSG message = spLoggerPrintInfo(msg);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
+}
+
+void spLoggerSafePrintDebug(const char* msg, const char* file,
+		const char* function, const int line) {
+	SP_LOGGER_MSG message = spLoggerPrintDebug(msg,file,function,line);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
+}
+
+void spLoggerSafePrintMsg(const char* msg){
+	SP_LOGGER_MSG message = spLoggerPrintMsg(msg);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
 }

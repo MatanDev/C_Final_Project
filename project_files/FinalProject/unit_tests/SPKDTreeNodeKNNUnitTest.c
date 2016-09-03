@@ -82,7 +82,7 @@ distanceWithPoint* createAndSortDistancesArray(int size, SPPoint queryPoint, SPP
 	int i;
 	distancesArray = (distanceWithPoint*)calloc(sizeof(distanceWithPoint),size);
 	if (distancesArray  == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return NULL;
 	}
 
@@ -101,7 +101,7 @@ int* getRealRsltsArray(int k,SPPoint* pointsArray,SPPoint queryPoint,int size){
 
 	if (outputArray == NULL)
 	{
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return NULL;
 	}
 
@@ -201,19 +201,19 @@ void initializeKnnTestCase1(){
 
 	kNNtestCase1Points = (SPPoint*)calloc(sizeof(SPPoint),kNNtestCase1Size);
 	if (kNNtestCase1Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,kNNtestCase1MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,kNNtestCase1MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -221,7 +221,7 @@ void initializeKnnTestCase1(){
 	if (kNNtestCase1QueryPoint == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -232,7 +232,7 @@ void initializeKnnTestCase1(){
 	if (kNNtestCase1QueueKNN == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -245,28 +245,28 @@ bool runKnnTestCase1(){
 	SPListElement curr_elem;
 	bool successFlag;
 	if (kNNtestCase1Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (kNNtestCase1Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNtestCase1QueueKNN == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUEUE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUEUE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNtestCase1QueryPoint == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
@@ -305,26 +305,26 @@ void initializeKnnTestCase2(){
 	SPKDArray kdArr = NULL;
 	kNNtestCase2Points = (SPPoint*)calloc(sizeof(SPPoint),kNNtestCase2Size);
 	if (kNNtestCase2Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,kNNtestCase2MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,kNNtestCase2MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p3 = spPointCreate(data3,kNNtestCase2MaxDim,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p4 = spPointCreate(data4,kNNtestCase2MaxDim,4);
@@ -332,7 +332,7 @@ void initializeKnnTestCase2(){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
 		spPointDestroy(p3);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p5 = spPointCreate(data5,kNNtestCase2MaxDim,5);
@@ -341,7 +341,7 @@ void initializeKnnTestCase2(){
 		spPointDestroy(p2);
 		spPointDestroy(p3);
 		spPointDestroy(p4);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	kNNtestCase2Points[0] = p1;
@@ -357,7 +357,7 @@ void initializeKnnTestCase2(){
 		spPointDestroy(p3);
 		spPointDestroy(p4);
 		spPointDestroy(p5);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -368,7 +368,7 @@ void initializeKnnTestCase2(){
 		spPointDestroy(p3);
 		spPointDestroy(p4);
 		spPointDestroy(p5);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -382,28 +382,28 @@ bool runKnnTestCase2(){
 	SP_BPQUEUE_MSG msg;
 	bool successFlag;
 	if (kNNtestCase2Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (kNNtestCase2Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNtestCase2Queue == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUEUE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUEUE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNtestCase2QueryPoint == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
@@ -460,13 +460,13 @@ void initializeKnnEdgeTestCase1(){
 
 	kNNedgeTestCase1Points = (SPPoint*)calloc(sizeof(SPPoint),kNNedgeTestCase1Size);
 	if (kNNedgeTestCase1Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,kNNedgeTestCase1MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -477,14 +477,14 @@ void initializeKnnEdgeTestCase1(){
 	kNNedgeTestCase1QueryPoint = spPointCreate(queryData,kNNedgeTestCase1MaxDim,2);
 	if (kNNedgeTestCase1QueryPoint == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	kNNedgeTestCase1Queue = spBPQueueCreate(kNNedgeTestCase1K);
 	if (kNNedgeTestCase1Queue == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -498,28 +498,28 @@ bool runKnnEdgeTestCase1(){
 	SPListElement curr_elem;
 	bool successFlag;
 	if (kNNedgeTestCase1Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (kNNedgeTestCase1Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNedgeTestCase1Queue == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUEUE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUEUE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
 		return false;
 	}
 	if (kNNedgeTestCase1QueryPoint == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
@@ -575,7 +575,7 @@ bool runRandomKnnTest(){
 	if (queue == NULL){
 		destroyCaseData(tree,kdArr,pointsArray,size,queue,queryPoint);
 
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_QUERY_POINT);
@@ -585,7 +585,7 @@ bool runRandomKnnTest(){
 	if (queryPoint == NULL){
 		destroyCaseData(tree,kdArr,pointsArray,size,queue,queryPoint);
 
-		spLoggerPrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_QUERY_POINT,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_QUERY_POINT);
@@ -594,7 +594,7 @@ bool runRandomKnnTest(){
 
 	if (pointsArray == NULL){
 		destroyCaseData(tree,kdArr,pointsArray,size,queue,queryPoint);
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
@@ -605,7 +605,7 @@ bool runRandomKnnTest(){
 
 	if (kdArr == NULL){
 		destroyCaseData(tree,kdArr,pointsArray,size,queue,queryPoint);
-		spLoggerPrintError(COULD_NOT_INITIALIZE_KD_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_KD_ARRAY,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_KD_ARRAY);
@@ -616,7 +616,7 @@ bool runRandomKnnTest(){
 
 	if (tree == NULL){
 		destroyCaseData(tree,kdArr,pointsArray,size,queue,queryPoint);
-		spLoggerPrintError(
+		spLoggerSafePrintError(
 				COULD_NOT_INITIALIZE_TREE,
 				__FILE__, __FUNCTION__,
 						__LINE__);

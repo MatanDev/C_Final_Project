@@ -226,7 +226,7 @@ bool verifyDimMaxSpread(SPKDTreeNode treeNode, int maxDim ){
 	relevantPoints = (SPPoint*)calloc(sizeof(SPPoint),size);
 
 	if (relevantPoints == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return false;
 	}
 
@@ -294,7 +294,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 	ASSERT_TRUE(pointsArray != NULL);
 	//test tree size
 	if (getTreeNumOfLeaves(treeNode) != size){
-		spLoggerPrintError(ERROR_AT_TREE_SIZE, __FILE__, __FUNCTION__,
+		spLoggerSafePrintError(ERROR_AT_TREE_SIZE, __FILE__, __FUNCTION__,
 				__LINE__);
 		FAIL(ERROR_AT_TREE_SIZE);
 		return false;
@@ -302,7 +302,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 
 	//test correct nodes structure
 	if (!isKDTreeDataCorrect(treeNode)){
-		spLoggerPrintError(ERROR_AT_NODES_STRUCTURE, __FILE__, __FUNCTION__,
+		spLoggerSafePrintError(ERROR_AT_NODES_STRUCTURE, __FILE__, __FUNCTION__,
 				__LINE__);
 		FAIL(ERROR_AT_NODES_STRUCTURE);
 		return false;
@@ -310,7 +310,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 
 	//test median
 	if (!verifyMedianTreeNode(treeNode)){
-		spLoggerPrintError(ERROR_AT_TREE_MEDIAN_INVARIANT, __FILE__,
+		spLoggerSafePrintError(ERROR_AT_TREE_MEDIAN_INVARIANT, __FILE__,
 				__FUNCTION__, __LINE__);
 		FAIL(ERROR_AT_TREE_MEDIAN_INVARIANT);
 		return false;
@@ -318,7 +318,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 
 	//test ordered
 	if (!verifyOrderedTree(treeNode)){
-		spLoggerPrintError(ERROR_AT_TREE_ORDER_INVARIANT, __FILE__,
+		spLoggerSafePrintError(ERROR_AT_TREE_ORDER_INVARIANT, __FILE__,
 				__FUNCTION__, __LINE__);
 		FAIL(ERROR_AT_TREE_ORDER_INVARIANT);
 		return false;
@@ -326,7 +326,7 @@ bool testKDTree(SPKDTreeNode treeNode, int maxDim,
 
 	//test dim
 	if (!verifyDimSelection(treeNode,maxDim,splitMethod)){
-		spLoggerPrintError(ERROR_AT_TREE_DIMENSION_SELECTION_METHOD, __FILE__,
+		spLoggerSafePrintError(ERROR_AT_TREE_DIMENSION_SELECTION_METHOD, __FILE__,
 				__FUNCTION__, __LINE__);
 		FAIL(ERROR_AT_TREE_DIMENSION_SELECTION_METHOD);
 		return false;
@@ -353,7 +353,7 @@ bool runRandomKDTreeTest(){
 	if (pointsArray == NULL){
 		spKDTreeDestroy(tree, false);
 		spKDArrayDestroy(kdArr);
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST);
@@ -365,7 +365,7 @@ bool runRandomKDTreeTest(){
 	if (kdArr == NULL){
 		spKDTreeDestroy(tree, false);
 		destroyPointsArray(pointsArray,size);
-		spLoggerPrintError(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
 						__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST);
@@ -377,7 +377,7 @@ bool runRandomKDTreeTest(){
 	if (tree == NULL){
 		spKDArrayDestroy(kdArr);
 		destroyPointsArray(pointsArray,size);
-		spLoggerPrintError(
+		spLoggerSafePrintError(
 				COULD_NOT_INITIALIZE_TREE_FOR_RANDOM_TEST,
 				__FILE__, __FUNCTION__,
 						__LINE__);
@@ -419,19 +419,19 @@ void initializeTestCase1(){
 
 	testCase1Points = (SPPoint*)calloc(sizeof(SPPoint),testCase1Size);
 	if (testCase1Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,testCase1MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,testCase1MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -447,14 +447,14 @@ void initializeTestCase1(){
 bool runTestCase1(){
 	SPKDTreeNode left,right;
 	if (testCase1Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (testCase1Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
@@ -497,26 +497,26 @@ void initializeTestCase2(){
 	SPKDArray kdArr = NULL;
 	testCase2Points = (SPPoint*)calloc(sizeof(SPPoint),testCase2Size);
 	if (testCase2Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,testCase2MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p2 = spPointCreate(data2,testCase2MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p3 = spPointCreate(data3,testCase2MaxDim,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p4 = spPointCreate(data4,testCase2MaxDim,4);
@@ -524,7 +524,7 @@ void initializeTestCase2(){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
 		spPointDestroy(p3);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	p5 = spPointCreate(data5,testCase2MaxDim,5);
@@ -533,7 +533,7 @@ void initializeTestCase2(){
 		spPointDestroy(p2);
 		spPointDestroy(p3);
 		spPointDestroy(p4);
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 	testCase2Points[0] = p1;
@@ -552,14 +552,14 @@ bool runTestCase2(){
 	SPKDTreeNode l,r,ll,lr,rl,rr,lll,llr;
 
 	if (testCase2Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (testCase2Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);
@@ -626,13 +626,13 @@ void initializeEdgeTestCase1(){
 
 	edgeTestCase1Points = (SPPoint*)calloc(sizeof(SPPoint),edgeTestCase1Size);
 	if (edgeTestCase1Points == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
 	p1 = spPointCreate(data1,edgeTestCase1MaxDim,1);
 	if (p1 == NULL){
-		spLoggerPrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
+		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
 
@@ -646,14 +646,14 @@ void initializeEdgeTestCase1(){
 
 bool runEdgeTestCase1(){
 	if (edgeTestCase1Tree == NULL){
-		spLoggerPrintError(COULD_NOT_CREATE_POINTS_ARRAY,
+		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
 	if (edgeTestCase1Points == NULL){
-		spLoggerPrintError(COULD_NOT_INITIALIZE_TREE,
+		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_INITIALIZE_TREE);

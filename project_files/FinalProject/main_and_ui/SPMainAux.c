@@ -131,7 +131,7 @@ int calculateTotalNumOfFeatures(SPImageData* workingImagesDatabase, int numOfIma
 	int i, sum = 0;
 	for (i = 0; i < numOfImages ; i++){
 		if (workingImagesDatabase[i]->numOfFeatures == 0){
-			spLoggerPrintWarning(WARNING_ZERO_FEATURES_FROM_IMAGE, __FILE__,__FUNCTION__, __LINE__);
+			spLoggerSafePrintWarning(WARNING_ZERO_FEATURES_FROM_IMAGE, __FILE__,__FUNCTION__, __LINE__);
 		}
 		sum += workingImagesDatabase[i]->numOfFeatures;
 	}
@@ -239,7 +239,6 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 }
 
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
-	//TODO  - verify num of similar <= num of images and if not set num of similar to num
 	//of images (TA) and print a warning to the log (Or)
 	char tempPath[MAX_PATH_LEN];
 	int i;
@@ -277,7 +276,7 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
 	if (*numOfSimilarImages > numOfImages){
 		spVal((msg = spConfigCropSimilarImages(config)) == SP_CONFIG_SUCCESS ,
 				ERROR_AT_IMAGES_COUNTS, false);
-		spLoggerPrintWarning(WARNING_IMAGES_COUNT_CROPPED,
+		spLoggerSafePrintWarning(WARNING_IMAGES_COUNT_CROPPED,
 						__FILE__, __FUNCTION__, __LINE__);
 		*numOfSimilarImages = numOfImages;
 	}

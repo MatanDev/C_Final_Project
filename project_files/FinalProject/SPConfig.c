@@ -84,7 +84,7 @@
 
 #define VALID_MSG_IN_SIGN		do { \
                 if (msg != SP_CONFIG_SUCCESS) { \
-					spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, \
+					spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, \
 							__LINE__); \
 					return NULL; \
 				} \
@@ -473,7 +473,7 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, in
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, function, line);
+		spLoggerSafePrintError(ERROR_INVALID_CONF_ARG, __FILE__, function, line);
 		return false;
 	}
 	*msg = SP_CONFIG_SUCCESS;
@@ -526,17 +526,17 @@ char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
 SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
 		int index, bool isFeats) {
 	if (imagePath == NULL) {
-		spLoggerPrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
 	}
 
 	if (config == NULL) {
-		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
 	}
 
 	if (index >= config->spNumOfImages) {
-		spLoggerPrintError(ERROR_OUT_OF_RANGE, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_OUT_OF_RANGE, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INDEX_OUT_OF_RANGE;
 	}
 
@@ -558,12 +558,12 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
 
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 	if (pcaPath == NULL) {
-		spLoggerPrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_INVALID_PATH_PTR, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
 	}
 
 	if (config == NULL) {
-		spLoggerPrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_INVALID_CONF_ARG, __FILE__, __FUNCTION__, __LINE__);
 		return SP_CONFIG_INVALID_ARGUMENT;
 	}
 
@@ -579,7 +579,7 @@ char* getSignature(const SPConfig config){
 
 	numOfImages = spConfigGetNumOfImages(config, &msg);
 	if (msg != SP_CONFIG_SUCCESS || numOfImages < 1) {
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 
@@ -594,9 +594,9 @@ char* getSignature(const SPConfig config){
 
 	signature = (char*)calloc(MAX_PATH_LEN*2, sizeof(char));
 	if (signature == NULL){
-		spLoggerPrintError(ALLOCATION_FAILED_MSG, __FILE__,
+		spLoggerSafePrintError(ALLOCATION_FAILED_MSG, __FILE__,
 				__FUNCTION__, __LINE__);
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__,
+		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__,
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -604,7 +604,7 @@ char* getSignature(const SPConfig config){
 			numOfFeatures, PCADim);
 	if (rsltFlag < 0) {
 		free(signature);
-		spLoggerPrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintError(ERROR_CREATING_SIGN, __FILE__, __FUNCTION__, __LINE__);
 		return NULL;
 	}
 	return signature;
@@ -670,7 +670,7 @@ char* duplicateString(const char *str)
 SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config){
 	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
 	if (config->spNumOfSimilarImages <= config->spNumOfImages){
-		spLoggerPrintWarning(WARNING_CROP_NOT_NEEDED,
+		spLoggerSafePrintWarning(WARNING_CROP_NOT_NEEDED,
 				__FILE__, __FUNCTION__, __LINE__);
 	}
 	config->spNumOfSimilarImages = config->spNumOfImages;
