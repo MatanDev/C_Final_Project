@@ -32,6 +32,18 @@ extern "C" {
 #define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
 #define SUCCESS_RETURN_VALUE 						0
 
+/*------------------------------------------------------------ logger info -------------------------------------------------------------------------*/
+#define EXTRACTED_IMAGES_DATA  						"Extracted images data from images files"
+#define IMAGED_DATABASE_INITIALIZATION_COMPLETED  	"Imaged database list basic initialization completed"
+#define CONFIGURATIONS_AND_LOGGER_INITIALIZED  		"Configurations and logger initialized"
+#define USER_INTERACTION_FINISHED_SUCCESSFULLY  	"User interaction finished successfully, releasing resources and exiting"
+#define INITIALIZATION_FINISHED_SUCCESSFUL  		"Initialization finished successful"
+#define SIMILAR_IMAGES_PRESENTED					"Similar images to the last query has been presented to the user"
+#define QUERY_HAS_BEEN_INSERTED 					"A legal query has been inserted by the user : "
+#define ILLEGAL_QUERY_HAS_BEEN_INSERTED 			"An illegal query has been inserted by the user : "
+#define INTERNAL_DATA_AND_LOGIC_CREATED 			"Internal data and logic layer has been created successfully, the user can start querying now"
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 /*
  * this macro is used to run the given 'action' and if it fails print the given
@@ -45,7 +57,10 @@ extern "C" {
                 } \
         } while (0)
 
-//TODO - log - info + debug
+//TODO - log - debug
+//TODO - check params in inner functions (convention) - as warning (for all files)
+//TODO - logger documentation in inner functions (convention)
+//TODO - remove fflush(NULL) at production
 
 /*
  * The method initializes the project, loads the settings, the logger, the images data and build's
@@ -78,10 +93,12 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 
 	spVal((initConfigAndSettings(argc, argv, config, numOfImages,
 			numOfSimilarImages, extractFlag, GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE );
-
+	spLoggerSafePrintInfo(CONFIGURATIONS_AND_LOGGER_INITIALIZED);
 
 	spVal(imagesDataList = initializeImagesDataList(*numOfImages),
 			ERROR_INIT_IMAGES, IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
+
+	spLoggerSafePrintInfo(IMAGED_DATABASE_INITIALIZATION_COMPLETED);
 
 	//build features database
 	(*imageProcObject) = new sp::ImageProc(*config);
@@ -94,6 +111,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 			imagesDataList[i]->featuresArray = (*imageProcObject)->getImageFeatures(tempPath,
 					i, &(imagesDataList[i]->numOfFeatures));
 		}
+		spLoggerSafePrintInfo(EXTRACTED_IMAGES_DATA);
 	}
 
 	spValWc((initializeWorkingImageKDTreeAndBPQueue(*config, imagesDataList,
@@ -102,6 +120,9 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 			IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 
 	freeAllImagesData(imagesDataList, *numOfImages, false);
+
+	spLoggerSafePrintInfo(INTERNAL_DATA_AND_LOGIC_CREATED);
+
 
 	return SUCCESS_RETURN_VALUE;
 }
@@ -128,6 +149,9 @@ void proccessQueryAndPresentImages(SPConfig config, SPImageData currentImageData
 	int *similarImagesIndices = NULL, i;
 	char tempPath[MAX_PATH_LEN];
 
+	spLoggerSafePrintInfo(QUERY_HAS_BEEN_INSERTED);
+	spLoggerSafePrintInfo(workingImagePath);
+
 	currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
 
 	spVal((similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
@@ -145,7 +169,7 @@ void proccessQueryAndPresentImages(SPConfig config, SPImageData currentImageData
 		presentSimilarImagesNoGUI(workingImagePath, config, similarImagesIndices,
 				numOfSimilarImages);
 	}
-
+	spLoggerSafePrintInfo(SIMILAR_IMAGES_PRESENTED);
 	spFree(similarImagesIndices);
 }
 
@@ -179,6 +203,9 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 		*isCurrentImageFeaturesArrayAllocated = false; //indicate we should not free currentImageData->features again
 
 		while (strcmp(workingImagePath, QUERY_EXIT_INPUT) && !verifyPathAndAvailableFile(workingImagePath)){
+		spLoggerSafePrintInfo(ILLEGAL_QUERY_HAS_BEEN_INSERTED);
+			spLoggerSafePrintInfo(workingImagePath);
+
 			spLoggerSafePrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
 			printf(REQUEST_QUERY_AGAIN);
 			fflush(NULL);
@@ -230,10 +257,12 @@ int main(int argc, char** argv) {
 			&numOfSimilarImages, &extractFlag, &GUIFlag, &bpq,
 			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
 
+	spLoggerSafePrintInfo(INITIALIZATION_FINISHED_SUCCESSFUL);
+
 	spMainStartUserInteraction(config,currentImageData, kdTree,numOfImages, numOfSimilarImages,
 			bpq, GUIFlag, &imageProcObject, &isCurrentImageFeaturesArrayAllocated);
 
-
+	spLoggerSafePrintInfo(USER_INTERACTION_FINISHED_SUCCESSFULLY);
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }

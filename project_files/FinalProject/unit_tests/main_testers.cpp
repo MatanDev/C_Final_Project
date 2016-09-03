@@ -22,7 +22,6 @@ extern "C" {
 #include "SPKDTreeNodeKNNUnitTest.h"
 
 }
-//TODO - testers contains a lot of static vars!!!!!
 
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -42,5 +41,4 @@ int main() {
 	spLoggerDestroy();
 	return 0;
 }
-
 */

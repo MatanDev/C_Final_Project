@@ -560,5 +560,5 @@ char* getSignature(const SPConfig config); //TODO - (matan) need to add tests fo
  *
  * @logger - the method logs relevant errors
  */
-SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
+SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config); //TODO - (matan) need to add tests for this..
 #endif /* SPCONFIG_H_ */

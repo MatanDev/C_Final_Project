@@ -1,7 +1,3 @@
-//TODO - check params in inner functions (convention) - as warning (for all files)
-//TODO - logger documentation in inner functions (convention)
-//TODO - add more logs
-
 #ifndef SPKDTREENODE_H_
 #define SPKDTREENODE_H_
 

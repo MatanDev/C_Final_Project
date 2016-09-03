@@ -8,7 +8,6 @@
  * allocation and cleaning, checking actions and logging errors
  */
 
-//TODO - validate / test ?
 
 #define ERROR_ALLOCATING_MEMORY 			"Could not allocate memory"
 #define ERROR_INVALID_ARGUMENT 				"Error Invalid argument"

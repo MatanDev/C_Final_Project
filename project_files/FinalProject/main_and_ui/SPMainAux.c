@@ -10,7 +10,7 @@
 #include "../data_structures/bpqueue_ds/SPBPriorityQueue.h"
 #include "../general_utils/SPUtils.h"
 
-//TODO - remove fflush(NULL) at production
+
 #define DEFAULT_CONFIG_FILE										"spcbir.config"
 #define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE 					"Please enter image path:\n"
