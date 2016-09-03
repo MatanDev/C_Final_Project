@@ -239,7 +239,6 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 }
 
 bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
-	//of images (TA) and print a warning to the log (Or)
 	char tempPath[MAX_PATH_LEN];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;

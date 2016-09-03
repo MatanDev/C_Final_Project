@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 #include "SPKDTreeNode.h"
 #include "../../general_utils/SPUtils.h"
 
@@ -34,7 +35,7 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
-	// TODO - make sure array->pointsArray cannot be NULL
+	assert(array->pointsArray != NULL);
 	node->data = array->pointsArray[0];
 
 	return node;

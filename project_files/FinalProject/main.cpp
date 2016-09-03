@@ -45,7 +45,6 @@ extern "C" {
                 } \
         } while (0)
 
-//TODO - forum: what to do with logger write return value - if fails quit
 //TODO - log - info + debug
 
 /*
