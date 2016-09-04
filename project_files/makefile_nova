@@ -1,7 +1,8 @@
 CC = gcc
 CPP = g++
 #put your object files here
-OBJS = main.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPKDArray.o SPKDTreeNode.o SPKDTreeNodeKNN.o SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o SPImageData.o
+OBJS = main.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPKDArray.o SPKDTreeNode.o SPKDTreeNodeKNN.o \
+SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o SPImageData.o
 #The executabel filename
 EXEC = SPCBIR
 PRIORITY_QUEUE_DIR = ./data_structures/bpqueue_ds
@@ -23,7 +24,8 @@ C_COMP_FLAG = -std=c99 -Wall -Wextra \
 
 $(EXEC): $(OBJS)
 	$(CPP) $(OBJS) -L$(LIBPATH) $(LIBS) -o $@
-main.o: main.cpp SPConfig.h SPLogger.h SPImageProc.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(IMAGE_PARSING_DIR)/SPImagesParser.h SPPoint.h $(KD_DS_DIR)/SPKDTreeNode.h $(MAIN_AND_UI_DIR)/SPImageQuery.h $(MAIN_AND_UI_DIR)/SPMainAux.h
+main.o: main.cpp SPConfig.h SPLogger.h SPImageProc.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(IMAGE_PARSING_DIR)/SPImagesParser.h \
+			SPPoint.h $(KD_DS_DIR)/SPKDTreeNode.h $(MAIN_AND_UI_DIR)/SPImageQuery.h $(MAIN_AND_UI_DIR)/SPMainAux.h
 	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $*.cpp
 SPImageProc.o: SPImageProc.cpp SPImageProc.h SPConfig.h SPPoint.h SPLogger.h
 	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $*.cpp
@@ -38,7 +40,8 @@ SPListElement.o: $(PRIORITY_QUEUE_DIR)/SPListElement.c $(PRIORITY_QUEUE_DIR)/SPL
 SPList.o: $(PRIORITY_QUEUE_DIR)/SPList.c $(PRIORITY_QUEUE_DIR)/SPList.h $(PRIORITY_QUEUE_DIR)/SPListElement.h $(GENERAL_UTILS_DIR)/SPUtils.h
 	$(CC) $(C_COMP_FLAG) -c $(PRIORITY_QUEUE_DIR)/$*.c
 		
-SPBPriorityQueue.o: $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.c $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(PRIORITY_QUEUE_DIR)/SPList.h $(PRIORITY_QUEUE_DIR)/SPListElement.h $(GENERAL_UTILS_DIR)/SPUtils.h
+SPBPriorityQueue.o: $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.c $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(PRIORITY_QUEUE_DIR)/SPList.h \
+							$(PRIORITY_QUEUE_DIR)/SPListElement.h $(GENERAL_UTILS_DIR)/SPUtils.h
 	$(CC) $(C_COMP_FLAG) -c $(PRIORITY_QUEUE_DIR)/$*.c
 
 #--------------------------------------------kd data structure--------------------------------------------------------------------------------
@@ -49,7 +52,8 @@ SPKDArray.o: $(KD_DS_DIR)/SPKDArray.c $(KD_DS_DIR)/SPKDArray.h SPLogger.h SPPoin
 SPKDTreeNode.o: $(KD_DS_DIR)/SPKDTreeNode.c $(KD_DS_DIR)/SPKDTreeNode.h SPLogger.h $(KD_DS_DIR)/SPKDArray.h SPConfig.h $(GENERAL_UTILS_DIR)/SPUtils.h
 	$(CC) $(C_COMP_FLAG) -c $(KD_DS_DIR)/$*.c
 	
-SPKDTreeNodeKNN.o: $(KD_DS_DIR)/SPKDTreeNodeKNN.c $(KD_DS_DIR)/SPKDTreeNodeKNN.h SPLogger.h $(KD_DS_DIR)/SPKDTreeNode.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(GENERAL_UTILS_DIR)/SPUtils.h
+SPKDTreeNodeKNN.o: $(KD_DS_DIR)/SPKDTreeNodeKNN.c $(KD_DS_DIR)/SPKDTreeNodeKNN.h SPLogger.h $(KD_DS_DIR)/SPKDTreeNode.h \
+								$(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(GENERAL_UTILS_DIR)/SPUtils.h
 	$(CC) $(C_COMP_FLAG) -c $(KD_DS_DIR)/$*.c
 	
 SPPoint.o: SPPoint.c SPPoint.h  SPLogger.h $(GENERAL_UTILS_DIR)/SPUtils.h
@@ -74,10 +78,13 @@ SPImagesParser.o: $(IMAGE_PARSING_DIR)/SPImagesParser.c $(IMAGE_PARSING_DIR)/SPI
 
 #---------------------------------------------------main aux and image query------------------------------------------------------------------------
 
-SPMainAux.o: $(MAIN_AND_UI_DIR)/SPMainAux.c $(MAIN_AND_UI_DIR)/SPMainAux.h  $(MAIN_AND_UI_DIR)/SPImageQuery.h SPLogger.h $(KD_DS_DIR)/SPKDTreeNode.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(IMAGE_PARSING_DIR)/SPImagesParser.h SPConfig.h $(GENERAL_UTILS_DIR)/SPUtils.h $(IMAGE_PARSING_DIR)/SPImageData.h
+SPMainAux.o: $(MAIN_AND_UI_DIR)/SPMainAux.c $(MAIN_AND_UI_DIR)/SPMainAux.h  $(MAIN_AND_UI_DIR)/SPImageQuery.h SPLogger.h \
+					$(KD_DS_DIR)/SPKDTreeNode.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(IMAGE_PARSING_DIR)/SPImagesParser.h SPConfig.h \
+					$(GENERAL_UTILS_DIR)/SPUtils.h $(IMAGE_PARSING_DIR)/SPImageData.h
 	$(CC) $(C_COMP_FLAG) -c $(MAIN_AND_UI_DIR)/$*.c
 	
-SPImageQuery.o: $(MAIN_AND_UI_DIR)/SPImageQuery.c $(MAIN_AND_UI_DIR)/SPImageQuery.h  SPConfig.h $(IMAGE_PARSING_DIR)/SPImagesParser.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(KD_DS_DIR)/SPKDTreeNode.h $(KD_DS_DIR)/SPKDTreeNodeKNN.h $(GENERAL_UTILS_DIR)/SPUtils.h
+SPImageQuery.o: $(MAIN_AND_UI_DIR)/SPImageQuery.c $(MAIN_AND_UI_DIR)/SPImageQuery.h  SPConfig.h $(IMAGE_PARSING_DIR)/SPImagesParser.h \
+						$(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h $(KD_DS_DIR)/SPKDTreeNode.h $(KD_DS_DIR)/SPKDTreeNodeKNN.h $(GENERAL_UTILS_DIR)/SPUtils.h
 	$(CC) $(C_COMP_FLAG) -c $(MAIN_AND_UI_DIR)/$*.c
 		
 

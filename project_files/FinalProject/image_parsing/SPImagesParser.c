@@ -412,6 +412,7 @@ SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int i
 
 	filePath = getImagePath(config, imageIndex, true , &message);
 
+
 	if (message == SP_DP_SUCCESS) {
 		message = loadKnownImageData(configSignature, filePath, allImagesData[imageIndex]);
 	}

@@ -8,7 +8,7 @@ extern "C" {
 
 //TODO - add unit tests for main aux and image query
 //TODO - testers contains a lot of static vars!!!!!
-//TODO - add testers from ex3
+
 
 #define FAIL(msg) do {\
 		fprintf(stderr,"%s Line %d: %s", __FILE__, __LINE__, msg);\

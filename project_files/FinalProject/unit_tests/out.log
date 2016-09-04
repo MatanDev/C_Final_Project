@@ -1,0 +1,115 @@
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueCreate
+- line: 49
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPListElement.c
+- function: spListElementCopy
+- line: 26
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPListElement.c
+- function: spListElementCopy
+- line: 26
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueCopy
+- line: 55
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPListElement.c
+- function: spListElementCopy
+- line: 26
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueSize
+- line: 83
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueGetMaxSize
+- line: 88
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueCreate
+- line: 49
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueuePeek
+- line: 233
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueuePeekLast
+- line: 241
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueuePeek
+- line: 233
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueuePeekLast
+- line: 241
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueCreate
+- line: 49
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: returnValueFrom
+- line: 249
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: returnValueFrom
+- line: 249
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: returnValueFrom
+- line: 249
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: returnValueFrom
+- line: 249
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPListElement.c
+- function: spListElementCopy
+- line: 26
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPListElement.c
+- function: spListElementCopy
+- line: 26
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueEnqueue
+- line: 186
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueEnqueue
+- line: 186
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueEnqueue
+- line: 186
+- message: Error Invalid argument
+---ERROR---
+- file: ..\data_structures\bpqueue_ds\SPBPriorityQueue.c
+- function: spBPQueueDequeue
+- line: 208
+- message: Error Invalid argument

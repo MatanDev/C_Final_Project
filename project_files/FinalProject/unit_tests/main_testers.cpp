@@ -19,8 +19,10 @@ extern "C" {
 #include "SPConfigUnitTest.h"
 #include "SPKDArrayUnitTest.h"
 #include "SPKDTreeNodeUnitTest.h"
+#include "SPPointUnitTest.h"
+#include "SPListUnitTest.h"
+#include "SPBPQueueUnitTest.h"
 #include "SPKDTreeNodeKNNUnitTest.h"
-
 }
 
 int main() {
@@ -32,11 +34,14 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	RunImagesParserTests(config);
-	runConfigTests();
-	runKDArrayTests();
-	runKDTreeNodeTests();
-	runKDTreeNodeKNNTests();
+	//RunImagesParserTests(config);
+	//runConfigTests();
+	//runKDArrayTests();
+	//runKDTreeNodeTests();
+	//runKDTreeNodeKNNTests();
+	//runListTests();
+	//runPointTests();
+	runBPQueueTests();
 	spConfigDestroy(config);
 	spLoggerDestroy();
 	return 0;
