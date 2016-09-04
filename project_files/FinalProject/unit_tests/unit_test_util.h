@@ -35,6 +35,13 @@ extern "C" {
 			}else{ fprintf(stderr, "%s  FAIL\n",#f);\
 			} }while (0)
 
+#define RUN_TEST_WITH_PARAM(f, parameter) do { \
+			if(f(parameter)==true){ \
+				fprintf(stdout, "%s  PASSS\n",#f);\
+				fflush(NULL);\
+			}else{ fprintf(stderr, "%s  FAIL\n",#f);\
+			} }while (0)
+
 
 
 

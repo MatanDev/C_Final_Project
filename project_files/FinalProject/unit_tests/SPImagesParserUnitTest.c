@@ -11,8 +11,10 @@
 #include "../SPConfig.h"
 #include "SPImagesParserUnitTest.h"
 
-SPConfig internalConfig = NULL;
-char* configSign = NULL;
+typedef struct configData {
+	SPConfig config;
+	char* configSign;
+} configData;
 
 static bool identicalFiles(const char* fname1, const char* fname2) {
 	FILE *fp1, *fp2;
@@ -137,7 +139,7 @@ static bool testLoadImageDataFromHeader(){
 	return true;
 }
 
-static bool testSaveImageData(){
+static bool testSaveImageData(configData conData){
 	SPImageData imageData = NULL;
 
 	double data1[] = {1,3,5,4};
@@ -160,7 +162,7 @@ static bool testSaveImageData(){
 		imageData->numOfFeatures = 3;
 		imageData->featuresArray = points;
 
-		msg = saveImageData(internalConfig,configSign, imageData);
+		msg = saveImageData(conData.config, conData.configSign, imageData);
 
 		ASSERT_TRUE(msg == SP_DP_SUCCESS);
 
@@ -179,7 +181,7 @@ static bool testSaveImageData(){
 	return false;
 }
 
-static bool testLoadKnownImageData(){
+static bool testLoadKnownImageData(char* configSign){
 	SPImageData imageData = NULL;
 	SP_DP_MESSAGES msg = SP_DP_SUCCESS;
 	bool successFlag = true;
@@ -217,7 +219,7 @@ static bool testLoadKnownImageData(){
 	return successFlag;
 }
 
-bool testGetLineBySize(int size){
+bool testGetLineBySize(int size, char* configSign){
 	char *line0 = NULL, *line1 = NULL, *line2 = NULL, *line3 = NULL, *line4 = NULL, *line5 = NULL, *line6 = NULL;
 	FILE* fp = NULL;
 	fp = fopen("./unit_tests/images/test1.feats","r");
@@ -252,10 +254,10 @@ bool testGetLineBySize(int size){
 	return true;
 }
 
-bool testGetLine(){
+bool testGetLine(char* configSign){
 	int i;
 	for (i = 1 ; i <= 1024 ; i++){
-		if (!testGetLineBySize(2*i)){
+		if (!testGetLineBySize(2*i, configSign)){
 			return false;
 		}
 	}
@@ -263,18 +265,22 @@ bool testGetLine(){
 }
 
 void RunImagesParserTests(SPConfig config){
-	internalConfig = config;
+	char* configSign = NULL;
 	configSign = getSignature(config);
+	configData configData;
 	if (configSign == NULL){
 		printf("%s Line %d: %s", __FILE__, __LINE__, "could not create config signature");
 		return;
 	}
+	configData.config = config;
+	configData.configSign = configSign;
+
 	RUN_TEST(pointToStringTests);
 	RUN_TEST(stringToPoint);
 	RUN_TEST(testGetImageHeaderAsString);
 	RUN_TEST(testLoadImageDataFromHeader);
-	RUN_TEST(testSaveImageData);
-	RUN_TEST(testLoadKnownImageData);
-	RUN_TEST(testGetLine);
+	RUN_TEST_WITH_PARAM(testSaveImageData, configData);
+	RUN_TEST_WITH_PARAM(testLoadKnownImageData, configSign);
+	RUN_TEST_WITH_PARAM(testGetLine, configSign);
 	free(configSign);
 }

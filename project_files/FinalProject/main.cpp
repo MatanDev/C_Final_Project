@@ -42,7 +42,6 @@ extern "C" {
 #define QUERY_HAS_BEEN_INSERTED 					"A legal query has been inserted by the user : "
 #define ILLEGAL_QUERY_HAS_BEEN_INSERTED 			"An illegal query has been inserted by the user : "
 #define INTERNAL_DATA_AND_LOGIC_CREATED 			"Internal data and logic layer has been created successfully, the user can start querying now"
-
 /*-------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 /*
@@ -242,7 +241,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '-3' - in case of error at the logger
  * '0'  - success
  */
-
+/*
 int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
@@ -266,4 +265,4 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
-
+*/

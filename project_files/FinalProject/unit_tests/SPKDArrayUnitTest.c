@@ -29,7 +29,7 @@
 //random test case macros
 #define RANDOM_TESTS_SIZE_RANGE  						200
 #define RANDOM_TESTS_DIM_RANGE 							50
-#define RANDOM_TESTS_COUNT 								20
+#define RANDOM_TESTS_COUNT 								10
 
 //random test case logging macros
 #define enableLoggingOnRandomTests 						false
@@ -39,20 +39,11 @@
 #define DEBUG_LOG_FORMAT_RANDOM_TEST_END 				"Success. end random test case."
 
 
-
-
-//global variables
-int randomTestsIndex = 0;
-SPPoint* case1PointsArray = NULL; //also used in NULL cases tests
-SPPoint* case2PointsArray = NULL;
-SPPoint* edgeCase1PointsArray = NULL;
-
-
-void initializePointsArrayCase1(){
+void initializePointsArrayCase1(SPPoint** case1PointsArray){
 	double data1[3] = {1,2,3},data2[3] = {5,-7,13};
 	SPPoint p1,p2;
-	case1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE1_NUM_OF_POINTS);
-	if (case1PointsArray == NULL){
+	*case1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE1_NUM_OF_POINTS);
+	if (*case1PointsArray == NULL){
 		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
@@ -69,15 +60,15 @@ void initializePointsArrayCase1(){
 		return;
 	}
 
-	case1PointsArray[0] = p1;
-	case1PointsArray[1] = p2;
+	(*case1PointsArray)[0] = p1;
+	(*case1PointsArray)[1] = p2;
 }
 
-void initializePointsArrayCase2(){
+void initializePointsArrayCase2(SPPoint** case2PointsArray){
 	double data1[2] = {1,2},data2[2] = {123,70},data3[2] = {2,7},data4[2] = {9,11}, data5[2] = {3,4};
 	SPPoint p1,p2,p3,p4,p5;
-	case2PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE2_NUM_OF_POINTS);
-	if (case2PointsArray == NULL){
+	*case2PointsArray = (SPPoint*)calloc(sizeof(SPPoint),CASE2_NUM_OF_POINTS);
+	if (*case2PointsArray == NULL){
 		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
@@ -117,18 +108,18 @@ void initializePointsArrayCase2(){
 		spLoggerSafePrintError(SPKDARRAY_TESTS_POINT_INITIALIZATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
-	case2PointsArray[0] = p1;
-	case2PointsArray[1] = p2;
-	case2PointsArray[2] = p3;
-	case2PointsArray[3] = p4;
-	case2PointsArray[4] = p5;
+	(*case2PointsArray)[0] = p1;
+	(*case2PointsArray)[1] = p2;
+	(*case2PointsArray)[2] = p3;
+	(*case2PointsArray)[3] = p4;
+	(*case2PointsArray)[4] = p5;
 }
 
-void initializePointsArrayEdgeCase1(){
+void initializePointsArrayEdgeCase1(SPPoint** edgeCase1PointsArray){
 	double data1[1] = {2};
 	SPPoint p1;
-	edgeCase1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),EDGE_CASE1_NUM_OF_POINTS);
-	if (edgeCase1PointsArray == NULL){
+	*edgeCase1PointsArray = (SPPoint*)calloc(sizeof(SPPoint),EDGE_CASE1_NUM_OF_POINTS);
+	if (*edgeCase1PointsArray == NULL){
 		spLoggerSafePrintError(SPKDARRAY_TESTS_ALLOCATION_ERROR,__FILE__,__FUNCTION__,__LINE__);
 		return;
 	}
@@ -140,7 +131,7 @@ void initializePointsArrayEdgeCase1(){
 	}
 
 
-	edgeCase1PointsArray[0] = p1;
+	(*edgeCase1PointsArray)[0] = p1;
 }
 
 void destroyPointsArray(SPPoint* array, int numOfItems){
@@ -256,7 +247,7 @@ bool isComplete(SPPoint* arr, SPPoint* left, SPPoint* right, int size, int left_
 	return true;
 }
 
-static bool testInitNullCases(){
+static bool testInitNullCases(SPPoint* case1PointsArray){
 	SPKDArray rsltArray = NULL;
 
 	rsltArray = Init(NULL,4);
@@ -282,7 +273,7 @@ static bool testInitNullCases(){
 	return true;
 }
 
-static bool testInitEdgeCase1(){
+static bool testInitEdgeCase1(SPPoint* edgeCase1PointsArray){
 	SPKDArray kdArr = NULL;
 	kdArr = Init(edgeCase1PointsArray,EDGE_CASE1_NUM_OF_POINTS);
 
@@ -304,7 +295,7 @@ static bool testInitEdgeCase1(){
 	return true;
 }
 
-static bool testInitCase1(){
+static bool testInitCase1(SPPoint* case1PointsArray){
 	SPKDArray kdArr = NULL;
 	kdArr = Init(case1PointsArray,CASE1_NUM_OF_POINTS);
 
@@ -344,7 +335,7 @@ static bool testInitCase1(){
 	return true;
 }
 
-static bool testInitCase2(){
+static bool testInitCase2(SPPoint* case2PointsArray){
 	SPKDArray kdArr = NULL;
 	kdArr = Init(case2PointsArray,CASE2_NUM_OF_POINTS);
 	int i;
@@ -397,7 +388,7 @@ static bool testInitCase2(){
 	return true;
 }
 
-static bool testSplitNullCases(){
+static bool testSplitNullCases(SPPoint* case1PointsArray){
 	SPKDArrayPair rsltPair = NULL;
 	SPKDArray kdArr = NULL;
 
@@ -423,7 +414,7 @@ static bool testSplitNullCases(){
 	return true;
 }
 
-static bool testSplitEdgeCase1(){
+static bool testSplitEdgeCase1(SPPoint* edgeCase1PointsArray){
 	SPKDArray kdArr = NULL;
 	SPKDArrayPair kdArrPair = NULL;
 
@@ -458,7 +449,7 @@ static bool testSplitEdgeCase1(){
 	return true;
 }
 
-static bool testSplitCase1(){
+static bool testSplitCase1(SPPoint* case1PointsArray){
 	SPKDArray kdArr = NULL;
 	SPKDArrayPair kdArrPair;
 
@@ -510,7 +501,7 @@ static bool testSplitCase1(){
 	return true;
 }
 
-static bool testSplitCase2(){
+static bool testSplitCase2(SPPoint* case2PointsArray){
 	SPKDArray kdArr = NULL;
 	SPKDArrayPair kdArrPair;
 
@@ -690,7 +681,7 @@ void logKDPair(SPKDArrayPair kdArrPair) {
 	}
 }
 
-bool commitRandomTest(){
+bool commitRandomTest(int randomTestsIndex){
 	int dim, size, splitting_dim;
 	char startMessage[MSG_MAX_SIZE];
 	SPPoint* points = NULL;
@@ -755,45 +746,50 @@ bool commitRandomTest(){
 
 void runKDArrayTests(){
 	int seed = time(NULL);
+	int randomTestsIndex = 0;
+	SPPoint* case1PointsArray = NULL; //also used in NULL cases tests
+	SPPoint* case2PointsArray = NULL;
+	SPPoint* edgeCase1PointsArray = NULL;
+
 	srand(seed);
 
 	//CASE 1 + NULL CASES
-	initializePointsArrayCase1();
+	initializePointsArrayCase1(&case1PointsArray);
 	if (case1PointsArray == NULL)
 		return;
 
-	RUN_TEST(testInitNullCases);
-	RUN_TEST(testSplitNullCases);
-	RUN_TEST(testInitCase1);
-	RUN_TEST(testSplitCase1);
+	RUN_TEST_WITH_PARAM(testInitNullCases, case1PointsArray);
+	RUN_TEST_WITH_PARAM(testSplitNullCases, case1PointsArray);
+	RUN_TEST_WITH_PARAM(testInitCase1, case1PointsArray);
+	RUN_TEST_WITH_PARAM(testSplitCase1, case1PointsArray);
 
 	destroyPointsArray(case1PointsArray, CASE1_NUM_OF_POINTS);
 	case1PointsArray = NULL;
 
 	//EDGE CASE 1
-	initializePointsArrayEdgeCase1();
+	initializePointsArrayEdgeCase1(&edgeCase1PointsArray);
 	if (edgeCase1PointsArray == NULL)
 		return;
 
-	RUN_TEST(testInitEdgeCase1);
-	RUN_TEST(testSplitEdgeCase1);
+	RUN_TEST_WITH_PARAM(testInitEdgeCase1, edgeCase1PointsArray);
+	RUN_TEST_WITH_PARAM(testSplitEdgeCase1, edgeCase1PointsArray);
 
 	destroyPointsArray(edgeCase1PointsArray, EDGE_CASE1_NUM_OF_POINTS);
 	edgeCase1PointsArray = NULL;
 
 	//CASE 2
-	initializePointsArrayCase2();
+	initializePointsArrayCase2(&case2PointsArray);
 	if (case2PointsArray == NULL)
 		return;
 
-	RUN_TEST(testInitCase2);
-	RUN_TEST(testSplitCase2);
+	RUN_TEST_WITH_PARAM(testInitCase2, case2PointsArray);
+	RUN_TEST_WITH_PARAM(testSplitCase2, case2PointsArray);
 
 	destroyPointsArray(case2PointsArray, CASE2_NUM_OF_POINTS);
 	case2PointsArray = NULL;
 
 	//Random tests
 	for (randomTestsIndex = 0 ; randomTestsIndex<RANDOM_TESTS_COUNT;randomTestsIndex++){
-		RUN_TEST(commitRandomTest);
+		RUN_TEST_WITH_PARAM(commitRandomTest, randomTestsIndex);
 	}
 }

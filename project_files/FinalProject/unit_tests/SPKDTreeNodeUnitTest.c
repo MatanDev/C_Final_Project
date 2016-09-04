@@ -14,49 +14,37 @@
 #include "../data_structures/kd_ds/SPKDTreeNode.h"
 #include "SPKDArrayUnitTest.h"
 #include "../image_parsing/SPImagesParser.h"
+#include "../general_utils/SPUtils.h"
 
 #define ERROR_AT_TREE_SIZE 									"Error at tree size"
 #define ERROR_AT_NODES_STRUCTURE 							"Error at nodes structure"
 #define ERROR_AT_TREE_MEDIAN_INVARIANT 						"Error at tree median invariant"
 #define ERROR_AT_TREE_ORDER_INVARIANT 						"Error at tree order invariant"
 #define ERROR_AT_TREE_DIMENSION_SELECTION_METHOD 			"Error at tree dimension selection method"
-#define ERROR_ALLOCATING_MEMORY 							"Error allocating memory"
-
 
 #define COULD_NOT_CREATE_POINTS_ARRAY_FOR_RANDOM_TEST 		"Could not create points array for random test"
 #define COULD_NOT_INITIALIZE_KD_ARRAY_FOR_RANDOM_TEST 		"Could not initialize kd-array for random test"
 #define COULD_NOT_INITIALIZE_TREE_FOR_RANDOM_TEST			"Could not initialize tree for random test - InitKDTree returned null"
 
 #define COULD_NOT_CREATE_POINTS_ARRAY 						"Could not create points array"
+#define COULD_NOT_CREATE_CASE_DATA							"Could not create case data"
 #define COULD_NOT_INITIALIZE_KD_ARRAY 						"Could not initialize kd-array"
 #define COULD_NOT_INITIALIZE_TREE 							"Could not initialize tree - InitKDTree returned null"
 
+typedef struct tree_node_test_case_data {
+	SPKDTreeNode tree;
+	SPPoint* points;
+	int max_dim;
+	int size;
+	SP_KDTREE_SPLIT_METHOD split_method;
+} tree_node_test_case_data;
+
+typedef struct tree_node_test_case_data* treeNodeTestCaseData;
 
 //random test case macros
 #define RANDOM_TESTS_SIZE_RANGE  							500
 #define RANDOM_TESTS_DIM_RANGE 								50
-#define RANDOM_TESTS_COUNT 									50
-
-//test case 1 data
-SPKDTreeNode testCase1Tree 									= NULL;
-SPPoint* testCase1Points 									= NULL;
-#define testCase1MaxDim           							3
-#define testCase1Size 										2
-#define testCase1SplitMethod 								MAX_SPREAD
-
-//test case 2 data
-SPKDTreeNode testCase2Tree 									= NULL;
-SPPoint* testCase2Points 									= NULL;
-#define testCase2MaxDim 									2
-#define testCase2Size 										5
-#define testCase2SplitMethod 								INCREMENTAL
-
-//edge case 1 data
-SPKDTreeNode edgeTestCase1Tree 								= NULL;
-SPPoint* edgeTestCase1Points 								= NULL;
-#define edgeTestCase1MaxDim 								1
-#define edgeTestCase1Size 									1
-#define edgeTestCase1SplitMethod 							INCREMENTAL
+#define RANDOM_TESTS_COUNT 									15
 
 //verify correct data
 bool isNodeDataCorrect(SPKDTreeNode node){
@@ -411,27 +399,36 @@ bool verifyNullArgument(){
 //specific case tests
 
 //test case 1
-void initializeTestCase1(){
+treeNodeTestCaseData initializeTestCase1(){
+	SPKDTreeNode testCase1Tree = NULL;
+	SPPoint* testCase1Points = NULL;
+	int testCase1MaxDim = 3;
+	int testCase1Size =	2;
+	SP_KDTREE_SPLIT_METHOD testCase1SplitMethod = MAX_SPREAD;
+	treeNodeTestCaseData caseData = NULL;
 	double data1[3] = {1,2,3},data2[3] = {5,-7,13};
 	SPPoint p1,p2;
 	SPKDArray kdArr = NULL;
+	spCalloc(caseData, tree_node_test_case_data, 1);
 
 	testCase1Points = (SPPoint*)calloc(sizeof(SPPoint),testCase1Size);
 	if (testCase1Points == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
+	caseData->points = testCase1Points;
+	caseData->size = testCase1Size;
 
 	p1 = spPointCreate(data1,testCase1MaxDim,1);
 	if (p1 == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	p2 = spPointCreate(data2,testCase1MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 
 	testCase1Points[0] = p1;
@@ -441,18 +438,33 @@ void initializeTestCase1(){
 	kdArr = Init(testCase1Points,testCase1Size);
 	testCase1Tree = InitKDTree(kdArr, testCase1SplitMethod);
 	spKDArrayDestroy(kdArr);
+
+
+	caseData->max_dim = testCase1MaxDim;
+	caseData->split_method = testCase1SplitMethod;
+	caseData->tree = testCase1Tree;
+
+
+	return caseData;
 }
 
-bool runTestCase1(){
+bool runTestCase1(treeNodeTestCaseData caseData){
 	SPKDTreeNode left,right;
-	if (testCase1Tree == NULL){
+	if (caseData == NULL){
+		spLoggerSafePrintError(COULD_NOT_CREATE_CASE_DATA,
+						__FILE__, __FUNCTION__,
+								__LINE__);
+		FAIL(COULD_NOT_CREATE_CASE_DATA);
+		return false;
+	}
+	if (caseData->tree == NULL){
 		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
-	if (testCase1Points == NULL){
+	if (caseData->points == NULL){
 		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
@@ -460,63 +472,76 @@ bool runTestCase1(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(testCase1Tree,testCase1MaxDim,
-			testCase1SplitMethod,testCase1Points,testCase1Size));
+	ASSERT_TRUE(testKDTree(caseData->tree,caseData->max_dim,
+			caseData->split_method,caseData->points,caseData->size));
 
 	//root node - not a leaf and split dim should be 2
-	ASSERT_TRUE(verifyNotLeafAndData(testCase1Tree,2,3));
+	ASSERT_TRUE(verifyNotLeafAndData(caseData->tree,2,3));
 
-	left = testCase1Tree->kdtLeft;
-	right = testCase1Tree->kdtRight;
+	left = caseData->tree->kdtLeft;
+	right = caseData->tree->kdtRight;
 
 	//left should be a point with value {1,2,3}
 	ASSERT_TRUE(verifyLeaf(left));
-	ASSERT_TRUE(verifyPointData(left->data, 1, testCase1MaxDim,1.0,2.0,3.0));
+	ASSERT_TRUE(verifyPointData(left->data, 1, caseData->max_dim,1.0,2.0,3.0));
 
 	//right should be a point with value {5,-7,13}
 	ASSERT_TRUE(verifyLeaf(right));
-	ASSERT_TRUE(verifyPointData(right->data, 2, testCase1MaxDim,5.0,-7.0,13.0));
+	ASSERT_TRUE(verifyPointData(right->data, 2, caseData->max_dim,5.0,-7.0,13.0));
 
 	return true;
 }
 
-void destroyTestCase1(){
-	destroyPointsArray(testCase1Points,testCase1Size);
-	testCase1Points = NULL;
 
-	spKDTreeDestroy(testCase1Tree, false);
-	testCase1Tree = NULL;
+void destroyTestCase(treeNodeTestCaseData testCase) {
+	if (testCase){
+		destroyPointsArray(testCase->points, testCase->size);
+		testCase->points = NULL;
+		spKDTreeDestroy(testCase->tree, true);
+		free(testCase);
+	}
 }
 
 //test case 2
-void initializeTestCase2(){
+treeNodeTestCaseData initializeTestCase2(){
+	//test case 2 data
+	SPKDTreeNode testCase2Tree = NULL;
+	SPPoint* testCase2Points = NULL;
+	int testCase2MaxDim = 2;
+	int testCase2Size = 5;
+	SP_KDTREE_SPLIT_METHOD testCase2SplitMethod = INCREMENTAL;
+	treeNodeTestCaseData caseData = NULL;
 	double data1[2] = {1,2},data2[2] = {123,70},data3[2] = {2,7},data4[2] = {9,11},
 			data5[2] = {3,4};
 	SPPoint p1,p2,p3,p4,p5;
 	SPKDArray kdArr = NULL;
+	spCalloc(caseData, tree_node_test_case_data, 1);
+
 	testCase2Points = (SPPoint*)calloc(sizeof(SPPoint),testCase2Size);
 	if (testCase2Points == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
+	caseData->points = testCase2Points;
+	caseData->size = testCase2Size;
 
 	p1 = spPointCreate(data1,testCase2MaxDim,1);
 	if (p1 == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	p2 = spPointCreate(data2,testCase2MaxDim,2);
 	if (p2 == NULL){
 		spPointDestroy(p1);
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	p3 = spPointCreate(data3,testCase2MaxDim,3);
 	if (p3 == NULL){
 		spPointDestroy(p1);
 		spPointDestroy(p2);
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	p4 = spPointCreate(data4,testCase2MaxDim,4);
 	if (p4 == NULL){
@@ -524,7 +549,7 @@ void initializeTestCase2(){
 		spPointDestroy(p2);
 		spPointDestroy(p3);
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	p5 = spPointCreate(data5,testCase2MaxDim,5);
 	if (p5 == NULL){
@@ -533,7 +558,7 @@ void initializeTestCase2(){
 		spPointDestroy(p3);
 		spPointDestroy(p4);
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 	testCase2Points[0] = p1;
 	testCase2Points[1] = p2;
@@ -544,20 +569,34 @@ void initializeTestCase2(){
 	kdArr = Init(testCase2Points,testCase2Size);
 	testCase2Tree = InitKDTree(kdArr, testCase2SplitMethod);
 	spKDArrayDestroy(kdArr);
+
+
+	caseData->max_dim = testCase2MaxDim;
+
+	caseData->split_method = testCase2SplitMethod;
+	caseData->tree = testCase2Tree;
+
+	return caseData;
 }
 
-bool runTestCase2(){
+bool runTestCase2(treeNodeTestCaseData caseData){
 	//l stands for left branch of the tree and r for right branch
 	SPKDTreeNode l,r,ll,lr,rl,rr,lll,llr;
-
-	if (testCase2Tree == NULL){
+	if (caseData == NULL){
+			spLoggerSafePrintError(COULD_NOT_CREATE_CASE_DATA,
+							__FILE__, __FUNCTION__,
+									__LINE__);
+			FAIL(COULD_NOT_CREATE_CASE_DATA);
+			return false;
+	}
+	if (caseData->tree == NULL){
 		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
-	if (testCase2Points == NULL){
+	if (caseData->points == NULL){
 		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
@@ -565,15 +604,15 @@ bool runTestCase2(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(testCase2Tree,testCase2MaxDim,
-			testCase2SplitMethod,testCase2Points,testCase2Size));
+	ASSERT_TRUE(testKDTree(caseData->tree,caseData->max_dim,
+			caseData->split_method,caseData->points,caseData->size));
 
 	//handle root
-	ASSERT_TRUE(verifyNotLeafAndData(testCase2Tree,0,3));
+	ASSERT_TRUE(verifyNotLeafAndData(caseData->tree,0,3));
 
 	//handle first level
-	l = testCase2Tree->kdtLeft;
-	r = testCase2Tree->kdtRight;
+	l = caseData->tree->kdtLeft;
+	r = caseData->tree->kdtRight;
 
 	ASSERT_TRUE(verifyNotLeafAndData(l,1,4));
 	ASSERT_TRUE(verifyNotLeafAndData(r,1,11));
@@ -587,13 +626,13 @@ bool runTestCase2(){
 	ASSERT_TRUE(verifyNotLeafAndData(ll,0,1));
 
 	ASSERT_TRUE(verifyLeaf(lr));
-	ASSERT_TRUE(verifyPointData(lr->data, 3, testCase2MaxDim,2.0,7.0));
+	ASSERT_TRUE(verifyPointData(lr->data, 3, caseData->max_dim,2.0,7.0));
 
 	ASSERT_TRUE(verifyLeaf(rl));
-	ASSERT_TRUE(verifyPointData(rl->data, 4, testCase2MaxDim,9.0,11.0));
+	ASSERT_TRUE(verifyPointData(rl->data, 4, caseData->max_dim,9.0,11.0));
 
 	ASSERT_TRUE(verifyLeaf(rr));
-	ASSERT_TRUE(verifyPointData(rr->data, 2, testCase2MaxDim,123.0,70.0));
+	ASSERT_TRUE(verifyPointData(rr->data, 2, caseData->max_dim,123.0,70.0));
 
 
 	//handle 3rd level
@@ -601,38 +640,41 @@ bool runTestCase2(){
 	llr = ll->kdtRight;
 
 	ASSERT_TRUE(verifyLeaf(lll));
-	ASSERT_TRUE(verifyPointData(lll->data, 1, testCase2MaxDim,1.0,2.0));
+	ASSERT_TRUE(verifyPointData(lll->data, 1, caseData->max_dim,1.0,2.0));
 
 	ASSERT_TRUE(verifyLeaf(llr));
-	ASSERT_TRUE(verifyPointData(llr->data, 5, testCase2MaxDim,3.0,4.0));
+	ASSERT_TRUE(verifyPointData(llr->data, 5, caseData->max_dim,3.0,4.0));
 
 	return true;
 }
 
-void destroyTestCase2(){
-	destroyPointsArray(testCase2Points,testCase2Size);
-	testCase2Points = NULL;
-
-	spKDTreeDestroy(testCase2Tree, false);
-	testCase2Tree = NULL;
-}
 
 //edge test case 1
-void initializeEdgeTestCase1(){
+treeNodeTestCaseData initializeEdgeTestCase1(){
+	//edge case 1 data
+	SPKDTreeNode edgeTestCase1Tree = NULL;
+	SPPoint* edgeTestCase1Points = NULL;
+	int edgeTestCase1MaxDim = 1;
+	int edgeTestCase1Size = 1;
+	SP_KDTREE_SPLIT_METHOD edgeTestCase1SplitMethod = INCREMENTAL;
+	treeNodeTestCaseData caseData = NULL;
 	double data1[1] = {2};
 	SPPoint p1;
 	SPKDArray kdArr = NULL;
+	spCalloc(caseData, tree_node_test_case_data, 1);
 
 	edgeTestCase1Points = (SPPoint*)calloc(sizeof(SPPoint),edgeTestCase1Size);
 	if (edgeTestCase1Points == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
+	caseData->points = edgeTestCase1Points;
+	caseData->size = edgeTestCase1Size;
 
 	p1 = spPointCreate(data1,edgeTestCase1MaxDim,1);
 	if (p1 == NULL){
 		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,__FILE__,__FUNCTION__,__LINE__);
-		return;
+		return NULL;
 	}
 
 
@@ -641,17 +683,32 @@ void initializeEdgeTestCase1(){
 	kdArr = Init(edgeTestCase1Points,edgeTestCase1Size);
 	edgeTestCase1Tree = InitKDTree(kdArr, edgeTestCase1SplitMethod);
 	spKDArrayDestroy(kdArr);
+
+
+	caseData->max_dim = edgeTestCase1MaxDim;
+	caseData->split_method = edgeTestCase1SplitMethod;
+	caseData->tree = edgeTestCase1Tree;
+
+	return caseData;
 }
 
-bool runEdgeTestCase1(){
-	if (edgeTestCase1Tree == NULL){
+bool runEdgeTestCase1(treeNodeTestCaseData caseData){
+	if (caseData == NULL){
+		spLoggerSafePrintError(COULD_NOT_CREATE_CASE_DATA,
+						__FILE__, __FUNCTION__,
+								__LINE__);
+		FAIL(COULD_NOT_CREATE_CASE_DATA);
+		return false;
+	}
+
+	if (caseData->tree == NULL){
 		spLoggerSafePrintError(COULD_NOT_CREATE_POINTS_ARRAY,
 						__FILE__, __FUNCTION__,
 								__LINE__);
 		FAIL(COULD_NOT_CREATE_POINTS_ARRAY);
 		return false;
 	}
-	if (edgeTestCase1Points == NULL){
+	if (caseData->points == NULL){
 		spLoggerSafePrintError(COULD_NOT_INITIALIZE_TREE,
 						__FILE__, __FUNCTION__,
 								__LINE__);
@@ -659,26 +716,21 @@ bool runEdgeTestCase1(){
 		return false;
 	}
 
-	ASSERT_TRUE(testKDTree(edgeTestCase1Tree,edgeTestCase1MaxDim,
-			edgeTestCase1SplitMethod,edgeTestCase1Points,edgeTestCase1Size));
+	ASSERT_TRUE(testKDTree(caseData->tree,caseData->max_dim,
+			caseData->split_method,caseData->points,caseData->size));
+
 
 	//root node - leaf with value {2}
-	ASSERT_TRUE(verifyLeaf(edgeTestCase1Tree));
-	ASSERT_TRUE(verifyPointData(edgeTestCase1Tree->data, 1, edgeTestCase1MaxDim,2.0));
+	ASSERT_TRUE(verifyLeaf(caseData->tree));
+	ASSERT_TRUE(verifyPointData(caseData->tree->data, 1, caseData->max_dim,2.0));
 
 	return true;
 }
 
-void destroyEdgeTestCase1(){
-	destroyPointsArray(edgeTestCase1Points,edgeTestCase1Size);
-	edgeTestCase1Points = NULL;
-
-	spKDTreeDestroy(edgeTestCase1Tree, false);
-	edgeTestCase1Tree = NULL;
-}
 
 void runKDTreeNodeTests(){
 	int i;
+	treeNodeTestCaseData case1Data = NULL, edgeCase1Data = NULL, case2Data = NULL;
 	int seed = time(NULL);
 	srand(seed);
 
@@ -686,19 +738,19 @@ void runKDTreeNodeTests(){
 	RUN_TEST(verifyNullArgument);
 
 	//case 1
-	initializeTestCase1();
-	RUN_TEST(runTestCase1);
-	destroyTestCase1();
+	case1Data = initializeTestCase1();
+	RUN_TEST_WITH_PARAM(runTestCase1, case1Data);
+	destroyTestCase(case1Data);
 
 	//case 2
-	initializeTestCase2();
-	RUN_TEST(runTestCase2);
-	destroyTestCase2();
+	case2Data = initializeTestCase2();
+	RUN_TEST_WITH_PARAM(runTestCase2, case2Data);
+	destroyTestCase(case2Data);
 
 	//edge case 1
-	initializeEdgeTestCase1();
-	RUN_TEST(runEdgeTestCase1);
-	destroyEdgeTestCase1();
+	edgeCase1Data = initializeEdgeTestCase1();
+	RUN_TEST_WITH_PARAM(runEdgeTestCase1, edgeCase1Data);
+	destroyTestCase(edgeCase1Data);
 
 	//random tests
 	for (i = 0 ; i< RANDOM_TESTS_COUNT;i++)
