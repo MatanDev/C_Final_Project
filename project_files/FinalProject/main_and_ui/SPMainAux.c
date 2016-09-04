@@ -50,6 +50,19 @@
 
 #define MAIN_RETURNED_ERROR										"An error has been encountered, please check the log file for more information.\n"
 
+#define DEBUG_ENDING_CONTROL_FLOW 								"Ending control flow with return value - "
+#define DEBUG_IMAGES_PRESENTED_NON_GUI							"Similar images are being presented, non GUI mode"
+#define DEBUG_IMAGES_PARSER_FINISHED 							"Images parser finished its work successfully"
+#define DEBUG_WORKING_IMAGE_INITIALIZED 						"Working image initialized successfully"
+#define DEBUG_NUMBER_OF_FEATURES_CALCULATED						"Total number of features calculated"
+#define DEBUG_FEATURES_ARRAY_INITIALIZED						"Features array initialized"
+#define DEBUG_KD_TREE_INITIALIZED  								"KD Tree initialized"
+#define DEBUG_PRIORITY_QUEUE_INITIALIZED						"Priority Queue initialized"
+#define DEBUG_PCA_FILE_IS_VERIFIED 								"PCA File is verified"
+#define DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX 					"Image file is verified at index - "
+#define DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX				"Image .feat file is verified at index - "
+#define DEBUG_LOGGER_HAS_BEEN_CREATED  							"Logger has been created"
+#define DEBUG_RELEVANT_SETTINGS_DATA_LOADED						"Relevant settings data loaded"
 
 char* getConfigFilename(int argc, char** argv) {
 	if (argc == 1)
@@ -96,6 +109,8 @@ void getAsString(const char* message, char* destination) {
 
 void endControlFlow(SPConfig config, SPImageData image,
 		bool isCurrentImageFeaturesArrayAllocated, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
+	spLoggerSafePrintDebugWithIndex(DEBUG_ENDING_CONTROL_FLOW, returnValue,
+				__FILE__, __FUNCTION__, __LINE__);
 	if (returnValue < 0){
 		printf(MAIN_RETURNED_ERROR);
 	}
@@ -115,6 +130,9 @@ void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
 
 	spVerifyArguments(queryImagePath != NULL && config != NULL && imagesIndicesArray != NULL &&
 			imagesCount >= 0, ERROR_PRESEINTING_IMAGES_NO_GUI_MODE, ); //returns;
+
+	spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_NON_GUI,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	printf(CLOSEST_IMAGES, queryImagePath);
 	fflush(NULL);
@@ -212,12 +230,24 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 	spVal(spImagesParserStartParsingProcess(config, imagesDataList) == SP_DP_SUCCESS, ERROR_PARSING_IMAGES_DATA, false);
 
+	spLoggerSafePrintDebug(DEBUG_IMAGES_PARSER_FINISHED,
+				__FILE__, __FUNCTION__, __LINE__);
+
 	spVal((*currentImageData = initializeWorkingImage()), ERROR_INITIALIZING_QUERY_IMAGE, false);
+
+	spLoggerSafePrintDebug(DEBUG_WORKING_IMAGE_INITIALIZED,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	totalNumOfFeatures = calculateTotalNumOfFeatures(imagesDataList, numOfImages);
 
+	spLoggerSafePrintDebug(DEBUG_NUMBER_OF_FEATURES_CALCULATED,
+				__FILE__, __FUNCTION__, __LINE__);
+
 	spVal((allFeaturesArray = initializeAllFeaturesArray(imagesDataList, numOfImages,
 			totalNumOfFeatures)), ERROR_CREATING_FEATURES_ARRAY, false);
+
+	spLoggerSafePrintDebug(DEBUG_FEATURES_ARRAY_INITIALIZED,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	splitMethod = spConfigGetSplitMethod(config, &configMessage);
 	spValWc(configMessage == SP_CONFIG_SUCCESS,
@@ -227,6 +257,9 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 			splitMethod)), ERROR_CREATING_KD_TREE,
 			free(allFeaturesArray), false);
 
+	spLoggerSafePrintDebug(DEBUG_KD_TREE_INITIALIZED,
+				__FILE__, __FUNCTION__, __LINE__);
+
 	free(allFeaturesArray);
 
 	knn = spConfigGetKNN(config, &configMessage);
@@ -234,6 +267,9 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 	spVal(configMessage == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, false);
 
 	spVal((*bpq = spBPQueueCreate(knn)), ERROR_INITIALIZING_BP_QUEUE, false);
+
+	spLoggerSafePrintDebug(DEBUG_PRIORITY_QUEUE_INITIALIZED,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	return true;
 }
@@ -248,18 +284,25 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 			&& verifyPathAndAvailableFile(tempPath),
 			ERROR_AT_PCA_FILE_PATH, false);
 
+	spLoggerSafePrintDebug(DEBUG_PCA_FILE_IS_VERIFIED,
+				__FILE__, __FUNCTION__, __LINE__);
+
 	//verify images files
 	for (i = 0;i < numOfImages ; i++){
 		spVal((msg = spConfigGetImagePath(tempPath, config, i)) == SP_CONFIG_SUCCESS
 				&& verifyPathAndAvailableFile(tempPath),
 				ERROR_AT_IMAGES_FILE_PATH, false);
-
+		spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX,
+				i,
+					__FILE__, __FUNCTION__, __LINE__);
 		if (!extractFlag){
 			//TODO - maybe load from image ?
 			// or ignore ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=79724
 			spVal((msg = spConfigGetImagePathFeats(tempPath, config, i, true)) == SP_CONFIG_SUCCESS
 					&& verifyPathAndAvailableFile(tempPath),
 					ERROR_AT_IMAGES_FEATURES_FILE_PATH, false);
+			spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX, i,
+						__FILE__, __FUNCTION__, __LINE__);
 		}
 	}
 	return true;
@@ -322,12 +365,16 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
 		printf(ERROR_AT_CREATE_LOGGER, loggerMsgToStr(loggerMsg));
 		return false;
 	}
+	spLoggerSafePrintDebug(DEBUG_LOGGER_HAS_BEEN_CREATED,
+			__FILE__, __FUNCTION__, __LINE__);
 
 	//load relevant data from settings
 	if (loadRelevantSettingsData(*config, numOfImages, numOfSimilarImages, extractFlag,
 			GUIFlag) != SP_CONFIG_SUCCESS) {
 		return false;
 	}
+	spLoggerSafePrintDebug(DEBUG_RELEVANT_SETTINGS_DATA_LOADED,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	return verifyImagesNumbersLimits(*config, *numOfImages, numOfSimilarImages) &&
 			verifyImagesFiles(*config, *numOfImages, *extractFlag);

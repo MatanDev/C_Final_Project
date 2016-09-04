@@ -26,6 +26,8 @@ extern "C" {
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
 #define	ERROR_SEARCHING_IMAGES						"An error encountered during querying the database, thus similar images could not be found"
 
+#define DEBUG_IMAGES_PRESENTED_GUI					"Similar images are being presented - GUI mode"
+
 #define RUN_ACTION									false
 
 #define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
@@ -56,7 +58,6 @@ extern "C" {
                 } \
         } while (0)
 
-//TODO - log - debug
 //TODO - check params in inner functions (convention) - as warning (for all files)
 //TODO - logger documentation in inner functions (convention)
 //TODO - remove fflush(NULL) at production
@@ -157,6 +158,8 @@ void proccessQueryAndPresentImages(SPConfig config, SPImageData currentImageData
 			numOfSimilarImages, bpq)) != NULL , ERROR_SEARCHING_IMAGES, ); //on error returns
 
 	if (GUIFlag) {
+		spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_GUI,
+					__FILE__, __FUNCTION__, __LINE__);
 		for (i = 0; i< numOfSimilarImages; i++) {
 			spValWarning(spConfigGetImagePath(tempPath, config, similarImagesIndices[i]) == SP_CONFIG_SUCCESS,
 									WARNING_COULD_NOT_LOAD_IMAGE_PATH,
@@ -241,7 +244,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '-3' - in case of error at the logger
  * '0'  - success
  */
-/*
+
 int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
@@ -265,4 +268,3 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
-*/

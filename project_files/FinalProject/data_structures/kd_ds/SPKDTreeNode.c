@@ -4,11 +4,15 @@
 #include "SPKDTreeNode.h"
 #include "../../general_utils/SPUtils.h"
 
-#define INVALID_DIM 					-1
-#define ERROR_CREATING_KD_INNER_NODE 	"Could not create inner node for KD tree"
-#define ERROR_INITIALIZING_KD_TREE	 	"Could not create KD tree"
-#define WARNING_KDTREE_NODE_NULL		"KDTreeNode object is null when destroy is called"
+#define INVALID_DIM 								-1
+#define ERROR_CREATING_KD_INNER_NODE 				"Could not create inner node for KD tree"
+#define ERROR_INITIALIZING_KD_TREE	 				"Could not create KD tree"
+#define WARNING_KDTREE_NODE_NULL					"KDTreeNode object is null when destroy is called"
 
+
+#define DEBUG_INITIALIZING_KD_TREE  				"Initializing KD Tree"
+#define DEBUG_CREATED_LEAF_NODE_INDEX  				"Created leaf, node->->index = "
+#define DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH 	"Creating inner node for rec depth - "
 
 
 SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
@@ -22,6 +26,8 @@ SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
 }
 
 SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
+	spLoggerSafePrintDebug(DEBUG_INITIALIZING_KD_TREE,
+				__FILE__, __FUNCTION__, __LINE__);
 	return internalInitKDTree(array, splitMethod, 0);
 }
 
@@ -31,13 +37,15 @@ SPKDTreeNode onErrorInInitKDTree(SPKDTreeNode node) {
 }
 
 SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
+	assert(array->pointsArray != NULL);
 	node->dim = INVALID_DIM;
 	node->val = NULL;
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
-	assert(array->pointsArray != NULL);
 	node->data = array->pointsArray[0];
-
+	spLoggerSafePrintDebugWithIndex(DEBUG_CREATED_LEAF_NODE_INDEX,
+			spPointGetIndex(node->data),
+				__FILE__, __FUNCTION__, __LINE__);
 	return node;
 }
 
@@ -60,7 +68,8 @@ int getSplitDimInMaxSpreadMethod(SPKDArray array) {
 SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth, int splitDim) {
 	SPKDArrayPair splitResPair = Split(array, splitDim);
-
+	spLoggerSafePrintDebugWithIndex(DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH, recDepth,
+				__FILE__, __FUNCTION__, __LINE__);
 	if (!splitResPair)
 		return onErrorInInitKDTree(node);
 

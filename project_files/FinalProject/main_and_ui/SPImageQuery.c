@@ -10,11 +10,13 @@
 
 #define ERROR_EMPTY_QUEUE 							"Queue is empty"
 #define ERROR_K_NEAREST_NEIGHBORS 					"Error in kNearestNeighbors func"
-#define ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE 	\
-	"Error in getSimilarImagesIndicesToFeature func"
-#define ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE 		\
-	"Error in updateCounterArrayPerFeature func"
+#define ERROR_GET_SIMILAR_IMAGES_INDICES_TO_FEAURE 	"Error in getSimilarImagesIndicesToFeature func"
+#define ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE 		"Error in updateCounterArrayPerFeature func"
 #define ERROR_GENERATING_SIMILAR_IMAGES				"Error generating similar images"
+
+#define DEBUG_SIMILAR_IMAGES_ENDED 					"Similar images search process ended, selecting best images"
+#define DEBUG_SIMILAR_IMAGES_SEARCH_STARTED 		"Similar images search process started"
+
 
 int* initializeCounterArray(int size) {
 	int i, *counterArray;
@@ -59,6 +61,8 @@ int* getSimilarImagesIndicesToFeature(SPPoint relevantFeature, SPKDTreeNode kdTr
 
 	return createSimImagesToFeatureIndicesArray(bpq, *finalQueueSize);
 }
+
+
 
 bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
 		SPKDTreeNode kdTree, SPBPQueue bpq) {
@@ -109,12 +113,18 @@ int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfIm
 	spValRn((counterArray = initializeCounterArray(numOfImages)),
 			ERROR_GENERATING_SIMILAR_IMAGES);
 
+	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_SEARCH_STARTED,
+				__FILE__, __FUNCTION__, __LINE__);
+
 	for (i = 0; i < workingImage->numOfFeatures; i++) {
 		spValWcRn((updateCounterArrayPerFeature(counterArray, (workingImage->featuresArray)[i],
 				kdTree, bpq)),
 				ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE,
 				free(counterArray));
 	}
+
+	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_ENDED,
+				__FILE__, __FUNCTION__, __LINE__);
 
 	topItems = getTopItems(counterArray, numOfImages, numOfSimilarImages);
 

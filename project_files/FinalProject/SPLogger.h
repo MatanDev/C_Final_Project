@@ -273,4 +273,35 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
  * for parameters spec's and method behavior please refer to 'spLoggerPrintMsg'
  */
 void spLoggerSafePrintMsg(const char* msg);
+
+
+/*
+ * The method wrap the 'spLoggerSafePrintDebug' method with an added index,
+ * it is used for debug messages with relevant indexes such as image index or point index.
+ *
+ * 	Prints the debug message. The debug message format is given below:
+ * 	---DEBUG---
+ * 	- file: <file>
+ *  - function: <function>
+ *  - line: <line>
+ *  - message: <msg> <index>
+ *
+ * 	<file> 	   - is the string given by file, it represents the file in which
+ * 		   		 the debug print call occurred.
+
+ * 	<function> - is the string given by function, it represents the function in which
+ * 			   	 the debug print call occurred.
+ * 	<line> 	   - is the string given by line, it represents the line in which
+ * 		   		 the debug print call occurred
+ * 	<msg> 	   - is the string given by msg, it contains the msg given by the user
+ *  <index>    - an additional integer data added to the message
+ *
+ * 	Debug messages will be printed at level:
+ *
+ *	SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL
+ *
+ * 	A new line will be printed after the print call.
+ */
+void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file,
+		const char* function, const int line);
 #endif

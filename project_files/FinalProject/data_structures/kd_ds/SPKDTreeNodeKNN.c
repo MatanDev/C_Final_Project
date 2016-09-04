@@ -6,6 +6,8 @@
 #define ERROR_PUSHING_LIST_ELEMENT 							    "Could not add list element due to memory issue, k-NN search failed"
 #define ERROR_CREATING_LIST_ELEMENT 							"Could not create list element, k-NN search failed"
 
+#define DEBUG_KNN_SEARCH_LOOKING_AT_THE_OTHER_PLANE 			"Knn search, looking at the other plane, dim index - "
+
 double getSquaredDistance(double a, double b){
 	return (a-b)*(a-b);
 }
@@ -13,6 +15,8 @@ double getSquaredDistance(double a, double b){
 SPKDTreeNode getSecondChild(SPKDTreeNode tree, SPKDTreeNode firstChild){
 	return firstChild == tree->kdtLeft ? tree->kdtRight : tree->kdtLeft;
 }
+
+
 
 bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
 	SPListElement elem = NULL;
@@ -63,6 +67,9 @@ bool kNearestNeighbors(SPKDTreeNode curr, SPBPQueue bpq, SPPoint queryPoint){
 
 	//check the other plane if needed
 	if (!spBPQueueIsFull(bpq) || isCrossingHypersphere(curr, relevantAxisValue, spBPQueueMaxValue(bpq))){
+		spLoggerSafePrintDebugWithIndex(
+				DEBUG_KNN_SEARCH_LOOKING_AT_THE_OTHER_PLANE, curr->dim,
+					__FILE__, __FUNCTION__, __LINE__);
 		return kNearestNeighbors(getSecondChild(curr,candidate) ,bpq,queryPoint);
 	}
 

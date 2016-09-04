@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <string.h>
 
 #define ERROR_MSG 									"---ERROR---\n"
 #define WARNING_MSG  								"---WARNING---\n"
@@ -19,6 +20,7 @@
 #define LOGGER_WRITE_FAIL_MSG						"SP_LOGGER_WRITE_FAIL"
 #define LOGGER_SUCCESS_MSG							"SP_LOGGER_SUCCESS"
 #define ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM 	"Error printing to logger, exiting program.\n"
+#define FAILED_TO_CREATE_MESSAGE_WITH_INDEX 		"Failed to create message with index"
 //File open mode
 #define SP_LOGGER_OPEN_MODE 						"w"
 
@@ -122,8 +124,6 @@ const char* getLoggerNameFromType(enum sp_logger_level_t logType) {
 			return NULL;
 	}
 }
-
-
 
 /*
  * This method gets log level enum and returns true iff it should write the log to the file
@@ -276,6 +276,27 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
 
 void spLoggerSafePrintMsg(const char* msg){
 	SP_LOGGER_MSG message = spLoggerPrintMsg(msg);
+
+	if (message != SP_LOGGER_SUCCESS){
+		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		exit(-3);
+	}
+}
+
+void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file,
+		const char* function, const int line) {
+	char* updatedMessage = NULL;
+	SP_LOGGER_MSG message;
+	updatedMessage = (char*)calloc(strlen(msg) + 20, sizeof(char));
+	if (updatedMessage != NULL){
+		sprintf(updatedMessage, "%s %d", msg, index);
+		message = spLoggerPrintDebug(updatedMessage,file,function,line);
+	}
+	else {
+		message = spLoggerPrintWarning(FAILED_TO_CREATE_MESSAGE_WITH_INDEX,
+				file, function, line);
+		message = spLoggerPrintDebug(msg,file,function,line);
+	}
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);

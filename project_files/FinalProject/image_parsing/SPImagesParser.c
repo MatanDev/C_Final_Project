@@ -49,6 +49,13 @@
 #define WARNING_FEATURES_NULL_PRE_DATABASE		   "Warning, features matrix is null pre database creation"
 #define WARNING_VERY_LONG_LINE 			   	   	   "Warning : A very long line is being read from a features file\n"
 
+#define DEBUG_GET_LINE_BUFFER_DOUBLED  			   "Get line buffer doubled"
+#define DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX 	   "Loading image from .feat file at index - "
+#define DEBUG_SAVING_IMAGE_TO_FEAT_INDEX 		   "Saving image to .feat file at index - "
+#define DEBUG_LOADING_IMAGES_DATA 				   "Loading images data from .feat files"
+#define DEBUG_DONE_LOADING_IMAGES_DATA 			   "Done loading images data from .feat files"
+#define DEBUG_SAVING_IMAGES_DATA 				   "Saving images data to .feat files"
+#define DEBUG_DONE_SAVING_IMAGES_DATA      		   "Done saving images data to .feat files"
 
 bool isAFullLine(char* line){
 	return strlen(line) > 0 && line[strlen(line)-1] == BREAKLINE_NO_CR;
@@ -80,7 +87,8 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
 		strcpy(tempLine,line);
 
 		buffer_size <<= 1; // buffer *= 2
-
+		spLoggerSafePrintDebug(DEBUG_GET_LINE_BUFFER_DOUBLED,
+					__FILE__, __FUNCTION__, __LINE__);
 		if (buffer_size > 2048) {
 			spLoggerSafePrintWarning(WARNING_VERY_LONG_LINE,
 					__FILE__, __FUNCTION__, __LINE__);
@@ -308,6 +316,8 @@ SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SP
 			SP_DP_INVALID_ARGUMENT);
 
 	for (i = 0 ;i < numOfImages ; i++) {
+		spLoggerSafePrintDebugWithIndex(DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX, i,
+					__FILE__, __FUNCTION__, __LINE__);
 		spVal((message = loadImageData(config, configSignature, i , allImagesData)) == SP_DP_SUCCESS,
 				ERROR_LOADING_IMAGES_DATA,
 				message);
@@ -515,6 +525,8 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
 					SP_DP_INVALID_ARGUMENT);
 
 	for (i= 0 ; i < numOfImages; i++) {
+		spLoggerSafePrintDebugWithIndex(DEBUG_SAVING_IMAGE_TO_FEAT_INDEX, i,
+					__FILE__, __FUNCTION__, __LINE__);
 		outputMessage = saveImageData(config, configSignature, imagesData[i]);
 		//TODO - ask in forum, maybe we don't want to stop the process ...
 		spVal(outputMessage == SP_DP_SUCCESS, ERROR_WRITING_IMAGES_DATA, outputMessage);
@@ -543,10 +555,18 @@ SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageD
 	spVal(configSignature != NULL, ERROR_AT_IMAGE_PARSING_PROCESS, SP_DP_INVALID_ARGUMENT);
 
 	if (!createDatabase) {
+		spLoggerSafePrintDebug(DEBUG_LOADING_IMAGES_DATA,
+					__FILE__, __FUNCTION__, __LINE__);
 		msg = loadAllImagesData(config, configSignature, allImagesData);
+		spLoggerSafePrintDebug(DEBUG_DONE_LOADING_IMAGES_DATA,
+					__FILE__, __FUNCTION__, __LINE__);
 	} else {
 		// already loaded allImagesData at main
+		spLoggerSafePrintDebug(DEBUG_SAVING_IMAGES_DATA,
+					__FILE__, __FUNCTION__, __LINE__);
 		msg = saveAllImagesData(config, configSignature, allImagesData);
+		spLoggerSafePrintDebug(DEBUG_DONE_SAVING_IMAGES_DATA,
+					__FILE__, __FUNCTION__, __LINE__);
 	}
 	spVal(msg == SP_DP_SUCCESS, ERROR_AT_IMAGE_PARSING_PROCESS, msg);
 

@@ -7,8 +7,6 @@ extern "C" {
 #include <stdio.h>
 
 //TODO - add unit tests for main aux and image query
-//TODO - testers contains a lot of static vars!!!!!
-
 
 #define FAIL(msg) do {\
 		fprintf(stderr,"%s Line %d: %s", __FILE__, __LINE__, msg);\
