@@ -495,9 +495,8 @@ bool runTestCase1(treeNodeTestCaseData caseData){
 
 void destroyTestCase(treeNodeTestCaseData testCase) {
 	if (testCase){
-		destroyPointsArray(testCase->points, testCase->size);
-		testCase->points = NULL;
 		spKDTreeDestroy(testCase->tree, true);
+		spFree(testCase->points);
 		free(testCase);
 	}
 }

@@ -279,6 +279,7 @@ void spLoggerSafePrintMsg(const char* msg){
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+		//TODO - memory leak here... cant handle without static or without calling a method from main?
 		exit(-3);
 	}
 }
@@ -291,6 +292,7 @@ void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file
 	if (updatedMessage != NULL){
 		sprintf(updatedMessage, "%s %d", msg, index);
 		message = spLoggerPrintDebug(updatedMessage,file,function,line);
+		free(updatedMessage);
 	}
 	else {
 		message = spLoggerPrintWarning(FAILED_TO_CREATE_MESSAGE_WITH_INDEX,
