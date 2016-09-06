@@ -12,6 +12,11 @@
 #define END_OF_STRING							   '\0'
 #define DEF_LINE_LEN                               512
 
+//these macros are used to define how many images do we allow to fail at the
+//save to .feats or load from .feats process
+#define MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS	   20
+#define MAX_ERRORS_PERCENTAGE_AT_LOAD_PROCESS	   20
+
 #define HEADER_STRING_FORMAT                       "%d,%d\n"
 #define POINT_STRING_FORMAT                        "%d%s\n"
 #define INTERNAL_POINT_DATA_STRING_FORMAT          ",%f%s"
@@ -32,10 +37,10 @@
 #define ERROR_PARSING_STRING_TO_POINT              "Error parsing point from string"
 #define ERROR_CREATING_IMAGE_STRING_HEADER         "Error converting image to string - error in creating header"
 #define ERROR_PARSING_IMAGE_DATA_FROM_HEADER       "Error parsing image data from header"
-#define ERROR_LOADING_IMAGES_DATA                  "Error at loading images data"
+#define ERROR_LOADING_IMAGES_DATA                  "Error at loading images data\n max limit of errors has been reached."
 #define ERROR_LOADING_IMAGE_DATA                   "Error at loading an image data"
 #define ERROR_AT_READING_FEATURES_FROM_FILE        "Problem at reading features from file"
-#define ERROR_WRITING_IMAGES_DATA                  "Error at writing images data"
+#define ERROR_WRITING_IMAGES_DATA                  "Error at writing images data\n max limit of errors has been reached."
 #define ERROR_WRITING_IMAGE_DATA                   "Error at writing an image data"
 #define ERROR_AT_IMAGE_PARSING_PROCESS             "Error at image parsing process"
 #define IMAGE_ERROR_DETAILS_FORMAT                 "Problem: Image index : %d \n Description : %s"
@@ -48,6 +53,8 @@
 #define WARNING_CONFIG_SHOULD_NOT_BE_NULL		   "Warning, could not extract config data, when config should not be null"
 #define WARNING_FEATURES_NULL_PRE_DATABASE		   "Warning, features matrix is null pre database creation"
 #define WARNING_VERY_LONG_LINE 			   	   	   "Warning : A very long line is being read from a features file\n"
+#define WARNING_SAVE_IMAGE_FEAT_LIMIT_NOT_REACHED  "Could not save image .feat file\n max limit of saves errors has not yet been reached."
+#define WARNING_LOAD_IMAGE_FEAT_LIMIT_NOT_REACHED  "Could not load image .feat file\n max limit of load errors has not yet been reached."
 
 #define DEBUG_GET_LINE_BUFFER_DOUBLED  			   "Get line buffer doubled"
 #define DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX 	   "Loading image from .feat file at index - "
@@ -305,22 +312,34 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
 SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SPImageData* allImagesData){
 	SP_CONFIG_MSG configMessage = SP_CONFIG_SUCCESS;
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
-	int i, numOfImages;
+	int i, numOfImages, maxFailsAllowed;
 
 	spVerifyArguments(allImagesData != NULL && config != NULL && configSignature != NULL,
 			ERROR_LOADING_IMAGES_DATA, SP_DP_INVALID_ARGUMENT);
 
-	numOfImages = spConfigGetNumOfImages(config,&configMessage);
-
+	numOfImages = spConfigGetNumOfImages(config, &configMessage);
 	spVal(configMessage == SP_CONFIG_SUCCESS, ERROR_LOADING_IMAGES_DATA,
 			SP_DP_INVALID_ARGUMENT);
+
+	maxFailsAllowed = numOfImages * MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS / 100;
 
 	for (i = 0 ;i < numOfImages ; i++) {
 		spLoggerSafePrintDebugWithIndex(DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX, i,
 					__FILE__, __FUNCTION__, __LINE__);
-		spVal((message = loadImageData(config, configSignature, i , allImagesData)) == SP_DP_SUCCESS,
-				ERROR_LOADING_IMAGES_DATA,
-				message);
+		if ((message = loadImageData(config, configSignature, i , allImagesData)) != SP_DP_SUCCESS){
+			if (maxFailsAllowed == 0){ 				//reached limit - report error and return message
+				spLoggerSafePrintError(ERROR_LOADING_IMAGES_DATA,
+									__FILE__, __FUNCTION__, __LINE__);
+				return message;
+
+			} else { //report warning
+				spLoggerSafePrintWarning(WARNING_LOAD_IMAGE_FEAT_LIMIT_NOT_REACHED,
+										__FILE__, __FUNCTION__, __LINE__);
+				resetImageData(allImagesData[i]); //treat as no features
+				maxFailsAllowed--;
+			}
+
+		}
 	}
 
 	return SP_DP_SUCCESS;
@@ -512,12 +531,14 @@ SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImag
 SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, SPImageData* imagesData){
 	SP_DP_MESSAGES outputMessage = SP_DP_SUCCESS;
 	SP_CONFIG_MSG configMessage;
-	int i, numOfImages;
+	int i, numOfImages, maxFailsAllowed;
 
 	spVerifyArguments(config != NULL && imagesData != NULL && configSignature != NULL,
 			ERROR_WRITING_IMAGES_DATA, SP_DP_INVALID_ARGUMENT);
 
 	numOfImages = spConfigGetNumOfImages(config, &configMessage);
+
+	maxFailsAllowed = numOfImages * MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS / 100;
 
 	spValWc(configMessage == SP_CONFIG_SUCCESS, ERROR_INVALID_ARGUMENT,
 			spLoggerSafePrintError(ERROR_WRITING_IMAGES_DATA, __FILE__,__FUNCTION__, __LINE__);
@@ -528,11 +549,22 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
 		spLoggerSafePrintDebugWithIndex(DEBUG_SAVING_IMAGE_TO_FEAT_INDEX, i,
 					__FILE__, __FUNCTION__, __LINE__);
 		outputMessage = saveImageData(config, configSignature, imagesData[i]);
-		//TODO - ask in forum, maybe we don't want to stop the process ...
-		spVal(outputMessage == SP_DP_SUCCESS, ERROR_WRITING_IMAGES_DATA, outputMessage);
+		if (outputMessage != SP_DP_SUCCESS){
+			if (maxFailsAllowed == 0){
+				spLoggerSafePrintError(ERROR_WRITING_IMAGES_DATA,
+									__FILE__, __FUNCTION__, __LINE__);
+				return outputMessage;
+				//log error and return message
+			} else {
+				spLoggerSafePrintWarning(WARNING_SAVE_IMAGE_FEAT_LIMIT_NOT_REACHED,
+										__FILE__, __FUNCTION__, __LINE__);
+				//log warning
+				maxFailsAllowed--;
+			}
+		}
 	}
 
-	return outputMessage;
+	return SP_DP_SUCCESS;
 }
 
 SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageData* allImagesData){

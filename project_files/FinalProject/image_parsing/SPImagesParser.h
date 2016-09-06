@@ -362,6 +362,11 @@ SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImag
 /*
  * The method saves to the disk a bulk of images data items at a CSV format.
  * The method will override existing files with the same name.
+ * The method will consider a success if it can write more than a given percentage of .feats file,
+ * this percentage is defined with the macro 'MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS',
+ * if more than MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS % of the images fails, the method will announce
+ * a failure and return the last failure message reason
+ *
  * In case of failure the method will stop writing files, those who were written would not be deleted
  *
  *
@@ -375,7 +380,8 @@ SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImag
  * SP_DP_FILE_WRITE_ERROR - error writing to file
  * SP_DP_SUCCESS - file created and saved successfully
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors to the logger, and warning in case of write failures that
+ * 				did not reached the MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS limit.
  */
 SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, SPImageData* imagesData);
 

@@ -27,13 +27,14 @@
 #define WARNING_ZERO_FEATURES_FROM_IMAGE						"Warning, some images have zero features"
 #define WARNING_IMAGES_COUNT_CROPPED							\
 	"Warning - the number of similar > number of images, only 'number of images' similar images will be presented when querying"
+#define WARNING_AT_IMAGES_FEATURES_FILE_PATH 					\
+	"An image features file does not exists or not available, please follow the logger for further information"
 
 #define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
 #define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
 #define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
-#define ERROR_AT_IMAGES_FEATURES_FILE_PATH 						"Error at images features file path, image does not exists or not available"
 #define ERROR_AT_PCA_FILE_PATH									"Error at PCA file path, does not exists or not available"
 #define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s"
 #define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s"
@@ -289,20 +290,20 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 
 	//verify images files
 	for (i = 0;i < numOfImages ; i++){
+		if (extractFlag){
 		spVal((msg = spConfigGetImagePath(tempPath, config, i)) == SP_CONFIG_SUCCESS
 				&& verifyPathAndAvailableFile(tempPath),
 				ERROR_AT_IMAGES_FILE_PATH, false);
 		spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX,
 				i,
 					__FILE__, __FUNCTION__, __LINE__);
-		if (!extractFlag){
-			//TODO - maybe load from image ?
-			// or ignore ? http://moodle.tau.ac.il/mod/forum/discuss.php?d=79724
-			spVal((msg = spConfigGetImagePathFeats(tempPath, config, i, true)) == SP_CONFIG_SUCCESS
+		}
+		else {
+			spValWarning((msg = spConfigGetImagePathFeats(tempPath, config, i, true)) == SP_CONFIG_SUCCESS
 					&& verifyPathAndAvailableFile(tempPath),
-					ERROR_AT_IMAGES_FEATURES_FILE_PATH, false);
-			spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX, i,
-						__FILE__, __FUNCTION__, __LINE__);
+					WARNING_AT_IMAGES_FEATURES_FILE_PATH, continue,
+					spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX, i,
+							__FILE__, __FUNCTION__, __LINE__));
 		}
 	}
 	return true;
