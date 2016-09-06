@@ -21,7 +21,7 @@ extern "C" {
 #define ERROR_LOADING_IMAGE_PATH 					"Error creating image path"
 #define ERROR_INIT_CONFIG 							"Error initializing configurations and settings"
 #define ERROR_INIT_IMAGES 							"Error at initialize images data items process"
-#define ERROR_INIT_KDTREE 							"Error building the KD-tree data structure"
+#define ERROR_INIT_KDTREE_OR_DATA 					"Error building the data structures"
 #define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
 #define	ERROR_SEARCHING_IMAGES						"An error encountered during querying the database, thus similar images could not be found"
@@ -115,7 +115,7 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 	}
 
 	spValWc((initializeWorkingImageKDTreeAndBPQueue(*config, imagesDataList,
-		currentImageData, kdTree, bpq, *numOfImages)), ERROR_INIT_KDTREE,
+		currentImageData, kdTree, bpq, *numOfImages)), ERROR_INIT_KDTREE_OR_DATA,
 			freeAllImagesData(imagesDataList, *numOfImages, true),
 			IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE);
 
@@ -244,7 +244,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '-3' - in case of error at the logger
  * '0'  - success
  */
-
+/*
 int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
@@ -268,3 +268,4 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
+*/

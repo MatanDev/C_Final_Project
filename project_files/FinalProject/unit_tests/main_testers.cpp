@@ -13,7 +13,7 @@ Please read the following regarding the unit tests:
  -----------------------------------------------------------------------------------------------------------------------------------*/
 
 
-/*#include <cstring>
+#include <cstring>
 #include <cassert>
 #include <cstdio>
 #include <cctype>
@@ -49,8 +49,8 @@ int main() {
 
 	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	RunImagesParserTests(config);
-	//runConfigTests();
+	//RunImagesParserTests(config);
+	runConfigTests();
 	//runKDArrayTests();
 	//runKDTreeNodeTests();
 	//runKDTreeNodeKNNTests();
@@ -61,4 +61,3 @@ int main() {
 	spLoggerDestroy();
 	return 0;
 }
-*/

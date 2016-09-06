@@ -1,0 +1,95 @@
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigIsExtractionMode
+- line: 484
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigMinimalGui
+- line: 488
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetNumOfImages
+- line: 492
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetNumOfFeatures
+- line: 496
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCADim
+- line: 500
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetNumOfSimilarImages
+- line: 504
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 531
+- message: The given index is bigger than the number of images
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 528
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 528
+- message: The given path pointer is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 529
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 529
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 528
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetImagePathFeats
+- line: 528
+- message: The given path pointer is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 550
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 550
+- message: The given path pointer is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 551
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 551
+- message: The given configuration instance is not valid
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 550
+- message: Error Invalid argument
+---ERROR---
+- file: ..\SPConfig.c
+- function: spConfigGetPCAPath
+- line: 550
+- message: The given path pointer is not valid

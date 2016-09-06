@@ -7,7 +7,7 @@
 
 bool testGivenConfFile() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("spcbir.config", &msg); //TODO - this should be another file so it wont mess up other stuff
+	SPConfig config = spConfigCreate("./unit_tests/spcbirTestCase1.config", &msg);
 	char imagePath[100];
 	char pcaPath[100];
 
