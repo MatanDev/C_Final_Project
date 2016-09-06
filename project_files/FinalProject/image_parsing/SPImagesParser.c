@@ -324,8 +324,8 @@ SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SP
 	maxFailsAllowed = numOfImages * MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS / 100;
 
 	for (i = 0 ;i < numOfImages ; i++) {
-		spLoggerSafePrintDebugWithIndex(DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX, i,
-					__FILE__, __FUNCTION__, __LINE__);
+		//spLoggerSafePrintDebugWithIndex(DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX, i,
+		//			__FILE__, __FUNCTION__, __LINE__);
 		if ((message = loadImageData(config, configSignature, i , allImagesData)) != SP_DP_SUCCESS){
 			if (maxFailsAllowed == 0){ 				//reached limit - report error and return message
 				spLoggerSafePrintError(ERROR_LOADING_IMAGES_DATA,

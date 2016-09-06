@@ -304,4 +304,17 @@ void spLoggerSafePrintMsg(const char* msg);
  */
 void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file,
 		const char* function, const int line);
+
+/*
+ * The method created an updated message with a time stamp for the input message, in
+ * case of failure it returns NULL and report the error
+ *
+ * @param message - the input message
+ *
+ * @returns - an output message that contains the input message with a time stamp
+ *
+ * @logger - logs relevant errors to the logger
+ */
+char* tryAddTimestamp(const char* msg);
+
 #endif

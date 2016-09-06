@@ -67,9 +67,9 @@ bool kNearestNeighbors(SPKDTreeNode curr, SPBPQueue bpq, SPPoint queryPoint){
 
 	//check the other plane if needed
 	if (!spBPQueueIsFull(bpq) || isCrossingHypersphere(curr, relevantAxisValue, spBPQueueMaxValue(bpq))){
-		spLoggerSafePrintDebugWithIndex(
-				DEBUG_KNN_SEARCH_LOOKING_AT_THE_OTHER_PLANE, curr->dim,
-					__FILE__, __FUNCTION__, __LINE__);
+		//spLoggerSafePrintDebugWithIndex(
+		//		DEBUG_KNN_SEARCH_LOOKING_AT_THE_OTHER_PLANE, curr->dim,
+		//			__FILE__, __FUNCTION__, __LINE__);
 		return kNearestNeighbors(getSecondChild(curr,candidate) ,bpq,queryPoint);
 	}
 

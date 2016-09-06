@@ -35,7 +35,7 @@
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
 #define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
 #define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
-#define ERROR_AT_PCA_FILE_PATH									"Error at PCA file path, does not exists or not available"
+#define ERROR_AT_PCA_FILE_PATH									"Error at generating PCA file path"
 #define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s"
 #define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s"
 #define ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG					"Failed to get logger level from configuration with message %s"
@@ -110,8 +110,8 @@ void getAsString(const char* message, char* destination) {
 
 void endControlFlow(SPConfig config, SPImageData image,
 		bool isCurrentImageFeaturesArrayAllocated, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
-	spLoggerSafePrintDebugWithIndex(DEBUG_ENDING_CONTROL_FLOW, returnValue,
-				__FILE__, __FUNCTION__, __LINE__);
+	//spLoggerSafePrintDebugWithIndex(DEBUG_ENDING_CONTROL_FLOW, returnValue,
+	//			__FILE__, __FUNCTION__, __LINE__);
 	if (returnValue < 0){
 		printf(MAIN_RETURNED_ERROR);
 	}
@@ -281,8 +281,8 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	//verify PCA file
-	spVal((msg = spConfigGetPCAPath(tempPath, config)) == SP_CONFIG_SUCCESS
-			&& verifyPathAndAvailableFile(tempPath),
+	spVal((msg = spConfigGetPCAPath(tempPath, config)) == SP_CONFIG_SUCCESS,
+		//	&& verifyPathAndAvailableFile(tempPath),
 			ERROR_AT_PCA_FILE_PATH, false);
 
 	spLoggerSafePrintDebug(DEBUG_PCA_FILE_IS_VERIFIED,

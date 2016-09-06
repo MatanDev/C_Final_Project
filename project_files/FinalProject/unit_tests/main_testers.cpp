@@ -12,7 +12,7 @@ Please read the following regarding the unit tests:
   convenient way.
  -----------------------------------------------------------------------------------------------------------------------------------*/
 
-
+/*
 #include <cstring>
 #include <cassert>
 #include <cstdio>
@@ -61,3 +61,4 @@ int main() {
 	spLoggerDestroy();
 	return 0;
 }
+*/

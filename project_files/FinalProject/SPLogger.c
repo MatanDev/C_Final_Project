@@ -4,11 +4,14 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
+#include <time.h>
+#include "general_utils/SPUtils.h"
 
 #define ERROR_MSG 									"---ERROR---\n"
 #define WARNING_MSG  								"---WARNING---\n"
 #define INFO_MSG  									"---INFO---\n"
 #define DEBUG_MSG  									"---DEBUG---\n"
+#define TIMESTAMP_MAX_LEN							100
 
 #define GENERAL_MESSAGE_SKELETON					"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
 #define SHORT_MESSAGE_SKELETON						"%s- message: %s"
@@ -256,7 +259,17 @@ void spLoggerSafePrintWarning(const char* msg, const char* file,
 }
 
 void spLoggerSafePrintInfo(const char* msg) {
-	SP_LOGGER_MSG message = spLoggerPrintInfo(msg);
+	SP_LOGGER_MSG message;
+	char* tempMessage = NULL;
+	tempMessage = tryAddTimestamp(msg);
+
+	if (tempMessage != NULL){
+		message = spLoggerPrintInfo(tempMessage);
+		free(tempMessage);
+	}
+	else {
+		message = spLoggerPrintInfo(msg);
+	}
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
@@ -266,7 +279,18 @@ void spLoggerSafePrintInfo(const char* msg) {
 
 void spLoggerSafePrintDebug(const char* msg, const char* file,
 		const char* function, const int line) {
-	SP_LOGGER_MSG message = spLoggerPrintDebug(msg,file,function,line);
+	SP_LOGGER_MSG message;
+	char* tempMessage = NULL;
+	tempMessage = tryAddTimestamp(msg);
+
+	if (tempMessage != NULL){
+		message = spLoggerPrintDebug(tempMessage,file,function,line);
+		free(tempMessage);
+	}
+	else {
+		message = spLoggerPrintDebug(msg,file,function,line);
+	}
+
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
@@ -279,7 +303,10 @@ void spLoggerSafePrintMsg(const char* msg){
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		//TODO - memory leak here... cant handle without static or without calling a method from main?
+		//TODO - memory leak here :
+		//can't handle without static or without calling a method from main?
+		//anyway the program exists and releases memory so think we should leave like this,
+		//Although  it rises at valgrind if logger file path is problematic
 		exit(-3);
 	}
 }
@@ -287,21 +314,27 @@ void spLoggerSafePrintMsg(const char* msg){
 void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file,
 		const char* function, const int line) {
 	char* updatedMessage = NULL;
-	SP_LOGGER_MSG message;
+
 	updatedMessage = (char*)calloc(strlen(msg) + 20, sizeof(char));
 	if (updatedMessage != NULL){
 		sprintf(updatedMessage, "%s %d", msg, index);
-		message = spLoggerPrintDebug(updatedMessage,file,function,line);
+		spLoggerSafePrintDebug(updatedMessage,file,function,line);
 		free(updatedMessage);
 	}
 	else {
-		message = spLoggerPrintWarning(FAILED_TO_CREATE_MESSAGE_WITH_INDEX,
+		spLoggerSafePrintWarning(FAILED_TO_CREATE_MESSAGE_WITH_INDEX,
 				file, function, line);
-		message = spLoggerPrintDebug(msg,file,function,line);
+		spLoggerSafePrintDebug(msg,file,function,line);
 	}
+}
 
-	if (message != SP_LOGGER_SUCCESS){
-		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		exit(-3);
-	}
+
+char* tryAddTimestamp(const char* message){
+	char* updatedMessage = NULL;
+	time_t ltime = time(NULL);
+	spMinimalVerifyArgumentsRn(message != NULL);
+	spCalloc(updatedMessage, char, strlen(message) + TIMESTAMP_MAX_LEN);
+	spValWcRn(sprintf(updatedMessage, "%s%s",asctime(localtime(&ltime)),message)>= 0 ,
+			"Error creating time stamp", free(updatedMessage));
+	return updatedMessage;
 }

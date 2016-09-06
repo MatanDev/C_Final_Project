@@ -43,9 +43,9 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
 	node->data = array->pointsArray[0];
-	spLoggerSafePrintDebugWithIndex(DEBUG_CREATED_LEAF_NODE_INDEX,
-			spPointGetIndex(node->data),
-				__FILE__, __FUNCTION__, __LINE__);
+	//spLoggerSafePrintDebugWithIndex(DEBUG_CREATED_LEAF_NODE_INDEX,
+	//		spPointGetIndex(node->data),
+	//			__FILE__, __FUNCTION__, __LINE__);
 	return node;
 }
 
@@ -68,8 +68,8 @@ int getSplitDimInMaxSpreadMethod(SPKDArray array) {
 SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth, int splitDim) {
 	SPKDArrayPair splitResPair = Split(array, splitDim);
-	spLoggerSafePrintDebugWithIndex(DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH, recDepth,
-				__FILE__, __FUNCTION__, __LINE__);
+	//spLoggerSafePrintDebugWithIndex(DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH, recDepth,
+	//			__FILE__, __FUNCTION__, __LINE__);
 	if (!splitResPair)
 		return onErrorInInitKDTree(node);
 
