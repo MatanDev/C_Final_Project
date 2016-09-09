@@ -2,7 +2,6 @@
 #include "../../general_utils/SPUtils.h"
 #include "assert.h"
 
-//we know its memory problem because the pushLeafToQueue pre assumes valid arguments
 #define ERROR_PUSHING_LIST_ELEMENT 							    "Could not add list element due to memory issue, k-NN search failed"
 #define ERROR_CREATING_LIST_ELEMENT 							"Could not create list element, k-NN search failed"
 
@@ -21,8 +20,11 @@ SPKDTreeNode getSecondChild(SPKDTreeNode tree, SPKDTreeNode firstChild){
 bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
 	SPListElement elem = NULL;
 	SP_BPQUEUE_MSG queueMessage;
-
-	spVal((elem = spListElementCreate(spPointGetIndex(currPoint), spPointL2SquaredDistance(currPoint, queryPoint))),
+	double distance = spPointL2SquaredDistance(currPoint, queryPoint);
+	//TODO - talk about this...
+	if (distance <= epsilon) // this is the most precise we can get => any lesser number should be treated as same point
+		distance = 0;
+	spVal((elem = spListElementCreate(spPointGetIndex(currPoint), distance)),
 			ERROR_CREATING_LIST_ELEMENT, false);
 
 	queueMessage = spBPQueueEnqueue(bpq, elem);
