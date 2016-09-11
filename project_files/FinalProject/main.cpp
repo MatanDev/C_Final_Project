@@ -58,7 +58,6 @@ extern "C" {
                 } \
         } while (0)
 
-//TODO - check params in inner functions (convention) - as warning (for all files)
 //TODO - logger documentation in inner functions (convention)
 //TODO - remove fflush(NULL) at production
 //TODO - we did not handle this - http://moodle.tau.ac.il/2015/mod/forum/discuss.php?d=80153

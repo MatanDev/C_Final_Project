@@ -547,7 +547,7 @@ char* duplicateString(const char* str);
  *
  * @logger - the method logs relevant errors
  */
-char* getSignature(const SPConfig config); //TODO - (matan) need to add tests for this..
+char* getSignature(const SPConfig config);
 
 /*
  * The method crop's the size of similar images to the size of images.
@@ -560,5 +560,5 @@ char* getSignature(const SPConfig config); //TODO - (matan) need to add tests fo
  *
  * @logger - the method logs relevant errors
  */
-SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config); //TODO - (matan) need to add tests for this..
+SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
 #endif /* SPCONFIG_H_ */
