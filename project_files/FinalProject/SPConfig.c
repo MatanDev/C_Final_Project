@@ -111,6 +111,15 @@ struct sp_config_t {
 	char* spLoggerFilename;
 };
 
+char* duplicateString(const char *str) {
+	char* duplicated;
+    int len = 1; // for '\0'
+    len += strlen(str);
+    spCalloc(duplicated, char, len);
+    strcpy(duplicated, str);
+    return duplicated;
+}
+
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
 		if ((*field = duplicateString(def)) == NULL) {
@@ -138,8 +147,8 @@ void initConfigToDefault(SPConfig config) {
 	config->spLoggerFilename = NULL;
 }
 
-void printErrorMessage(const char* filename, int lineNum,
-		ERROR_MSG_TYPE errorMsgType, const char* parameterName) {
+void printErrorMessage(const char* filename, int lineNum, ERROR_MSG_TYPE errorMsgType,
+		const char* parameterName) {
 	printf(FILE_TEMPLATE_FOR_ERROR, filename);
 	printf(LINE_TEMPLATE_FOR_ERROR, lineNum);
 	switch(errorMsgType) {
@@ -154,9 +163,8 @@ void printErrorMessage(const char* filename, int lineNum,
 	}
 }
 
-bool parseLine(const char* filename, int lineNum, char* line,
-		char** varName, char** value, bool* isCommentOrEmpty,
-		SP_CONFIG_MSG* msg) {
+bool parseLine(const char* filename, int lineNum, char* line, char** varName, char** value,
+		bool* isCommentOrEmpty, SP_CONFIG_MSG* msg) {
 	unsigned int startIndex, i;
 	char *tmpPtr;
 
@@ -243,24 +251,24 @@ bool isValidInt(char* strVal, int* intVal) {
 	return *endOfParse == NULL_CHARACTER;
 }
 
-bool handlePositiveIntField(int* posIntField, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+bool handlePositiveIntField(int* posIntField, const char* filename, int lineNum,
+		char* value, SP_CONFIG_MSG* msg) {
 	int tmpInt;
 	VALIDATE_INT(tmpInt <= 0);
 	*posIntField = tmpInt;
 	return true;
 }
 
-bool handlePCADimension(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+bool handlePCADimension(SPConfig config, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg) {
 	int tmpInt;
 	VALIDATE_INT(tmpInt < PCA_DIM_MIN_VALID_VAL || tmpInt > PCA_DIM_MAX_VALID_VAL);
 	config->spPCADimension = tmpInt;
 	return true;
 }
 
-bool handleBoolField(bool* boolField, const char* filename, int lineNum,
-		char* value, SP_CONFIG_MSG* msg) {
+bool handleBoolField(bool* boolField, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg) {
 	if (!strcmp(value, TRUE_AS_STR))
 		*boolField = true;
 
@@ -276,8 +284,8 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
 	return true;
 }
 
-bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+bool handleKDTreeSplitMethod(SPConfig config, const char* filename, int lineNum,
+		char* value, SP_CONFIG_MSG* msg) {
 	if (!strcmp(value, RAND_SPLIT_METHOD))
 		config->spKDTreeSplitMethod = RANDOM;
 
@@ -296,8 +304,8 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
 	return true;
 }
 
-bool handleLoggerLevel(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg) {
+bool handleLoggerLevel(SPConfig config, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg) {
 	int tmpInt;
 	VALIDATE_INT(tmpInt < LOG_LVL_MIN_VALID_VAL || tmpInt > LOG_LVL_MAX_VALID_VAL);
 
@@ -318,8 +326,8 @@ bool handleLoggerLevel(SPConfig config, const char* filename,
 	return true;
 }
 
-bool handleVariable(SPConfig config, const char* filename, int lineNum,
-		char *varName, char *value, SP_CONFIG_MSG* msg) {
+bool handleVariable(SPConfig config, const char* filename, int lineNum, char *varName,
+		char *value, SP_CONFIG_MSG* msg) {
 	assert(value[0] != NULL_CHARACTER); // value is not an empty string
 
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))
@@ -387,8 +395,8 @@ SPConfig onError(SPConfig config, FILE* configFile) {
 	return NULL;
 }
 
-SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
-		const char* filename, int lineNum, FILE* configFile) {
+SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg, const char* filename,
+		int lineNum, FILE* configFile) {
 	const char* parameterName;
 
 	if (!config->spImagesDirectory) {
@@ -478,7 +486,7 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, in
 	*msg = SP_CONFIG_SUCCESS;
 	return true;
 }
-
+//TODO - better to use && instead of ternary operator (here and in the next function)?
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spExtractionMode : false;
 }
@@ -522,9 +530,10 @@ char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spLoggerFilename : NULL;
 }
 
-SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
-		int index, bool isFeats) {
-	spVerifyArguments(imagePath != NULL, ERROR_INVALID_PATH_PTR, SP_CONFIG_INVALID_ARGUMENT);
+SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config, int index,
+		bool isFeats) {
+	spVerifyArguments(imagePath != NULL, ERROR_INVALID_PATH_PTR,
+			SP_CONFIG_INVALID_ARGUMENT);
 	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
 
 	spVal(index < config->spNumOfImages, ERROR_OUT_OF_RANGE, SP_CONFIG_INDEX_OUT_OF_RANGE);
@@ -554,7 +563,7 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 	return SP_CONFIG_SUCCESS;
 }
 
-char* getSignature(const SPConfig config){
+char* getSignature(const SPConfig config) {
 	char lastImagePath[MAX_PATH_LEN],*signature = NULL;
 	int PCADim,numOfImages,numOfFeatures;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
@@ -624,21 +633,11 @@ const char* configMsgToStr(SP_CONFIG_MSG msg) {
 	return NULL;
 }
 
-char* duplicateString(const char *str)
-{
-	char* duplicated;
-    int len = 1; // for '\0'
-    len += strlen(str);
-    spCalloc(duplicated, char, len);
-    strcpy(duplicated, str);
-    return duplicated;
-}
-
-SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config){
+SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config) {
 	spVerifyArguments(config != NULL, ERROR_INVALID_CONF_ARG, SP_CONFIG_INVALID_ARGUMENT);
-	if (config->spNumOfSimilarImages <= config->spNumOfImages){
-		spLoggerSafePrintWarning(WARNING_CROP_NOT_NEEDED,
-				__FILE__, __FUNCTION__, __LINE__);
+	if (config->spNumOfSimilarImages <= config->spNumOfImages) {
+		spLoggerSafePrintWarning(WARNING_CROP_NOT_NEEDED, __FILE__, __FUNCTION__,
+				__LINE__);
 	}
 	config->spNumOfSimilarImages = config->spNumOfImages;
 	return SP_CONFIG_SUCCESS;

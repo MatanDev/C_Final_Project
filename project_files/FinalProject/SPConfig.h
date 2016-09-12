@@ -47,6 +47,19 @@ typedef enum sp_kdtree_split_method_t {
 typedef struct sp_config_t* SPConfig;
 
 /*
+ * Returns a hard copy of a given string
+ * returns null in case of memory allocation failure
+ * (not logging the failure)
+ *
+ * @param str - the given string to duplicate
+ *
+ * @returns -
+ * NULL in case of memory failure
+ * otherwise a hard copy of the given string (char array)
+ */
+char* duplicateString(const char* str);
+
+/*
  * Returns true if copying def to *field was successful, false otherwise.
  *
  * @param field - pointer to the string field to copy the default value into
@@ -75,8 +88,8 @@ void initConfigToDefault(SPConfig config);
  * @param parameterName - the name of the parameter which is not set in case of
  * parameter not set error
  */
-void printErrorMessage(const char* filename, int lineNum,
-		ERROR_MSG_TYPE errorMsgType, const char* parameterName);
+void printErrorMessage(const char* filename, int lineNum, ERROR_MSG_TYPE errorMsgType,
+		const char* parameterName);
 
 /*
  * Checks if the given configuration line is valid
@@ -94,9 +107,8 @@ void printErrorMessage(const char* filename, int lineNum,
  * invalid the msg would be SP_CONFIG_INVALID_LINE
  * @return true if the given line is valid, otherwise returns false
  */
-bool parseLine(const char* filename, int lineNum, char* line,
-		char** varName, char** value, bool* isCommentOrEmpty,
-		SP_CONFIG_MSG* msg);
+bool parseLine(const char* filename, int lineNum, char* line, char** varName, char** value,
+		bool* isCommentOrEmpty, SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value upholds all the constraints of the given string field
@@ -117,8 +129,8 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
 		const char* value, SP_CONFIG_MSG* msg, bool isImagesSuffix);
 
 /*
- * Checks if the 'strVal' is a valid integer according to the rules of the forum and
- * if so stores it in *'intVal'
+ * Checks if 'strVal' is a valid integer according to the rules in the forum and if so
+ * stores it in *'intVal'
  *
  * @param strVal - the string to be checked
  * @param intVal - pointer to the address to store the parsed integer in
@@ -139,8 +151,8 @@ bool isValidInt(char* strVal, int* intVal);
  * @param msg - pointer in which the msg returned by the function is stored
  * @return true if the given value is a positive integer, otherwise returns false
  */
-bool handlePositiveIntField(int* posIntField, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg);
+bool handlePositiveIntField(int* posIntField, const char* filename, int lineNum,
+		char* value, SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value is a positive integer between 10 and 28
@@ -155,8 +167,8 @@ bool handlePositiveIntField(int* posIntField, const char* filename,
  * @return true if the given value is a positive integer between 10 and 28,
  * otherwise returns false
  */
-bool handlePCADimension(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg);
+bool handlePCADimension(SPConfig config, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value is "true" or "false"
@@ -171,8 +183,8 @@ bool handlePCADimension(SPConfig config, const char* filename,
  * @return true if the given value is "true" or "false",
  * otherwise returns false
  */
-bool handleBoolField(bool* boolField, const char* filename, int lineNum,
-		char* value, SP_CONFIG_MSG* msg);
+bool handleBoolField(bool* boolField, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value is a KDTree split method
@@ -186,8 +198,8 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum,
  * @param msg - pointer in which the msg returned by the function is stored
  * @return true if the given value is a KDTree split method, otherwise returns false
  */
-bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg);
+bool handleKDTreeSplitMethod(SPConfig config, const char* filename, int lineNum,
+		char* value, SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given value is a positive integer between 1 and 4
@@ -202,13 +214,13 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename,
  * @return true if the given value is a positive integer between 1 and 4,
  * otherwise returns false
  */
-bool handleLoggerLevel(SPConfig config, const char* filename,
-		int lineNum, char* value, SP_CONFIG_MSG* msg);
+bool handleLoggerLevel(SPConfig config, const char* filename, int lineNum, char* value,
+		SP_CONFIG_MSG* msg);
 
 /*
  * Checks if the given variable name is a name of a field in config and if so sets the
- * field's value to the given value, in case the value upholds all the constraints regarding
- * the field
+ * field's value to the given value, in case the value upholds all the constraints
+ * regarding the field
  *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
@@ -219,8 +231,8 @@ bool handleLoggerLevel(SPConfig config, const char* filename,
  * @param msg - pointer in which the msg returned by the function is stored
  * @return true if the given value was set successfully to the given variable
  */
-bool handleVariable(SPConfig config, const char* filename, int lineNum,
-		char *varName, char *value, SP_CONFIG_MSG* msg);
+bool handleVariable(SPConfig config, const char* filename, int lineNum, char *varName,
+		char *value, SP_CONFIG_MSG* msg);
 
 /*
  * Closes given FILE pointer 'configFile', destroys the given configuration structure
@@ -244,23 +256,8 @@ SPConfig onError(SPConfig config, FILE* configFile);
  * @return config if all parameters that don't have a default value were set in the
  * configuration file, otherwise return NULL
  */
-SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg,
-		const char* filename, int lineNum, FILE* configFile);
-
-/*
- * Returns true if both config is not null, otherwise false
- *
- * @param config - the configuration structure
- * @assert msg != NULL
- * @param msg - pointer in which the msg returned by the function is stored
- * @return true if both config is not null, otherwise false
- * @param function - the name of the function from which this function is called
- * @param line - the line from which this function is called
- *
- * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
- * - SP_CONFIG_SUCCESS - in case of success
- */
-bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line);
+SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg, const char* filename,
+		int lineNum, FILE* configFile);
 
 /**
  * Creates a new system configuration struct. The configuration struct
@@ -289,6 +286,23 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, in
 SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 
 /*
+ * Returns true if config is not null, otherwise false
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @param function - the name of the function from which this function is called
+ * @param line - the line from which this function is called
+ * @return true if config is not null, otherwise false
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
+ */
+bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line);
+
+/*
  * Returns true if spExtractionMode = true, false otherwise.
  *
  * @param config - the configuration structure
@@ -298,6 +312,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -311,6 +327,8 @@ bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -325,6 +343,8 @@ bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -339,6 +359,8 @@ int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -352,6 +374,8 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -366,12 +390,13 @@ int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
 /*
- * Returns the KNN set in the configuration file, i.e the value
- * of spKNN.
+ * Returns the KNN set in the configuration file, i.e the value of spKNN.
  *
  * @param config - the configuration structure
  * @assert msg != NULL
@@ -380,6 +405,8 @@ int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -395,6 +422,8 @@ int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -410,6 +439,8 @@ SP_KDTREE_SPLIT_METHOD spConfigGetSplitMethod(const SPConfig config, SP_CONFIG_M
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -424,12 +455,14 @@ SP_LOGGER_LEVEL spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg);
 
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
- * ith image if 'isFeats' is false, and the full path of the ith image with ".feats"
+ * i'th image if 'isFeats' is false, and the full path of the i'th image with ".feats"
  * extension if 'isFeats' is true.
  *
  * @param imagePath - an address to store the result in, it must contain enough space.
@@ -442,9 +475,11 @@ char* spConfigGetLoggerFilename(const SPConfig config, SP_CONFIG_MSG* msg);
  * - SP_CONFIG_INVALID_ARGUMENT - if imagePath == NULL or config == NULL
  * - SP_CONFIG_INDEX_OUT_OF_RANGE - if index >= spNumOfImages
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case of any type of failure the relevant error is written to the logger
  */
-SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
-		int index, bool isFeats);
+SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config, int index,
+		bool isFeats);
 
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
@@ -470,6 +505,8 @@ SP_CONFIG_MSG spConfigGetImagePathFeats(char* imagePath, const SPConfig config,
  * - SP_CONFIG_INVALID_ARGUMENT - if imagePath == NULL or config == NULL
  * - SP_CONFIG_INDEX_OUT_OF_RANGE - if index >= spNumOfImages
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case of any type of failure the relevant error is written to the logger
  */
 SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int index);
 
@@ -488,11 +525,28 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config, int i
  * @return
  *  - SP_CONFIG_INVALID_ARGUMENT - if imagePath == NULL or config == NULL
  *  - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case of any type of failure the relevant error is written to the logger
  */
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config);
 
+/*
+ * Creates a string signature of some of the configuration settings
+ * that are relevant for features loading and verifications
+ *
+ * @param config - the configurations item
+ *
+ * @returns
+ * NULL in case of an error occurred otherwise returns a string representing
+ * the config data as following:
+ * '==[last image path][number of images][number of features][PCA dimension]=='
+ *
+ * @logger - the method logs relevant errors
+ */
+char* getSignature(const SPConfig config);
+
 /**
- * Frees all memory resources associate with config.
+ * Frees all memory resources associated with config.
  * If config == NULL nothing is done.
  */
 void spConfigDestroy(SPConfig config);
@@ -506,42 +560,15 @@ void spConfigDestroy(SPConfig config);
 const char* configMsgToStr(SP_CONFIG_MSG msg);
 
 /*
- * Returns a hard copy of a given string
- * returns null in case of memory allocation failure
- * (not logging the failure)
- *
- * @param str - the given string to duplicate
- *
- * @returns -
- * NULL in case of memory failure
- * otherwise a hard copy of the given string (char array)
- */
-char* duplicateString(const char* str);
-
-/*
- * Creates a string signature of some of the configurations
- * that are relevant for features loading and verifications
+ * The method crops the size of similar images to the size of images.
  *
  * @param config - the configurations item
- *
- * @returns
- * NULL in case of an error accourd otherwise returns a string representing
- * the config data as following : '==[last image path][number of images][number of features][PCA dimension]=='
- *
- * @logger - the method logs relevant errors
- */
-char* getSignature(const SPConfig config);
-
-/*
- * The method crop's the size of similar images to the size of images.
- *
- *  @param config - the configurations item
  *
  * @returns
  * SP_CONFIG_INVALID_ARGUMENT - in case config is NULL
  * SP_CONFIG_SUCCESS - otherwise
  *
- * @logger - the method logs relevant errors
+ * @logger - the method logs relevant errors and warnings
  */
 SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
 
@@ -560,6 +587,8 @@ SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 char* spConfigGetImagesDirectory(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -574,6 +603,8 @@ char* spConfigGetImagesDirectory(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 char* spConfigGetImagesPrefix(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -588,6 +619,8 @@ char* spConfigGetImagesPrefix(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 char* spConfigGetImagesSuffix(const SPConfig config, SP_CONFIG_MSG* msg);
 
@@ -602,6 +635,8 @@ char* spConfigGetImagesSuffix(const SPConfig config, SP_CONFIG_MSG* msg);
  *
  * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
  * - SP_CONFIG_SUCCESS - in case of success
+ *
+ * @logger - in case config is NULL a relevant error is written to the logger
  */
 char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg);
 
