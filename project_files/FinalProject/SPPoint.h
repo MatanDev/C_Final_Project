@@ -35,6 +35,8 @@ typedef struct sp_point_t* SPPoint;
  * @return
  * NULL in case allocation failure ocurred OR data is NULL OR dim <=0 OR index <0
  * Otherwise, the new point is returned
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SPPoint spPointCreate(double* data, int dim, int index);
 
@@ -52,12 +54,16 @@ SPPoint spPointCreate(double* data, int dim, int index);
  * @return
  * NULL in case memory allocation occurs
  * Others a copy of source is returned.
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SPPoint spPointCopy(SPPoint source);
 
 /**
  * Free all memory allocation associated with point,
  * if point is NULL nothing happens.
+ *
+ * @logger - the method logs free(NULL) cases as warnings
  */
 void spPointDestroy(SPPoint point);
 
@@ -113,6 +119,8 @@ double spPointL2SquaredDistance(SPPoint p, SPPoint q);
  * @param p2 - second point
  *
  * @return true iff both points are not NULL and contains the same values
+ *
+ * @logger - the method logs arguments errors if needed
  */
 bool spPointCompare(SPPoint p1, SPPoint p2);
 

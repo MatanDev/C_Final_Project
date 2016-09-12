@@ -54,6 +54,8 @@ typedef enum sp_bp_queue_msg_t {
  * @return
  * 	NULL - If allocations failed or maxSize <= 0
  * 	A new queue in case of success.
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SPBPQueue spBPQueueCreate(int maxSize);
 
@@ -66,6 +68,8 @@ SPBPQueue spBPQueueCreate(int maxSize);
  * @return
  * NULL if a NULL was sent or a memory allocation failed.
  * A queue containing the same capacity and the same queue items.
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SPBPQueue spBPQueueCopy(SPBPQueue source);
 
@@ -94,6 +98,8 @@ void spBPQueueClear(SPBPQueue source);
  * @return
  * -1 if a NULL pointer was sent or in case of internal NULL pointer
  * Otherwise the number of elements in the queue.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 int spBPQueueSize(SPBPQueue source);
 
@@ -104,6 +110,8 @@ int spBPQueueSize(SPBPQueue source);
  * @return
  * -1 if a NULL pointer was sent
  * Otherwise the capacity of the queue.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 int spBPQueueGetMaxSize(SPBPQueue source);
 
@@ -122,6 +130,8 @@ int spBPQueueGetMaxSize(SPBPQueue source);
  *					  to maximal element in the queue.
  *	SP_BPQUEUE_INVALID_ARGUMENT - in case source is NULL or element is NULL
  *	SP_BPQUEUE_SUCCESS - in case the element was successfully inserted to the queue
+ *
+ *	@logger - the method logs allocation and arguments errors if needed
  */
 SP_BPQUEUE_MSG spBPQueueEnqueue(SPBPQueue source, SPListElement element);
 
@@ -134,6 +144,8 @@ SP_BPQUEUE_MSG spBPQueueEnqueue(SPBPQueue source, SPListElement element);
  * SP_BPQUEUE_INVALID_ARGUMENT if source is NULL
  * SP_BPQUEUE_EMPTY if the queue if empty
  * SP_BPQUEUE_SUCCESS the element has been removed successfully
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SP_BPQUEUE_MSG spBPQueueDequeue(SPBPQueue source);
 
@@ -152,6 +164,8 @@ SPListElement spBPQueuePeek(SPBPQueue source);
  * @return
  * NULL if source is NULL or queue is empty, otherwise returns the
  * a hard copy of the last (maximum) item in the queue.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SPListElement spBPQueuePeekLast(SPBPQueue source);
 
@@ -161,6 +175,8 @@ SPListElement spBPQueuePeekLast(SPBPQueue source);
  * @return
  * -1 if source is NULL or queue is empty, otherwise returns the
  * minimum value of the items in the queue.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 double spBPQueueMinValue(SPBPQueue source);
 
@@ -170,6 +186,8 @@ double spBPQueueMinValue(SPBPQueue source);
  * @return
  * -1 if source is NULL or queue is empty, otherwise returns the
  * maximum value of the items in the queue.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 double spBPQueueMaxValue(SPBPQueue source);
 
@@ -179,6 +197,7 @@ double spBPQueueMaxValue(SPBPQueue source);
  * @param source - The target which the check is requested on.
  * @return
  * true iff the queue is empty
+ *
  */
 bool spBPQueueIsEmpty(SPBPQueue source);
 
@@ -203,6 +222,8 @@ bool spBPQueueIsFull(SPBPQueue source);
  * @return
  * 	NULL - If allocations failed or maxSize <= 0 or createNewList flag is off and source_queue is NULL
  * 	A new queue in case of success, with respect to the createNewList flag
+ *
+ * 	@logger - the method logs allocation and arguments errors if needed
  */
 SPBPQueue spBPQueueCreateWrapper(int maxSize, SPBPQueue source_queue, bool createNewList);
 
@@ -280,6 +301,8 @@ SP_BPQUEUE_MSG spBPQueueInsertNotEmpty(SPBPQueue source, SPListElement newElemen
  * @param func - a function pointer that given a queue, extract some element from it
  * @return
  * DEFAULT_INVALID_DOUBLE if source is NULL, otherwise the func(source) value.
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 double returnValueFrom(SPBPQueue source, SPListElement (*func)(SPBPQueue));
 #endif

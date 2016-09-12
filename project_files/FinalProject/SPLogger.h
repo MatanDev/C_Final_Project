@@ -218,20 +218,30 @@ SP_LOGGER_MSG spLoggerPrintMsg(const char* msg);
 /**
  * Returns the given SP_LOGGER_MSG instance as string
  *
+ * pre assumptions - msg is a valid input of the SP_LOGGER_MSG enum
+ *
  * @param msg - the SP_LOGGER_MSG instance
+ *
  * @return the given SP_LOGGER_MSG instance as string
  */
 const char* loggerMsgToStr(SP_LOGGER_MSG msg);
 
 
-//these are wrapers for the main logger methods,
+//these are wrappers for the main logger methods,
 //as we were instructed when asking, that if the logger fails the program should terminate
 
 /*
  * The method acts as 'spLoggerPrintError' besides it does not
- * returns any value, in case of any type of failure the program will exit
+ * returns any value, in case of any type of failure the program will report error and
+ * exit with exit code -3
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintError'
+ *
+ *
+ * In case of errors, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 void spLoggerSafePrintError(const char* msg, const char* file,
 		const char* function, const int line);
@@ -239,9 +249,14 @@ void spLoggerSafePrintError(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintWarning' besides it does not
  * returns any value, in case of any type of failure the program
- * will exit with return value -3
+ * will report error and exit with exit code -3
  *
- * for parameters spec's and method behavior please refer to 'spLoggerPrintWarning'
+ * for parameters spec's and method behavior please refer to 'spLoggerPrintWarning'.
+ *
+ * In case of errors, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 void spLoggerSafePrintWarning(const char* msg, const char* file,
 		const char* function, const int line);
@@ -249,18 +264,28 @@ void spLoggerSafePrintWarning(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintInfo' besides it does not
  * returns any value, in case of any type of failure the program
- * will exit with return value -3
+ * will report error and exit with exit code -3
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintInfo'
+ *
+ * In case of errors, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 void spLoggerSafePrintInfo(const char* msg);
 
 /*
  * The method acts as 'spLoggerPrintDebug' besides it does not
  * returns any value, in case of any type of failure the program
- * will exit with return value -3
+ * will report error and exit with exit code -3
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintDebug'
+ *
+ * In case of errors, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 void spLoggerSafePrintDebug(const char* msg, const char* file,
 		const char* function, const int line);
@@ -268,9 +293,14 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintMsg' besides it does not
  * returns any value, in case of any type of failure the program
- * will exit with return value -3
+ * will report error and exit with exit code -3
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintMsg'
+ *
+ * In case of errors, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 void spLoggerSafePrintMsg(const char* msg);
 
@@ -313,7 +343,8 @@ void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file
  *
  * @returns - an output message that contains the input message with a time stamp
  *
- * @logger - logs relevant errors to the logger
+ * @logger - log a warning in case of failure, the logger will be later on called
+ * 			without a timestamp
  */
 char* tryAddTimestamp(const char* msg);
 

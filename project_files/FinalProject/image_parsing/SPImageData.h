@@ -22,17 +22,17 @@ typedef struct sp_image_data* SPImageData;
  * NULL in case of memory allocation failure
  * otherwise an ImageData item with the given index
  *
- * @logger - logs the relevant error if needed
+ * @logger - the method logs allocation errors if needed
  */
 SPImageData createImageData(int index);
 
 /*
  * Deallocates a number of features from a given features array
+ * pre assumptions - numOfFeatures >= 0
  *
  * @param features - the features array
  * @param numOfFeatures - the number of features
  *
- * @assert numOfFeatures >= 0
  *  @logger - prints a warning if images data is null
  */
 void freeFeatures(SPPoint* features, int numOfFeatures);
@@ -51,11 +51,12 @@ void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, boo
 /*
  * Deallocates an images data items array
  *
+ * pre-assumptions - size >=0
+ *
  * @param imagesData - the images data array that should be destryed
  * @param size - the size of the array
  * @param freeInternalFeatures - indicates if the internal features (SPPoints) should be destroyed too
  *
- * @assert size >= 0
  *
  * @logger - prints a warning if images data is null
  */

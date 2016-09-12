@@ -73,6 +73,8 @@ SPList spListCreate();
  * @return
  * NULL if a NULL was sent or a memory allocation failed.
  * A List containing the same elements with same order as list otherwise.
+ *
+ * @logger - the method logs allocation and arguments errors errors if needed
  */
 SPList spListCopy(SPList list);
 
@@ -107,6 +109,8 @@ int spListGetSize(SPList list);
  * @return
  * NULL is a NULL pointer was sent or the list is empty.
  * The first element of the list otherwise
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SPListElement spListGetFirst(SPList list);
 
@@ -120,6 +124,8 @@ SPListElement spListGetFirst(SPList list);
  * NULL if reached the end of the list, the iterator is at an invalid state or
  * a NULL sent as argument
  * The next element on the list in case of success
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SPListElement spListGetNext(SPList list);
 
@@ -130,6 +136,8 @@ SPListElement spListGetNext(SPList list);
  * @return
  * NULL if the iterator is at an invalid state or a NULL sent as argument
  * The current element on the list in case of success
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SPListElement spListGetCurrent(SPList list);
 
@@ -144,6 +152,8 @@ SPListElement spListGetCurrent(SPList list);
  * SP_LIST_NULL_ARGUMENT if a NULL was sent as list
  * SP_LIST_OUT_OF_MEMORY if an allocation failed
  * SP_LIST_SUCCESS the element has been inserted successfully
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SP_LIST_MSG spListInsertFirst(SPList list, SPListElement element);
 
@@ -158,6 +168,8 @@ SP_LIST_MSG spListInsertFirst(SPList list, SPListElement element);
  * SP_LIST_NULL_ARGUMENT if a NULL was sent as list
  * SP_LIST_OUT_OF_MEMORY if an allocation failed
  * SP_LIST_SUCCESS the element has been inserted successfully
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SP_LIST_MSG spListInsertLast(SPList list, SPListElement element);
 
@@ -175,6 +187,8 @@ SP_LIST_MSG spListInsertLast(SPList list, SPListElement element);
  * not point to a legal element in the list)
  * SP_LIST_OUT_OF_MEMORY if an allocation failed
  * SP_LIST_SUCCESS the element has been inserted successfully
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SP_LIST_MSG spListInsertBeforeCurrent(SPList list, SPListElement element);
 
@@ -192,6 +206,8 @@ SP_LIST_MSG spListInsertBeforeCurrent(SPList list, SPListElement element);
  * not point to a legal element in the list)
  * SP_LIST_OUT_OF_MEMORY if an allocation failed
  * SP_LIST_SUCCESS the element has been inserted successfully
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SP_LIST_MSG spListInsertAfterCurrent(SPList list, SPListElement element);
 
@@ -204,6 +220,8 @@ SP_LIST_MSG spListInsertAfterCurrent(SPList list, SPListElement element);
  * SP_LIST_NULL_ARGUMENT if list is NULL
  * SP_LIST_INVALID_CURRENT if the current pointer of the list is in invalid state
  * SP_LIST_SUCCESS the current element was removed successfully
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SP_LIST_MSG spListRemoveCurrent(SPList list);
 
@@ -215,6 +233,8 @@ SP_LIST_MSG spListRemoveCurrent(SPList list);
  * @return
  * SP_LIST_NULL_ARGUMENT - if a NULL pointer was sent.
  * SP_LIST_SUCCESS - Otherwise.
+ *
+ * @logger - the method logs arguments errors if needed
  */
 SP_LIST_MSG spListClear(SPList list);
 

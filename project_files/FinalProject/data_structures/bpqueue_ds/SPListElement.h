@@ -44,6 +44,8 @@ typedef struct sp_list_element_t * SPListElement;
  * @return
  * NULL in case of memory allocation fails.
  * A new element with the corresponding index and value .
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  */
 SPListElement spListElementCreate(int index, double value);
 
@@ -66,6 +68,8 @@ SPListElement spListElementCreate(int index, double value);
  * @return
  * NULL if a NULL was sent or memory allocation failed.
  * Otherwise the address of the new copy
+ *
+ * @logger - the method logs allocation and arguments errors if needed
  **/
 SPListElement spListElementCopy(SPListElement data);
 
@@ -102,6 +106,8 @@ int spListElementCompare(SPListElement e1, SPListElement e2);
  *  SP_ELEMENT_INVALID_ARGUMENT in case data==NULL || index<0
  *  SP_ELEMENT_OUT_OF_MEMORY in case memory allocation fails
  *  SP_ELEMENT_SUCCESS otherwise
+ *
+ *  @logger - the method logs arguments errors if needed
  */
 SP_ELEMENT_MSG spListElementSetIndex(SPListElement data, int index);
 
@@ -112,6 +118,8 @@ SP_ELEMENT_MSG spListElementSetIndex(SPListElement data, int index);
  * @return
  * -1 in case data==NULL
  * otherwise, the index of the target element
+ *
+ * @logger - the method logs arguments errors if needed
  */
 int spListElementGetIndex(SPListElement data);
 
@@ -125,6 +133,8 @@ int spListElementGetIndex(SPListElement data);
  *  SP_ELEMENT_INVALID_ARGUMENT in case data==NULL || newValue<0
  *  SP_ELEMENT_OUT_OF_MEMORY in case memory allocation fails
  *  SP_ELEMENT_SUCCESS otherwise
+ *
+ *  @logger - the method logs arguments errors if needed
  */
 SP_ELEMENT_MSG spListElementSetValue(SPListElement data, double newValue);
 

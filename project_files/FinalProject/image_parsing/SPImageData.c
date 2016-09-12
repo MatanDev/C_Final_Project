@@ -24,33 +24,35 @@ SPImageData createImageData(int index){
 void freeFeatures(SPPoint* features, int numOfFeatures){
 	assert(numOfFeatures >= 0);
 	int i;
-	if (features != NULL) {
-		for (i = 0 ; i<numOfFeatures;i++){
+	if (features != NULL){
+		for (i = 0 ; i < numOfFeatures ; i++){
 			spPointDestroy(features[i]);
 		}
 	}
 	else {
-		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL,
+				__FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
 void freeImageData(SPImageData imageData, bool suppressFeaturesArrayWarning, bool freeInternalFeatures){
 	if (imageData != NULL){
-		if (imageData->featuresArray != NULL) {
+		if (imageData->featuresArray != NULL){
 			if (freeInternalFeatures)
-				freeFeatures(imageData->featuresArray,imageData->numOfFeatures);
+				freeFeatures(imageData->featuresArray, imageData->numOfFeatures);
 			free(imageData->featuresArray);
 			imageData->featuresArray = NULL;
 		}
-		else {
-			if (!suppressFeaturesArrayWarning)
-				spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL, __FILE__,__FUNCTION__, __LINE__);
+		else if (!suppressFeaturesArrayWarning){
+				spLoggerSafePrintWarning(WARNING_IMAGE_DATA_POINTS_ARRAY_NULL,
+						__FILE__,__FUNCTION__, __LINE__);
 		}
 		free(imageData);
 		imageData = NULL;
 	}
-	else {
-		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
+	else{
+		spLoggerSafePrintWarning(WARNING_IMAGE_DATA_NULL,
+				__FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
@@ -58,26 +60,28 @@ void freeAllImagesData(SPImageData* imagesData, int size, bool freeInternalFeatu
 	assert(size>=0);
 	int i;
 	if (imagesData != NULL){
-		for (i=0;i<size;i++){
+		for (i = 0 ; i < size ; i++){
 			freeImageData(imagesData[i], false, freeInternalFeatures);
 		}
 		free(imagesData);
 		imagesData = NULL;
 	}
 	else {
-		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL, __FILE__,__FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL,
+				__FILE__,__FUNCTION__, __LINE__);
 	}
 }
 
 void resetImageData(SPImageData image){
 	if (image != NULL){
-		if (image->featuresArray != NULL) {
-			freeFeatures(image->featuresArray,image->numOfFeatures);
+		if (image->featuresArray != NULL){
+			freeFeatures(image->featuresArray, image->numOfFeatures);
 			free(image->featuresArray);
 		}
 		image->numOfFeatures = 0;
 	}
-	else {
-		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL_ON_RESET, __FILE__,__FUNCTION__, __LINE__);
+	else{
+		spLoggerSafePrintWarning(WARNING_IMAGES_DATA_NULL_ON_RESET,
+				__FILE__,__FUNCTION__, __LINE__);
 	}
 }

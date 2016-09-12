@@ -73,40 +73,40 @@ void onGetLineError(char* s1, char* s2){
 	if (s2) free(s2);
 }
 
-char* getLineByMinBufferSize(FILE* fp, int min_buffer_size){
-	int buffer_size = min_buffer_size;
+char* getLineByMinBufferSize(FILE* fp, int minBufferSize){
+	int bufferSize = minBufferSize;
 	char *line = NULL, *tempLine = NULL, *rslt = NULL;
 
-	spVerifyArgumentsRn(fp != NULL && min_buffer_size > 0 && min_buffer_size % 2 == 0,
+	spVerifyArgumentsRn(fp != NULL && minBufferSize > 0 && minBufferSize % 2 == 0,
 			ERROR_READING_A_LINE_FROM_FILE);
 
-	spSafeCalloc(line, char, buffer_size, onGetLineError(line,tempLine));
+	spSafeCalloc(line, char, bufferSize, onGetLineError(line,tempLine));
 
-	rslt = fgets(line,buffer_size,fp);
+	rslt = fgets(line,bufferSize,fp);
 
 	if (!feof(fp) && rslt == NULL){
 		onGetLineError(line,tempLine);
 		return NULL;
 	}
 
-	while (!feof(fp) && ! isAFullLine(line)) {
-		spSafeCalloc(tempLine, char, buffer_size,onGetLineError(line,tempLine));
+	while (!feof(fp) && ! isAFullLine(line)){
+		spSafeCalloc(tempLine, char, bufferSize,onGetLineError(line,tempLine));
 		strcpy(tempLine,line);
 
-		buffer_size <<= 1; // buffer *= 2
+		bufferSize <<= 1; // buffer *= 2
 		spLoggerSafePrintDebug(DEBUG_GET_LINE_BUFFER_DOUBLED,
 					__FILE__, __FUNCTION__, __LINE__);
-		if (buffer_size > 2048) {
+		if (bufferSize > 2048){
 			spLoggerSafePrintWarning(WARNING_VERY_LONG_LINE,
 					__FILE__, __FUNCTION__, __LINE__);
 		}
 
-		spSafeRealloc(line, char, buffer_size , onGetLineError(line,tempLine));
+		spSafeRealloc(line, char, bufferSize , onGetLineError(line,tempLine));
 
 		//this is why min_buffer_size must be even
-		rslt = fgets(tempLine,buffer_size >> 1,fp);
+		rslt = fgets(tempLine,bufferSize >> 1,fp);
 
-		if (!feof(fp) && rslt == NULL) {
+		if (!feof(fp) && rslt == NULL){
 			onGetLineError(line,tempLine);
 			return NULL;
 		}
@@ -120,7 +120,7 @@ char* getLine(FILE* fp){
 	return getLineByMinBufferSize(fp, DEF_LINE_LEN);
 }
 
-char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message){
+char* getImagePath(const SPConfig config, int index, bool dataPath, SP_DP_MESSAGES* message){
 	SP_CONFIG_MSG  configMessage;
 	char *path  = NULL;
 
@@ -136,11 +136,10 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
 
 	*message = SP_DP_SUCCESS;
 	return path;
-
 }
 
 double getFloatingNumberFromSubString(char* myString, int* start) {
-	assert (myString != NULL && *start >= 0);
+	assert(myString != NULL && *start >= 0);
 	char rsltAsString[strlen(myString)];
 	int i = 0;
 
@@ -155,9 +154,7 @@ double getFloatingNumberFromSubString(char* myString, int* start) {
 
 int getNumOfDigits(int x){
 	int digits = 0;
-
-	if (x == 0)
-		return 1;
+	if (x == 0) return 1;
 
 	while (x != 0){
 		digits++;
@@ -170,13 +167,13 @@ int getPointCSVSize(SPPoint point){
 	int rslt, digits, i;
 	digits =  getNumOfDigits(spPointGetDimension(point));
 
-	if ( digits == 0 && spPointGetDimension(point) != 0){
+	if (digits == 0 && spPointGetDimension(point) != 0){
 		spLoggerSafePrintWarning(WARNING_WRONG_DIGITS_CALC,
 				__FILE__,__FUNCTION__, __LINE__);
 	}
 
 	rslt = digits + 3; // +4 stands for "," + "\n" + "\0"
-	for (i= 0; i<spPointGetDimension(point);i++){
+	for (i = 0 ; i < spPointGetDimension(point) ; i++){
 		rslt += DOUBLE_PRECISION + 3; // +2 stands for the ".", "," and possible "-"
 		rslt += getNumOfDigits((int)spPointGetAxisCoor(point,i));
 	}
@@ -207,7 +204,7 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 	tempString[0] = END_OF_STRING;
 
 	//create internal string data
-	for (i = spPointGetDimension(point) -1 ;i>=0;i--){
+	for (i = spPointGetDimension(point) -1 ; i >= 0 ; i--){
 		strcpy(secondTempString, tempString);
 		spValWcRn(sprintf(tempString, INTERNAL_POINT_DATA_STRING_FORMAT,
 				spPointGetAxisCoor(point,i),secondTempString) >= 0,
@@ -217,7 +214,7 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message){
 	spValWcRn(sprintf(rsltString, POINT_STRING_FORMAT,
 			spPointGetDimension(point),tempString) >= 0,
 			ERROR_CONVERTING_POINT_TO_STRING,
-			free(tempString); free(rsltString); free(secondTempString); *message = SP_DP_FORMAT_ERROR );
+			free(tempString); free(rsltString); free(secondTempString); *message = SP_DP_FORMAT_ERROR);
 
 	free(secondTempString);
 	free(tempString);
@@ -243,37 +240,21 @@ SPPoint parsePointFromString(char* pointdata, int index, SP_DP_MESSAGES* message
 	}
 
 	//allocate main data for the point
-	data = (double*) calloc(sizeof(double), dim);
-
-	if (data == NULL){
-		spLoggerSafePrintError(ERROR_PARSING_STRING_TO_POINT,
-				__FILE__,__FUNCTION__, __LINE__);
-		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,
-				__FILE__,__FUNCTION__, __LINE__);
-		*message = SP_DP_MEMORY_FAILURE;
-		return NULL;
-	}
+	spCallocErWc(data, double, dim, ERROR_PARSING_STRING_TO_POINT,
+			*message = SP_DP_MEMORY_FAILURE);
 
 	//extract main data
-	for (j = 0 ; j< dim ; j++){
+	for (j = 0 ; j < dim ; j++){
 		data[j] = getFloatingNumberFromSubString(pointdata, &i);
 		i++;
 	}
 
-
 	//allocate a new point
-	rsltPoint = spPointCreate(data,dim,index);
+	spValWcRn((rsltPoint = spPointCreate(data, dim, index)) != NULL,
+			ERROR_PARSING_STRING_TO_POINT,
+			*message = SP_DP_MEMORY_FAILURE;free(data));
+
 	free(data);
-
-	if (rsltPoint == NULL){
-		spLoggerSafePrintError(ERROR_PARSING_STRING_TO_POINT,
-				__FILE__,__FUNCTION__, __LINE__);
-		spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY,
-				__FILE__,__FUNCTION__, __LINE__);
-		*message = SP_DP_MEMORY_FAILURE;
-		return NULL;
-	}
-
 	return rsltPoint;
 }
 
@@ -297,7 +278,7 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 	return rslt;
 }
 
-SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image) {
+SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image){
 	int i = 0, index;
 	spVal((index = (int)getFloatingNumberFromSubString(header,&i))>= 0 && index == image->index,
 			ERROR_STRING_PARSING_WRONG_FORMAT, SP_DP_FORMAT_ERROR);
@@ -323,11 +304,9 @@ SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SP
 
 	maxFailsAllowed = numOfImages * MAX_ERRORS_PERCENTAGE_AT_SAVE_PROCESS / 100;
 
-	for (i = 0 ;i < numOfImages ; i++) {
-		//spLoggerSafePrintDebugWithIndex(DEBUG_LOADING_IMAGE_FROM_FEAT_INDEX, i,
-		//			__FILE__, __FUNCTION__, __LINE__);
+	for (i = 0 ; i < numOfImages ; i++){
 		if ((message = loadImageData(config, configSignature, i , allImagesData)) != SP_DP_SUCCESS){
-			if (maxFailsAllowed == 0){ 				//reached limit - report error and return message
+			if (maxFailsAllowed == 0){ //reached limit - report error and return message
 				spLoggerSafePrintError(ERROR_LOADING_IMAGES_DATA,
 									__FILE__, __FUNCTION__, __LINE__);
 				return message;
@@ -341,7 +320,6 @@ SP_DP_MESSAGES loadAllImagesData(const SPConfig config,char* configSignature, SP
 
 		}
 	}
-
 	return SP_DP_SUCCESS;
 }
 
@@ -351,23 +329,22 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 	char *line = NULL;
 	SPPoint currentPoint;
 
-	spVerifyArguments(imageFile != NULL && imageData != NULL && imageData->featuresArray != NULL && imageData->numOfFeatures>=0,
+	spVerifyArguments(imageFile != NULL && imageData != NULL &&
+			imageData->featuresArray != NULL && imageData->numOfFeatures>=0,
 			ERROR_AT_READING_FEATURES_FROM_FILE, SP_DP_INVALID_ARGUMENT);
 
-	for (i=0;i<imageData->numOfFeatures;i++)
-	{
-
+	for (i = 0 ; i < imageData->numOfFeatures ; i++){
 		spValWc((line = getLine(imageFile)) != NULL, ERROR_AT_READING_FEATURES_FROM_FILE,
 			spLoggerSafePrintError(ERROR_READING_FILE, __FILE__,__FUNCTION__, __LINE__);
 			//rollback - free the points that were allocated so far
-			freeFeatures(imageData->featuresArray,i);
+			freeFeatures(imageData->featuresArray, i);
 			free(line), SP_DP_FILE_READ_ERROR);
 
 		currentPoint = parsePointFromString(line, imageData->index, &message);
 
 		spValWc(message == SP_DP_SUCCESS, ERROR_AT_READING_FEATURES_FROM_FILE,
 				//rollback - free the points that were allocated so far
-				freeFeatures(imageData->featuresArray,i);
+				freeFeatures(imageData->featuresArray, i);
 				spPointDestroy(currentPoint);
 				free(line), message);
 
@@ -376,7 +353,6 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData){
 	}
 
 	return message;
-
 }
 
 SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SPImageData imageData){
@@ -432,17 +408,17 @@ SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPI
 	return message;
 }
 
-SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex, SPImageData* allImagesData){
+SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex,
+		SPImageData* allImagesData){
 	char* filePath;
 	SP_DP_MESSAGES message = SP_DP_SUCCESS;
 
-	spVerifyArguments( config != NULL && imageIndex >= 0 && configSignature != NULL && allImagesData != NULL,
-			ERROR_LOADING_IMAGE_DATA, SP_DP_INVALID_ARGUMENT);
+	spVerifyArguments( config != NULL && imageIndex >= 0 && configSignature != NULL
+			&& allImagesData != NULL, ERROR_LOADING_IMAGE_DATA, SP_DP_INVALID_ARGUMENT);
 
-	filePath = getImagePath(config, imageIndex, true , &message);
+	filePath = getImagePath(config, imageIndex, true, &message);
 
-
-	if (message == SP_DP_SUCCESS) {
+	if (message == SP_DP_SUCCESS){
 		message = loadKnownImageData(configSignature, filePath, allImagesData[imageIndex]);
 	}
 	else{
@@ -460,7 +436,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char
 	int i;
 	char *line = NULL;
 	//write config signature to file
-	spVal(fputs(configSignature,imageFile) >= 0 , ERROR_WRITING_IMAGE_DATA,	SP_DP_FILE_WRITE_ERROR);
+	spVal(fputs(configSignature,imageFile) >= 0, ERROR_WRITING_IMAGE_DATA, SP_DP_FILE_WRITE_ERROR);
 
 	fflush(imageFile);
 
@@ -472,15 +448,14 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char
 					__FILE__,__FUNCTION__, __LINE__),
 			SP_DP_INVALID_ARGUMENT);
 
-	spValWc(fputs(line,imageFile) >= 0 , ERROR_WRITING_IMAGE_DATA,
+	spValWc(fputs(line,imageFile) >= 0 ,ERROR_WRITING_IMAGE_DATA,
 			free(line),
 			SP_DP_FILE_WRITE_ERROR);
 
 	fflush(imageFile);
 	free(line);
 	//write features to file
-	for (i=0;i<imageData->numOfFeatures;i++)
-	{
+	for (i = 0; i < imageData->numOfFeatures ; i++){
 		line = pointToString(imageData->featuresArray[i], &message);
 
 		spValWc(message == SP_DP_SUCCESS && line != NULL, ERROR_TRANSLATING_POINT,
@@ -516,7 +491,7 @@ SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImag
 
 	remove(filePath); //remove old files if exists
 
-	spValWc((imageFile = fopen(filePath, CREATE_IF_NOT_EXISTS_FILE_MODE))!= NULL, ERROR_OPEN_FILE,
+	spValWc((imageFile = fopen(filePath, CREATE_IF_NOT_EXISTS_FILE_MODE)) != NULL, ERROR_OPEN_FILE,
 			spLoggerSafePrintError(ERROR_WRITING_IMAGE_DATA, __FILE__,__FUNCTION__, __LINE__);
 			free(filePath), SP_DP_FILE_WRITE_ERROR);
 
@@ -545,7 +520,7 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
 			spLoggerSafePrintWarning(WARNING_CONFIG_SHOULD_NOT_BE_NULL, __FILE__,__FUNCTION__, __LINE__),
 					SP_DP_INVALID_ARGUMENT);
 
-	for (i= 0 ; i < numOfImages; i++) {
+	for (i = 0 ; i < numOfImages ; i++){
 		spLoggerSafePrintDebugWithIndex(DEBUG_SAVING_IMAGE_TO_FEAT_INDEX, i,
 					__FILE__, __FUNCTION__, __LINE__);
 		outputMessage = saveImageData(config, configSignature, imagesData[i]);
@@ -578,7 +553,8 @@ SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageD
 	createDatabase = spConfigIsExtractionMode(config, &configMsg);
 
 	spValWc(configMsg == SP_CONFIG_SUCCESS, ERROR_INVALID_ARGUMENT,
-			spLoggerSafePrintError(ERROR_AT_IMAGE_PARSING_PROCESS, __FILE__,__FUNCTION__, __LINE__);
+			spLoggerSafePrintError(ERROR_AT_IMAGE_PARSING_PROCESS,
+					__FILE__,__FUNCTION__, __LINE__);
 			spLoggerSafePrintWarning(WARNING_CONFIG_SHOULD_NOT_BE_NULL,
 					__FILE__,__FUNCTION__, __LINE__), SP_DP_INVALID_ARGUMENT);
 

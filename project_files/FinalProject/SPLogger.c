@@ -12,6 +12,7 @@
 #define INFO_MSG  									"---INFO---\n"
 #define DEBUG_MSG  									"---DEBUG---\n"
 #define TIMESTAMP_MAX_LEN							100
+#define LOGGER_ERROR_EXIT_CODE						-3
 
 #define GENERAL_MESSAGE_SKELETON					"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
 #define SHORT_MESSAGE_SKELETON						"%s- message: %s"
@@ -24,6 +25,7 @@
 #define LOGGER_SUCCESS_MSG							"SP_LOGGER_SUCCESS"
 #define ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM 	"Error printing to logger, exiting program.\n"
 #define FAILED_TO_CREATE_MESSAGE_WITH_INDEX 		"Failed to create message with index"
+#define FAILED_TO_CREATE_TIMESTAMP					"Failed creating time stamp"
 //File open mode
 #define SP_LOGGER_OPEN_MODE 						"w"
 
@@ -244,7 +246,7 @@ void spLoggerSafePrintError(const char* msg, const char* file,
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		exit(-3);
+		exit(LOGGER_ERROR_EXIT_CODE);
 	}
 }
 
@@ -254,7 +256,7 @@ void spLoggerSafePrintWarning(const char* msg, const char* file,
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		exit(-3);
+		exit(LOGGER_ERROR_EXIT_CODE);
 	}
 }
 
@@ -273,7 +275,7 @@ void spLoggerSafePrintInfo(const char* msg) {
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		exit(-3);
+		exit(LOGGER_ERROR_EXIT_CODE);
 	}
 }
 
@@ -294,7 +296,7 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		exit(-3);
+		exit(LOGGER_ERROR_EXIT_CODE);
 	}
 }
 
@@ -303,11 +305,7 @@ void spLoggerSafePrintMsg(const char* msg){
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
-		//TODO - memory leak here :
-		//can't handle without static or without calling a method from main?
-		//anyway the program exists and releases memory so think we should leave like this,
-		//Although  it rises at valgrind if logger file path is problematic
-		exit(-3);
+		exit(LOGGER_ERROR_EXIT_CODE);
 	}
 }
 
@@ -334,7 +332,11 @@ char* tryAddTimestamp(const char* message){
 	time_t ltime = time(NULL);
 	spMinimalVerifyArgumentsRn(message != NULL);
 	spCalloc(updatedMessage, char, strlen(message) + TIMESTAMP_MAX_LEN);
-	spValWcRn(sprintf(updatedMessage, "%s%s",asctime(localtime(&ltime)),message)>= 0 ,
-			"Error creating time stamp", free(updatedMessage));
+	if (sprintf(updatedMessage, "%s%s",asctime(localtime(&ltime)),message) < 0){
+		spLoggerSafePrintWarning(FAILED_TO_CREATE_TIMESTAMP,
+				__FILE__, __FUNCTION__, __LINE__);
+		free(updatedMessage);
+		return NULL;
+	}
 	return updatedMessage;
 }
