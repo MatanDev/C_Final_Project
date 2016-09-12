@@ -680,7 +680,6 @@ void spConfigSetImagesNum(SPConfig config, int imagesNum) {
 	config->spNumOfImages = imagesNum;
 }
 
-// TODO - is better or unite with initConfigToDefault?
 int spConfigGetConfigStructSize() {
 	return sizeof(struct sp_config_t);
 }

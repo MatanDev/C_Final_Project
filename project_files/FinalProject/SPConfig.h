@@ -545,7 +545,7 @@ char* getSignature(const SPConfig config);
  */
 SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
 
-/////////////////////// FOR TESTING PURPOSES ONLY ///////////////////////
+/********************** FOR TESTING PURPOSES ONLY **********************
 
 /*
  * Returns the images directory as configured in the configuration file
@@ -641,7 +641,11 @@ void spConfigSetImagesNum(SPConfig config, int imagesNum);
 
 /*
  * Returns the size of the structure sp_config_t
+ *
+ * (This method is used for unit tests only)
  */
 int spConfigGetConfigStructSize();
+
+/***********************************************************************
 
 #endif /* SPCONFIG_H_ */
