@@ -6,26 +6,35 @@
 #include "stdlib.h"
 
 bool testGivenConfFile() {
+	char imagePath[100], pcaPath[100];
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("./unit_tests/spcbirTestCase1.config", &msg);
-	char imagePath[100];
-	char pcaPath[100];
 
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(!strcmp(config->spImagesDirectory, "./images/"));
-	ASSERT_TRUE(!strcmp(config->spImagesPrefix, "img"));
-	ASSERT_TRUE(!strcmp(config->spImagesSuffix, ".png"));
-	ASSERT_TRUE(config->spNumOfImages == 22);
-	ASSERT_TRUE(config->spPCADimension == 20);
-	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
-	ASSERT_TRUE(config->spNumOfFeatures == 100);
-	ASSERT_TRUE(config->spExtractionMode == true);
-	ASSERT_TRUE(config->spMinimalGUI == false);
-	ASSERT_TRUE(config->spNumOfSimilarImages == 5);
-	ASSERT_TRUE(config->spKNN == 5);
-	ASSERT_TRUE(config->spKDTreeSplitMethod == MAX_SPREAD);
-	ASSERT_TRUE(config->spLoggerLevel == SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
-	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
+
+	ASSERT_TRUE(!strcmp(spConfigGetImagesDirectory(config, &msg), "./images/"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetImagesDirectory(NULL, &msg) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(!strcmp(spConfigGetImagesPrefix(config, &msg), "img"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetImagesPrefix(NULL, &msg) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(!strcmp(spConfigGetImagesSuffix(config, &msg), ".png"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetImagesSuffix(NULL, &msg) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(!strcmp(spConfigGetPCAFilename(config, &msg), "pca.yml"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetPCAFilename(NULL, &msg) == NULL);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
 
 	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg) == true);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
@@ -61,6 +70,30 @@ bool testGivenConfFile() {
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
 	ASSERT_TRUE(spConfigGetNumOfSimilarImages(NULL, &msg) == -1);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(spConfigGetKNN(config, &msg) == 5);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetKNN(NULL, &msg) == -1);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(spConfigGetSplitMethod(config, &msg) == MAX_SPREAD);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetSplitMethod(NULL, &msg) == MAX_SPREAD);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(spConfigGetLoggerLevel(config, &msg) == SP_LOGGER_DEBUG_INFO_WARNING_ERROR_LEVEL);
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetLoggerLevel(NULL, &msg) == SP_LOGGER_INFO_WARNING_ERROR_LEVEL);
+	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
+
+	ASSERT_TRUE(!strcmp(spConfigGetLoggerFilename(config, &msg), "stdout"));
+	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+
+	ASSERT_TRUE(spConfigGetLoggerFilename(NULL, &msg) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_ARGUMENT);
 
 
@@ -177,81 +210,85 @@ bool testParseLine() {
 }
 
 bool testDefault() {
-	SPConfig config = calloc(1, sizeof(struct sp_config_t));
+	char imagePath[100], *loggerFilename = NULL, *pcaFilename = NULL;
+	SPConfig config = calloc(1, spConfigGetConfigStructSize());
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
 	initConfigToDefault(config);
-	ASSERT_TRUE(config->spImagesDirectory == NULL);
-	ASSERT_TRUE(config->spImagesPrefix == NULL);
-	ASSERT_TRUE(config->spImagesSuffix == NULL);
-	ASSERT_TRUE(config->spNumOfImages == 0);
+
+	ASSERT_TRUE(spConfigGetImagesDirectory(config, &msg) == NULL);
+	ASSERT_TRUE(spConfigGetImagesPrefix(config, &msg) == NULL);
+	ASSERT_TRUE(spConfigGetImagesSuffix(config, &msg) == NULL);
+	ASSERT_TRUE(spConfigGetNumOfImages(config, &msg) == 0);
 
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_DIR);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, sizeof(struct sp_config_t));
+	config = calloc(1, spConfigGetConfigStructSize());
 	initConfigToDefault(config);
-	config->spImagesDirectory = duplicateString("./bla/bla/");
+	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_PREFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, sizeof(struct sp_config_t));
+	config = calloc(1, spConfigGetConfigStructSize());
 	initConfigToDefault(config);
-	config->spImagesDirectory = duplicateString("./bla/bla/");
-	config->spImagesPrefix = duplicateString("whatever");
+	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
+	spConfigSetImagesPrefix(config, duplicateString("whatever"));
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_SUFFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, sizeof(struct sp_config_t));
+	config = calloc(1, spConfigGetConfigStructSize());
 	initConfigToDefault(config);
-	config->spImagesDirectory = duplicateString("./bla/bla/");
-	config->spImagesPrefix = duplicateString("whatever");
-	config->spImagesSuffix = duplicateString(".jpg");
+	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
+	spConfigSetImagesPrefix(config, duplicateString("whatever"));
+	spConfigSetImagesSuffix(config, duplicateString(".jpg"));
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_NUM_IMAGES);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, sizeof(struct sp_config_t));
+	config = calloc(1, spConfigGetConfigStructSize());
 	initConfigToDefault(config);
-	config->spImagesDirectory = duplicateString("./bla/bla/");
-	config->spImagesPrefix = duplicateString("whatever");
-	config->spImagesSuffix = duplicateString(".jpg");
-	config->spNumOfImages = 9000;
+	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
+	spConfigSetImagesPrefix(config, duplicateString("whatever"));
+	spConfigSetImagesSuffix(config, duplicateString(".jpg"));
+	spConfigSetImagesNum(config, 9000);
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == config);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
-	char imagePath[100];
 	ASSERT_TRUE(spConfigGetImagePath(imagePath, config, 4444) == SP_CONFIG_SUCCESS);
 	ASSERT_TRUE(!strcmp(imagePath, "./bla/bla/whatever4444.jpg"));
 
-	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
-	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "stdout"));
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&loggerFilename, "stdout", &msg));
+	ASSERT_TRUE(!strcmp(loggerFilename, "stdout"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	free(config->spLoggerFilename);
+	free(loggerFilename);
 
-	config->spLoggerFilename = duplicateString("/tmp/whatever");
-	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spLoggerFilename), "stdout", &msg));
-	ASSERT_TRUE(!strcmp(config->spLoggerFilename, "/tmp/whatever"));
+	loggerFilename = duplicateString("/tmp/whatever");
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&loggerFilename, "stdout", &msg));
+	ASSERT_TRUE(!strcmp(loggerFilename, "/tmp/whatever"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	free(loggerFilename);
 
-	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
-	ASSERT_TRUE(!strcmp(config->spPCAFilename, "pca.yml"));
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&pcaFilename, "pca.yml", &msg));
+	ASSERT_TRUE(!strcmp(pcaFilename, "pca.yml"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	free(config->spPCAFilename);
+	free(pcaFilename);
 
-	config->spPCAFilename = duplicateString("/tmp/whatever2");
-	ASSERT_TRUE(checkAndSetDefIfNeeded(&(config->spPCAFilename), "pca.yml", &msg));
-	ASSERT_TRUE(!strcmp(config->spPCAFilename, "/tmp/whatever2"));
+	pcaFilename = duplicateString("/tmp/whatever2");
+	ASSERT_TRUE(checkAndSetDefIfNeeded(&pcaFilename, "pca.yml", &msg));
+	ASSERT_TRUE(!strcmp(pcaFilename, "/tmp/whatever2"));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
+	free(pcaFilename);
 
 	spConfigDestroy(config);
 	return true;
 }
 
 bool testHandler() {
-	SPConfig config = calloc(1, sizeof(struct sp_config_t));
+	SPConfig config = calloc(1, spConfigGetConfigStructSize());
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectori", "C:\\MyDocuments\\",
@@ -279,15 +316,15 @@ bool testHandler() {
 	// check that a valid int is according to the rules in the forum (next 4 tests)
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfImages", "014", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spNumOfImages == 14);
+	ASSERT_TRUE(spConfigGetNumOfImages(config, &msg) == 14);
 	msg = SP_CONFIG_SUCCESS;
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfImages", "+1", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spNumOfImages == 1);
+	ASSERT_TRUE(spConfigGetNumOfImages(config, &msg) == 1);
 	msg = SP_CONFIG_SUCCESS;
 
-	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "1.1", &msg));
+	ASSERT_FALSE(handleVariable(config, "a", 1, "spNumOfImages", "1.0", &msg));
 	ASSERT_TRUE(msg == SP_CONFIG_INVALID_INTEGER);
 	msg = SP_CONFIG_SUCCESS;
 
@@ -330,38 +367,41 @@ bool testHandler() {
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spImagesDirectory", "C:\\Documents\\",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(!strcmp(config->spImagesDirectory, "C:\\Documents\\"));
+	ASSERT_TRUE(!strcmp(spConfigGetImagesDirectory(config, &msg), "C:\\Documents\\"));
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spImagesSuffix", ".bmp",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(!strcmp(config->spImagesSuffix, ".bmp"));
+	ASSERT_TRUE(!strcmp(spConfigGetImagesSuffix(config, &msg), ".bmp"));
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spNumOfFeatures", "80",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spNumOfFeatures == 80);
+	ASSERT_TRUE(spConfigGetNumOfFeatures(config, &msg) == 80);
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spPCADimension", "19",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spPCADimension == 19);
+	ASSERT_TRUE(spConfigGetPCADim(config, &msg) == 19);
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spExtractionMode", "true",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spExtractionMode);
+	ASSERT_TRUE(spConfigIsExtractionMode(config, &msg));
 
 	ASSERT_TRUE(handleVariable(config, "a", 1, "spKDTreeSplitMethod", "INCREMENTAL",
 			&msg));
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
-	ASSERT_TRUE(config->spKDTreeSplitMethod == INCREMENTAL);
+	ASSERT_TRUE(spConfigGetSplitMethod(config, &msg) == INCREMENTAL);
 
 	spConfigDestroy(config);
 	return true;
 }
 
 void runConfigTests() {
+	// Because of the fact that edge cases are also tested in these unit tests
+	// there might be printed messages that can be ignored in case all we care about is
+	// whether the tests have passed or not
 	RUN_TEST(testGivenConfFile);
 	RUN_TEST(testParseLine);
 	RUN_TEST(testDefault);

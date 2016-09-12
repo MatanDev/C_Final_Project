@@ -44,23 +44,6 @@ typedef enum sp_kdtree_split_method_t {
 	INCREMENTAL
 } SP_KDTREE_SPLIT_METHOD;
 
-struct sp_config_t {
-	char* spImagesDirectory;
-	char* spImagesPrefix;
-	char* spImagesSuffix;
-	int spNumOfImages;
-	int spPCADimension;
-	char* spPCAFilename;
-	int spNumOfFeatures;
-	bool spExtractionMode;
-	int spNumOfSimilarImages;
-	SP_KDTREE_SPLIT_METHOD spKDTreeSplitMethod;
-	int spKNN;
-	bool spMinimalGUI;
-	SP_LOGGER_LEVEL spLoggerLevel;
-	char* spLoggerFilename;
-};
-
 typedef struct sp_config_t* SPConfig;
 
 /*
@@ -561,4 +544,104 @@ char* getSignature(const SPConfig config);
  * @logger - the method logs relevant errors
  */
 SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config);
+
+/////////////////////// FOR TESTING PURPOSES ONLY ///////////////////////
+
+/*
+ * Returns the images directory as configured in the configuration file
+ * i.e the value of spImagesDirectory.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return spImagesDirectory in success, NULL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+char* spConfigGetImagesDirectory(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+ * Returns the images prefix as configured in the configuration file
+ * i.e the value of spImagesPrefix.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return spImagesPrefix in success, NULL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+char* spConfigGetImagesPrefix(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+ * Returns the images suffix as configured in the configuration file
+ * i.e the value of spImagesSuffix.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return spImagesSuffix in success, NULL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+char* spConfigGetImagesSuffix(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+ * Returns the PCA filename as configured in the configuration file
+ * i.e the value of spPCAFilename.
+ *
+ * @param config - the configuration structure
+ * @assert msg != NULL
+ * @param msg - pointer in which the msg returned by the function is stored
+ * @return spPCAFilename in success, NULL otherwise.
+ *
+ * - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+ * - SP_CONFIG_SUCCESS - in case of success
+ */
+char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+ * Sets config->spImagesDirectory to given imagesDir
+ *
+ * @assert config != NULL
+ * @param config - the configuration structure
+ * @param imagesDir - the string to set config->spImagesDirectory to
+ */
+void spConfigSetImagesDirectory(SPConfig config, char* imagesDir);
+
+/*
+ * Sets config->spImagesPrefix to given imagesPrefix
+ *
+ * @assert config != NULL
+ * @param config - the configuration structure
+ * @param imagesPrefix - the string to set config->spImagesPrefix to
+ */
+void spConfigSetImagesPrefix(SPConfig config, char* imagesPrefix);
+
+/*
+ * Sets config->spImagesSuffix to given imagesSuffix
+ *
+ * @assert config != NULL
+ * @param config - the configuration structure
+ * @param imagesSuffix - the string to set config->spImagesSuffix to
+ */
+void spConfigSetImagesSuffix(SPConfig config, char* imagesSuffix);
+
+/*
+ * Sets config->spNumOfImages to given imagesNum
+ *
+ * @assert config != NULL
+ * @param config - the configuration structure
+ * @param imagesNum - the integer to set config->spNumOfImages to
+ */
+void spConfigSetImagesNum(SPConfig config, int imagesNum);
+
+/*
+ * Returns the size of the structure sp_config_t
+ */
+int spConfigGetConfigStructSize();
+
 #endif /* SPCONFIG_H_ */

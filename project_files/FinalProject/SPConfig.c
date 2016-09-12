@@ -94,7 +94,7 @@
 /**
  * A data-structure which is used for configuring the system.
  */
-/*struct sp_config_t {
+struct sp_config_t {
 	char* spImagesDirectory;
 	char* spImagesPrefix;
 	char* spImagesSuffix;
@@ -109,7 +109,7 @@
 	bool spMinimalGUI;
 	SP_LOGGER_LEVEL spLoggerLevel;
 	char* spLoggerFilename;
-};*/
+};
 
 bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg) {
 	if (*field == NULL) {
@@ -469,7 +469,6 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg) {
 }
 
 bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, int line) {
-	//(http://moodle.tau.ac.il/mod/forum/discuss.php?d=77675)
 	assert(msg != NULL);
 	if (config == NULL) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
@@ -644,3 +643,45 @@ SP_CONFIG_MSG spConfigCropSimilarImages(const SPConfig config){
 	config->spNumOfSimilarImages = config->spNumOfImages;
 	return SP_CONFIG_SUCCESS;
 }
+
+char* spConfigGetImagesDirectory(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spImagesDirectory : NULL;
+}
+
+char* spConfigGetImagesPrefix(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spImagesPrefix : NULL;
+}
+
+char* spConfigGetImagesSuffix(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spImagesSuffix : NULL;
+}
+
+char* spConfigGetPCAFilename(const SPConfig config, SP_CONFIG_MSG* msg) {
+	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spPCAFilename : NULL;
+}
+
+void spConfigSetImagesDirectory(SPConfig config, char* imagesDir) {
+	assert(config != NULL);
+	config->spImagesDirectory = imagesDir;
+}
+
+void spConfigSetImagesPrefix(SPConfig config, char* imagesPrefix) {
+	assert(config != NULL);
+	config->spImagesPrefix = imagesPrefix;
+}
+
+void spConfigSetImagesSuffix(SPConfig config, char* imagesSuffix) {
+	assert(config != NULL);
+	config->spImagesSuffix = imagesSuffix;
+}
+
+void spConfigSetImagesNum(SPConfig config, int imagesNum) {
+	assert(config != NULL);
+	config->spNumOfImages = imagesNum;
+}
+
+// TODO - is better or unite with initConfigToDefault?
+int spConfigGetConfigStructSize() {
+	return sizeof(struct sp_config_t);
+}
+

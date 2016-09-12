@@ -244,7 +244,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '0'  - success
  */
 
-int main(int argc, char** argv) {
+/*int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
 	int numOfSimilarImages, numOfImages = 0;
@@ -267,3 +267,4 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
+*/
