@@ -14,9 +14,8 @@
 #define ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE 		"Error in updateCounterArrayPerFeature func"
 #define ERROR_GENERATING_SIMILAR_IMAGES				"Error generating similar images"
 
-#define WARNING_ZERO_IN_TOP_ITEMS_ARRAY				"Some image will appear in results even though		\
-													it did not have any feature which was one of the k	\
-													nearest neighbors of any of the query image features"
+#define WARNING_ZERO_IN_TOP_ITEMS_ARRAY				"Some image will appear in results even though \
+it did not have any feature which was one of the k nearest neighbors of any of the query image features"
 
 #define DEBUG_SIMILAR_IMAGES_ENDED 					"Similar images search process ended, selecting best images"
 #define DEBUG_SIMILAR_IMAGES_SEARCH_STARTED 		"Similar images search process started"
