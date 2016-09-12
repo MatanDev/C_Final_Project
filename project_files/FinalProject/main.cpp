@@ -60,6 +60,7 @@ extern "C" {
 
 //TODO - logger documentation in inner functions (convention)
 //TODO - remove fflush(NULL) at production
+//TODO - http://moodle.tau.ac.il/2015/mod/forum/discuss.php?d=80225
 /*
  * The method initializes the project, loads the settings, the logger, the images data and build's
  * the KD data structure with the images data, it loads the data into the pointers that are
