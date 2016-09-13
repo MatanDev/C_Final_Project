@@ -44,6 +44,8 @@ typedef struct index_with_coor_value* IndexWithCoorValue;
  * The method is a comparator for IndexWithCoorValue array to be used in
  * the quick sort function
  *
+ * pre assumptions - both a and b are valid pointers
+ *
  * @param a - pointer to the first element to be compared
  * @param b - pointer to the second element to be compared
  *
@@ -61,7 +63,7 @@ int compareIndexWithCoorValue(const void* a, const void* b);
  * @param size - the number of elements that were initiated in the array
  *
  * @logger -
- * in case of we try to free a null pointer a relevant warning is logged to the logger
+ * in case we try to free a null pointer a relevant warning is logged to the logger
  */
 void indexWithCoorValueArrDestroy(IndexWithCoorValue* indexWithCoorValueArr, int size);
 
@@ -78,9 +80,7 @@ void indexWithCoorValueArrDestroy(IndexWithCoorValue* indexWithCoorValueArr, int
  *  - not all points in arr have the same dimension
  * otherwise returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool checkInitArgs(SPPoint* arr, int size);
 
@@ -95,8 +95,7 @@ bool checkInitArgs(SPPoint* arr, int size);
  * @returns false in case of memory allocation failure or invalid argument, otherwise
  * returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
 
@@ -109,8 +108,7 @@ bool copyPointsArr(SPPoint** dst, SPPoint* src, int size);
  * @returns false in case of memory allocation failure or invalid argument, otherwise
  * returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool allocateKDArrayIndicesMatrix(SPKDArray arr);
 
@@ -131,8 +129,7 @@ SPKDArray onErrorInInitOrCopy(SPKDArray arr);
  * @returns NULL in case of memory allocation failure or invalid argument, otherwise
  * returns arr after its indices matrix was filled
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 SPKDArray fillIndicesMatrix(SPKDArray arr);
 
@@ -148,12 +145,9 @@ SPKDArray fillIndicesMatrix(SPKDArray arr);
  *  - size <= 0 or
  *  - not all points in arr have the same dimension or
  *  - memory allocation failed
- * otherwise returns a new SPKDArray initialized according to the given
- * data
+ * otherwise returns a new SPKDArray initialized according to the given data
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 SPKDArray Init(SPPoint* arr, int size);
 
@@ -171,12 +165,10 @@ SPKDArray Init(SPPoint* arr, int size);
  * @param source - The source sp_kd_array structure instance
  *
  * @returns
- * NULL in case source is null of memory allocation failure occurs
+ * NULL in case source is null or memory allocation failure occurs
  * Otherwise a copy of source is returned.
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 SPKDArray spKDArrayCopy(SPKDArray source);
 
@@ -200,6 +192,9 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr, int* map1, int*
  * if kdArr->pointsArray[i] belongs to the left sub SPKDArray and
  * X[i] = 1 if kdArr->pointsArray[i] belongs to the right sub SPKDArray
  *
+ * pre assumptions - kdArr is valid, and kdArr->indicesMatrix is initiated successfully
+ * (meaning it is valid, and every row in the matrix is valid)
+ *
  * @param xArr - a pointer to the array to fill and return
  * @param kdArr - the given SPKDArray to split
  * @param leftKdArrSize - the size of the left KDArray
@@ -208,15 +203,16 @@ SPKDArrayPair onErrorInSplit(SPKDArrayPair kdArrPair, int* xArr, int* map1, int*
  * @returns false in case of memory allocation failure, otherwise
  * returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor);
 
 /*
  * The method creates and fills the two kd-arrays points arrays
  * in kdArrPair, with respect to given kdArr and the array xArr
+ *
+ * pre assumptions - kdArrPair, kdArrPair->kdLeft, kdArrPair->kdRight, kdArr and
+ * kdArr->pointsArray are valid
  *
  * @param kdArrPair - the given SPKDArrayPair to fill the points
  * arrays of its elements
@@ -226,9 +222,7 @@ bool initXArr(int** xArr, SPKDArray kdArr, int leftKdArrSize, int coor);
  * @returns false in case of memory allocation failure, otherwise
  * returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair, SPKDArray kdArr, int* xArr);
 
@@ -237,6 +231,8 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair, SPKDArray kdArr, int
  * map1 contains the indices of the elements in the left SPKDArray in
  * kdArrPair and map2 contains the indices of the elements in the right
  * SPKDArray in kdArrPair
+ *
+ * pre assumptions - kdArr and xArr are valid
  *
  * @param map1 - a pointer to an array to contain the indices of the
  * elements in the left KDArray in kdArrPair in the end of the function
@@ -248,9 +244,7 @@ bool createKDArrayPairPointsArrays(SPKDArrayPair kdArrPair, SPKDArray kdArr, int
  * @returns false in case of memory allocation failure, otherwise
  * returns true
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
- * logger
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr, int* xArr);
 
@@ -258,6 +252,8 @@ bool createMap1AndMap2(int** map1, int** map2, SPKDArray kdArr, int* xArr);
  * The method creates and fills the two kd-arrays indices matrices
  * in kdArrPair, with respect to given kdArr, and the arrays: xArr, map1
  * and map2
+ *
+ * pre assumptions - kdArrPair, kdArr, kdArr->indicesMatrix, xArr, map1 and map2 are valid
  *
  * @param kdArrPair - the given SPKDArrayPair to fill the indices
  * matrices of its elements and eventually return
@@ -290,14 +286,12 @@ SPKDArrayPair fillKDArrayPairIndicesMatrices(SPKDArrayPair kdArrPair,
  *  - coor < 0 or
  *  - memory allocation failed
  * otherwise:
- * if kdArr->size == 1 returns SPKDArrayPair that contains
- * pointer to kdLeft and sets kdRight to NULL
- * else returns SPKDArrayPair that contains
- * pointers to kdLeft and kdRight
+ * if kdArr->size == 1 returns SPKDArrayPair that contains pointer to kdLeft and sets
+ * kdRight to NULL
+ * else returns SPKDArrayPair that contains pointers to kdLeft and kdRight
  *
  *
- * @logger -
- * in case of any type of failure the relevant error is logged to the
+ * @logger - in case of any type of error or warning a relevant message is written to the
  * logger
  */
 SPKDArrayPair Split(SPKDArray kdArr, int coor);
@@ -309,7 +303,7 @@ SPKDArrayPair Split(SPKDArray kdArr, int coor);
  * @param kdArr - the SPKDArray instance to destroy
  *
  * @logger -
- * in case of we try to free a null pointer a relevant warning is logged to the logger
+ * in case we try to free a null pointer a relevant warning is logged to the logger
  */
 void spKDArrayDestroy(SPKDArray kdArr);
 
@@ -320,7 +314,7 @@ void spKDArrayDestroy(SPKDArray kdArr);
  * @param kdArrPair - the SPKDArrayPair instance to destroy
  *
  * @logger -
- * in case of we try to free a null pointer a relevant warning is logged to the logger
+ * in case we try to free a null pointer a relevant warning is logged to the logger
  */
 void spKDArrayPairDestroy(SPKDArrayPair kdArrPair);
 

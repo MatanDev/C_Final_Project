@@ -564,8 +564,8 @@ SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config) {
 }
 
 char* getSignature(const SPConfig config) {
-	char lastImagePath[MAX_PATH_LEN],*signature = NULL;
-	int PCADim,numOfImages,numOfFeatures;
+	char lastImagePath[MAX_PATH_LEN], *signature = NULL;
+	int PCADim, numOfImages, numOfFeatures;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	numOfImages = spConfigGetNumOfImages(config, &msg);
@@ -577,7 +577,7 @@ char* getSignature(const SPConfig config) {
 	PCADim = spConfigGetPCADim(config, &msg);
 	VALID_MSG_IN_SIGN;
 
-	msg = spConfigGetImagePath(lastImagePath,config,numOfImages-1);
+	msg = spConfigGetImagePath(lastImagePath, config, numOfImages-1);
 	VALID_MSG_IN_SIGN;
 
 	spCallocEr(signature, char, (MAX_PATH_LEN*2), ERROR_CREATING_SIGN, NULL);

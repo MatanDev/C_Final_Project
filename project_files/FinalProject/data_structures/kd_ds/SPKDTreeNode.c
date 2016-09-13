@@ -7,8 +7,8 @@
 #define INVALID_DIM 								-1
 #define ERROR_CREATING_KD_INNER_NODE 				"Could not create inner node for KD tree"
 #define ERROR_INITIALIZING_KD_TREE	 				"Could not create KD tree"
-#define WARNING_KDTREE_NODE_NULL					"KDTreeNode object is null when destroy is called"
 
+#define WARNING_KDTREE_NODE_NULL					"KDTreeNode object is null when destroy is called"
 
 #define DEBUG_INITIALIZING_KD_TREE  				"Initializing KD Tree"
 #define DEBUG_CREATED_LEAF_NODE_INDEX  				"Created leaf, node->->index = "
@@ -26,8 +26,7 @@ SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
 }
 
 SPKDTreeNode InitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod) {
-	spLoggerSafePrintDebug(DEBUG_INITIALIZING_KD_TREE,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_INITIALIZING_KD_TREE, __FILE__, __FUNCTION__, __LINE__);
 	return internalInitKDTree(array, splitMethod, 0);
 }
 
@@ -74,6 +73,7 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 		return onErrorInInitKDTree(node);
 
 	node->dim = splitDim;
+
 	//allocate node's value
 	spCallocErWcRCb((node->val), double, 1, ERROR_CREATING_KD_INNER_NODE,
 			spKDArrayPairDestroy(splitResPair), onErrorInInitKDTree(node));
@@ -82,10 +82,10 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 			array->pointsArray[array->indicesMatrix[splitDim][(array->size - 1) / 2]],
 			splitDim);
 
-	if (!(node->kdtLeft = internalInitKDTree(splitResPair->kdLeft, splitMethod,
+	if (	!(node->kdtLeft = internalInitKDTree(splitResPair->kdLeft, splitMethod,
 					(recDepth + 1) % array->dim)) ||
 
-	// valid cause we get here only if array->size > 1
+	// valid because we get here only if array->size > 1
 			!(node->kdtRight = internalInitKDTree(splitResPair->kdRight, splitMethod,
 					(recDepth + 1) % array->dim))	) {
 		spKDArrayPairDestroy(splitResPair);
@@ -99,8 +99,8 @@ SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 	return node;
 }
 
-SPKDTreeNode internalInitKDTree(SPKDArray array,
-		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth) {
+SPKDTreeNode internalInitKDTree(SPKDArray array, SP_KDTREE_SPLIT_METHOD splitMethod,
+		int recDepth) {
 	SPKDTreeNode ret;
 	int splitDim;
 
@@ -146,7 +146,8 @@ void spKDTreeDestroy(SPKDTreeNode kdTreeNode, bool freePointsData) {
 		free(kdTreeNode);
 	}
 	else {
-		spLoggerSafePrintWarning(WARNING_KDTREE_NODE_NULL, __FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_KDTREE_NODE_NULL, __FILE__, __FUNCTION__,
+				__LINE__);
 	}
 }
 
