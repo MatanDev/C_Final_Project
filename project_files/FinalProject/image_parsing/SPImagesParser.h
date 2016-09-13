@@ -8,46 +8,6 @@
 #include "SPImageData.h"
 
 
-/*
- * This macro is used to generate safe calloc action
- * @param pointer - the pointer we want to allocate
- * @param type - the type of data we want to allocate
- * @param countOfItems - the number of items to be allocated
- * @param onError - some action to be performed in case of error
- *
- * the macro is used to allocate data, and in case of an error report it to the logger,
- * invoke "onError" and return NULL
- */
-#define spSafeCalloc(pointer, type, countOfItems, onError)  do { \
-				pointer = (type*)calloc(countOfItems, sizeof(type)); \
-                if(!(pointer)) { \
-					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
-					return NULL;\
-                } \
-        } while (0)
-
-/*
- * This macro is used to generate safe realloc action
- * @param pointer - the pointer we want to reallocate
- * @param type - the type of data we want to allocate
- * @param countOfItems - the number of items to be allocated
- * @param onError - some action to be performed in case of error
- *
- * the macro is used to reallocate data, and in case of an error report it to the logger,
- * invoke "onError" and return NULL
- */
-#define spSafeRealloc(pointer, type, countOfItems, onError)  do { \
-				pointer = (type*)realloc(pointer, countOfItems * sizeof(type)); \
-                if(!(pointer)) { \
-					spLoggerPrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
-					return NULL;\
-                } \
-        } while (0)
-
-
-
 /** A type used to indicate errors in function calls **/
 typedef enum sp_data_parse_messages {
 	SP_DP_SUCCESS,
@@ -124,6 +84,8 @@ char* getLine(FILE* fp);
  *
  * @param point - the relevant point
  * @return - the requested size
+ *
+ * @logger - the method reports odd internal calculations as warnings
  */
 int getPointCSVSize(SPPoint point);
 
@@ -140,7 +102,7 @@ int getNumOfDigits(int x);
  * The method gets a char array and a start position and try to extract a double value from
  * that string starting from "start", at the end "start" should be at the end of that double value
  *
- * @assert myString != NULL && *start >= 0
+ * pre assumptions - myString != NULL && *start >= 0
  *
  * @param myString - the relavent char array
  * @param start - a pointer to the start position at the string
@@ -162,7 +124,7 @@ double getFloatingNumberFromSubString(char* myString, int* start);
  *  - memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  *  otherwise returns a CSV representing the point [message = SP_DP_SUCCESS]
  *
- * @logger - Prints relevant errors to the logger regarding NULL pointer or memory allocation failure.
+ * @logger - Prints relevant errors and warnings to the logger regarding NULL pointer or memory allocation failure.
  */
 char* pointToString(SPPoint point, SP_DP_MESSAGES* message);
 
@@ -180,7 +142,7 @@ char* pointToString(SPPoint point, SP_DP_MESSAGES* message);
  * 	- could not parse the point due to wrong format issues [message = SP_DP_FORMAT_ERROR],
  * 	otherwise returns a SPPoint representing the point  [message = SP_DP_SUCCESS]
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SPPoint parsePointFromString(char* pointdata, int index, SP_DP_MESSAGES* message);
 
@@ -197,7 +159,7 @@ SPPoint parsePointFromString(char* pointdata, int index, SP_DP_MESSAGES* message
  *  - memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  *  otherwise returns a CSV representing the image basic details  [message = SP_DP_SUCCESS]
  *
- * @logger - Prints relevant errors to the logger regarding NULL pointer or memory allocation failure.
+ * @logger - Prints relevant errors and warnings to the logger regarding NULL pointer or memory allocation failure.
  */
 char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message);
 
@@ -215,7 +177,7 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message);
  * 	- memory allocation failure [message = SP_DP_MEMORY_FAILURE],
  * 	otherwise returns the requested path [message = SP_DP_SUCCESS]
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant information to the logger.
  */
 char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES* message);
 
@@ -231,7 +193,7 @@ char* getImagePath(const SPConfig config,int index,bool dataPath, SP_DP_MESSAGES
  * SP_DP_FORMAT_ERROR - could not parse the image due to wrong format issues
  * SP_DP_SUCCESS - Successfully written data to the image item
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image);
 
@@ -253,7 +215,7 @@ SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image);
  *  - SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
  * 	- SP_DP_SUCCESS - otherwise fully allocates allImagesData with the relevant data from the images
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES loadAllImagesData(const SPConfig config, char* configSignature, SPImageData* allImagesData);
 
@@ -269,6 +231,8 @@ SP_DP_MESSAGES loadAllImagesData(const SPConfig config, char* configSignature, S
  * SP_DP_FILE_READ_ERROR - error reading from file
  * SP_DP_FORMAT_ERROR - the file is not in the correct format
  * SP_DP_SUCCESS - image data created successfully
+ *
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData);
 
@@ -280,18 +244,22 @@ SP_DP_MESSAGES readFeaturesFromFile(FILE* imageFile, SPImageData imageData);
  * @param imageDataPath - the file path
  * @param imageData - an allocated SPImageData item to which the data will be written
  *
+ * pre assumptions - configSignature != NULL
+ *
  * @return -
  * SP_DP_MEMORY_FAILURE - memory allocation failure
  * SP_DP_FILE_READ_ERROR - error reading from file
  * SP_DP_FORMAT_ERROR - the file is not in the correct format
  * SP_DP_SUCCESS - image data created successfully
+ *
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SPImageData imageData);
 
 /*
  * The method loads image data into an allocated SPImageData structure by an opened file (not processing the data again)
  *
- * @assert - imageFile and imageData != NULL
+ * pre assumptions - imageFile and imageData and configSignature != NULL
  *
  * @param configSignature - a string representing the config file relevant settings
  * @param imageFile - a pointer to the file that contains the data regarding the image
@@ -302,6 +270,8 @@ SP_DP_MESSAGES loadKnownImageData(char* configSignature, char* imageDataPath, SP
  * SP_DP_FILE_READ_ERROR - error reading from file
  * SP_DP_FORMAT_ERROR - the file is not in the correct format
  * SP_DP_SUCCESS - image data created successfully
+ *
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPImageData imageData);
 
@@ -323,21 +293,25 @@ SP_DP_MESSAGES loadImageDataFromFile(char* configSignature, FILE* imageFile, SPI
  *  - SP_DP_FEATURE_EXTRACTION_ERROR - the features extraction failed
  * 	- SP_DP_SUCCESS - otherwise fills the relevant image data
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES loadImageData(const SPConfig config, char* configSignature, int imageIndex, SPImageData* allImagesData);
 
 /*
  * The method gets an opened file pointer and an image data item and writes the image data to the file.
- * @assert - imageFile and imageData and configSignature not NULL
+ *
  * @param imageFile - a pointer to the file that the data should be written to
  * @param imageData - an item that contains the image data
  * @param configSignature - a string representing a signature of the config file
+ *
+ * pre assumptions  - imageFile and imageData and configSignature not NULL
  *
  * @returns
  * SP_DP_MEMORY_FAILURE - memory allocation failure
  * SP_DP_FILE_WRITE_ERROR - error writing to file
  * SP_DP_SUCCESS - file created and saved successfully
+ *
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char* configSignature);
 
@@ -355,7 +329,7 @@ SP_DP_MESSAGES writeImageDataToFile(FILE* imageFile, SPImageData imageData, char
  * SP_DP_FILE_WRITE_ERROR - error writing to file
  * SP_DP_SUCCESS - file created and saved successfully
  *
- * @logger - Prints relevant errors to the logger.
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES saveImageData(const SPConfig config,char* configSignature, SPImageData imageData);
 
@@ -400,6 +374,7 @@ SP_DP_MESSAGES saveAllImagesData(const SPConfig config, char* configSignature, S
  *	    SP_DP_FEATURE_EXTRACTION_ERROR - could not extract features
  *	    SP_DP_SUCCESS - if all actions done successfully
  *
+ * @logger - Prints relevant errors and warnings to the logger.
  */
 SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageData* imagesData);
 

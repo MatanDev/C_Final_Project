@@ -489,7 +489,7 @@
  * @onError - the callback code to run in case of failure
  */
 #define spReallocWc(pointer, type, countOfItems, onError)  do { \
-				pointer = ((type)*)realloc((pointer), countOfItems * sizeof(type)); \
+				pointer = (type*)realloc((pointer), countOfItems * sizeof(type)); \
                 if(!(pointer)) { \
 					spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
 					onError; \

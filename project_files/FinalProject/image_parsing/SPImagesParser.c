@@ -77,7 +77,7 @@ char* getLineByMinBufferSize(FILE* fp, int minBufferSize){
 	int bufferSize = minBufferSize;
 	char *line = NULL, *tempLine = NULL, *rslt = NULL;
 
-	spSafeCalloc(line, char, bufferSize, onGetLineError(line,tempLine));
+	spCallocWc(line, char, bufferSize, onGetLineError(line,tempLine));
 
 	rslt = fgets(line,bufferSize,fp);
 
@@ -87,7 +87,7 @@ char* getLineByMinBufferSize(FILE* fp, int minBufferSize){
 	}
 
 	while (!feof(fp) && ! isAFullLine(line)){
-		spSafeCalloc(tempLine, char, bufferSize,onGetLineError(line,tempLine));
+		spCallocWc(tempLine, char, bufferSize,onGetLineError(line,tempLine));
 		strcpy(tempLine,line);
 
 		bufferSize <<= 1; // buffer *= 2
@@ -98,7 +98,7 @@ char* getLineByMinBufferSize(FILE* fp, int minBufferSize){
 					__FILE__, __FUNCTION__, __LINE__);
 		}
 
-		spSafeRealloc(line, char, bufferSize , onGetLineError(line,tempLine));
+		spReallocWc(line, char, bufferSize , onGetLineError(line,tempLine));
 
 		//this is why min_buffer_size must be even
 		rslt = fgets(tempLine,bufferSize >> 1,fp);
@@ -277,6 +277,9 @@ char* getImageStringHeader(SPImageData imageData, SP_DP_MESSAGES* message){
 
 SP_DP_MESSAGES loadImageDataFromHeader(char* header, SPImageData image){
 	int i = 0, index;
+	spVerifyArgumentsNc(header != NULL && image != NULL,
+			FAILED_STRING_PARSING_WRONG_FORMAT, SP_DP_INVALID_ARGUMENT);
+
 	spValNc((index = (int)getFloatingNumberFromSubString(header,&i))>= 0 && index == image->index,
 			FAILED_STRING_PARSING_WRONG_FORMAT, SP_DP_FORMAT_ERROR);
 
