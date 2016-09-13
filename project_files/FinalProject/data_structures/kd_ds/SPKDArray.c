@@ -13,7 +13,6 @@
 #define ERROR_SPLITTING_KD_ARRAY		"Error when trying to split KD array"
 
 #define WARNING_ARR_SIZE_1 				"KDArray of size 1 was passed to Split function"
-#define WARNING_INVALID_ARGUMENT		"Invalid argument in an inner function"
 #define WARNING_KDARR_NULL    			"KDArray object is null when destroy is called"
 #define WARNING_KDARR_PAIR_NULL    		"KDArrayPair object is null when destroy is called"
 #define WARNING_KDARR_PNTS_ARR_NULL		"KDArray points array is null when destroy is called"

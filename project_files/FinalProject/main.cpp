@@ -22,10 +22,9 @@ extern "C" {
 #define ERROR_INIT_CONFIG 							"Error initializing configurations and settings"
 #define ERROR_INIT_IMAGES 							"Error at initialize images data items process"
 #define ERROR_INIT_KDTREE_OR_DATA 					"Error building the data structures"
-#define ERROR_USER_QUERY 							"Error at user input. neither a valid image path, nor exit request"
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
-#define	ERROR_SEARCHING_IMAGES						"An error encountered during querying the database, thus similar images could not be found"
-
+#define	FAIL_SEARCHING_IMAGES						"Failed during querying the database, thus similar images could not be found"
+#define WRONG_USER_QUERY 							"Wrong user input. neither a valid image path, nor exit request"
 #define DEBUG_IMAGES_PRESENTED_GUI					"Similar images are being presented - GUI mode"
 
 #define RUN_ACTION									false
@@ -153,8 +152,8 @@ void proccessQueryAndPresentImages(SPConfig config, SPImageData currentImageData
 
 	currentImageData->featuresArray = (*imageProcObject)->getImageFeatures(workingImagePath,0,&(currentImageData->numOfFeatures));
 
-	spVal((similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
-			numOfSimilarImages, bpq)) != NULL , ERROR_SEARCHING_IMAGES, ); //on error returns
+	spValNc((similarImagesIndices = searchSimilarImages(currentImageData, kdTree, numOfImages,
+			numOfSimilarImages, bpq)) != NULL , FAIL_SEARCHING_IMAGES, ); //on error returns
 
 	if (GUIFlag) {
 		spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_GUI,
@@ -207,7 +206,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 		spLoggerSafePrintInfo(ILLEGAL_QUERY_HAS_BEEN_INSERTED);
 			spLoggerSafePrintInfo(workingImagePath);
 
-			spLoggerSafePrintWarning(ERROR_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
+			spLoggerSafePrintWarning(WRONG_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
 			printf(REQUEST_QUERY_AGAIN);
 			fflush(NULL);
 			getQuery(workingImagePath);
@@ -244,7 +243,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '0'  - success
  */
 
-/*int main(int argc, char** argv) {
+int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
 	int numOfSimilarImages, numOfImages = 0;
@@ -267,4 +266,3 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
-*/

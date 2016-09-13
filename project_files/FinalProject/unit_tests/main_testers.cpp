@@ -39,7 +39,7 @@ extern "C" {
 #include "SPBPQueueUnitTest.h"
 #include "SPKDTreeNodeKNNUnitTest.h"
 }
-
+/*
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
@@ -62,3 +62,4 @@ int main() {
 	return 0;
 }
 
+*/

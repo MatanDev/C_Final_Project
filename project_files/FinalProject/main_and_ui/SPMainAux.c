@@ -29,8 +29,9 @@
 	"Warning - the number of similar > number of images, only 'number of images' similar images will be presented when querying"
 #define WARNING_AT_IMAGES_FEATURES_FILE_PATH 					\
 	"An image features file does not exists or not available, please follow the logger for further information"
+#define WARNING_WRONG_FILE 										"wrong file path or file not available"
+#define FAILED_PRESEINTING_IMAGES_NO_GUI_MODE					"Failed to present similar images at non-GUI mode"
 
-#define ERROR_WRONG_FILE 										"Error, wrong file path or file not available"
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
 #define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
@@ -41,7 +42,6 @@
 #define ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG					"Failed to get logger level from configuration with message %s"
 #define ERROR_AT_CREATE_LOGGER									"Failed to create logger with message %s"
 #define ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG						"Failed to get image path from configuration"
-#define ERROR_PRESEINTING_IMAGES_NO_GUI_MODE					"Failed to present similar images at non-GUI mode"
 #define ERROR_PARSING_IMAGES_DATA 								"Failed at images parsing process"
 #define ERROR_INITIALIZING_QUERY_IMAGE 							"Failed to initialize query image item"
 #define ERROR_CREATING_FEATURES_ARRAY 							"Failed to create features array"
@@ -90,8 +90,8 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 bool verifyPathAndAvailableFile(char* path) {
 	FILE* fp;
 
-	spVerifyArgumentsRn(path != NULL, ERROR_WRONG_FILE);
-	spVal((fp = fopen(path, READ_FILE_MODE))!= NULL, ERROR_WRONG_FILE, false);
+	spVerifyArgumentsRnNc(path != NULL, WARNING_WRONG_FILE);
+	spValNc((fp = fopen(path, READ_FILE_MODE))!= NULL, WARNING_WRONG_FILE, false);
 	fclose(fp);
 
 	return true;
@@ -129,8 +129,8 @@ void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	char tmpImagePath[MAX_PATH_LEN];
 
-	spVerifyArguments(queryImagePath != NULL && config != NULL && imagesIndicesArray != NULL &&
-			imagesCount >= 0, ERROR_PRESEINTING_IMAGES_NO_GUI_MODE, ); //returns;
+	spVerifyArgumentsNc(queryImagePath != NULL && config != NULL && imagesIndicesArray != NULL &&
+			imagesCount >= 0, FAILED_PRESEINTING_IMAGES_NO_GUI_MODE, ); //returns;
 
 	spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_NON_GUI,
 				__FILE__, __FUNCTION__, __LINE__);
