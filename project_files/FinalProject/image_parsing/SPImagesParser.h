@@ -105,7 +105,7 @@ char* getLineByMinBufferSize(FILE* fp, int min_buffer_size);
  * the file pointer will point to the beginning of the next line after the
  * method is invoked
  *
- * pre assumptions - fp != NULL
+ * pre assumptions - fp != NULL && minBufferSize > 0 && minBufferSize % 2 == 0
  *
  * @param fp - a pointer to a pre-allocated file at read mode
  *

@@ -345,6 +345,11 @@ void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file
  *
  * @logger - log a warning in case of failure, the logger will be later on called
  * 			without a timestamp
+ *
+ * In case of memory allocation error, the program will terminate, this is done without releasing all
+ * the resources, as instructed at 'shaat kabala' to even use assertion, and since we
+ * cannot use any CPP code outside of the main, or call any function at the main,
+ * we cannot release the SPImageProc object at all.
  */
 char* tryAddTimestamp(const char* msg);
 

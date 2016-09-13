@@ -242,7 +242,7 @@ const char* loggerMsgToStr(SP_LOGGER_MSG msg) {
 
 void spLoggerSafePrintError(const char* msg, const char* file,
 		const char* function, const int line) {
-	SP_LOGGER_MSG message = spLoggerPrintError(msg,file,function,line);
+	SP_LOGGER_MSG message = spLoggerPrintError(msg, file, function, line);
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
@@ -252,7 +252,7 @@ void spLoggerSafePrintError(const char* msg, const char* file,
 
 void spLoggerSafePrintWarning(const char* msg, const char* file,
 		const char* function, const int line) {
-	SP_LOGGER_MSG message = spLoggerPrintWarning(msg,file,function,line);
+	SP_LOGGER_MSG message = spLoggerPrintWarning(msg, file, function, line);
 
 	if (message != SP_LOGGER_SUCCESS){
 		printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
@@ -286,11 +286,11 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
 	tempMessage = tryAddTimestamp(msg);
 
 	if (tempMessage != NULL){
-		message = spLoggerPrintDebug(tempMessage,file,function,line);
+		message = spLoggerPrintDebug(tempMessage, file, function, line);
 		free(tempMessage);
 	}
 	else {
-		message = spLoggerPrintDebug(msg,file,function,line);
+		message = spLoggerPrintDebug(msg, file, function, line);
 	}
 
 
@@ -326,12 +326,13 @@ void spLoggerSafePrintDebugWithIndex(const char* msg,int index, const char* file
 	}
 }
 
-
 char* tryAddTimestamp(const char* message){
 	char* updatedMessage = NULL;
 	time_t ltime = time(NULL);
 	spMinimalVerifyArgumentsRn(message != NULL);
-	spCalloc(updatedMessage, char, strlen(message) + TIMESTAMP_MAX_LEN);
+	spCallocWc(updatedMessage, char, strlen(message) + TIMESTAMP_MAX_LEN,
+			printf(ERROR_PRINTING_TO_LOGGER_EXITING_PROGRAM);
+			exit(LOGGER_ERROR_EXIT_CODE));
 	if (sprintf(updatedMessage, "%s%s",asctime(localtime(&ltime)),message) < 0){
 		spLoggerSafePrintWarning(FAILED_TO_CREATE_TIMESTAMP,
 				__FILE__, __FUNCTION__, __LINE__);
