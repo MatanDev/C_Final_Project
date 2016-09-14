@@ -10,6 +10,7 @@ bool testGivenConfFile() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate("./unit_tests/spcbirTestCase1.config", &msg);
 
+	ASSERT_TRUE(config != NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_SUCCESS);
 
 	ASSERT_TRUE(!strcmp(spConfigGetImagesDirectory(config, &msg), "./images/"));
@@ -211,8 +212,10 @@ bool testParseLine() {
 
 bool testDefault() {
 	char imagePath[100], *loggerFilename = NULL, *pcaFilename = NULL;
-	SPConfig config = calloc(1, spConfigGetConfigStructSize());
+	SPConfig config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_TRUE(config != NULL);
 
 	initConfigToDefault(config);
 
@@ -225,14 +228,16 @@ bool testDefault() {
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_DIR);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, spConfigGetConfigStructSize());
+	config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
+	ASSERT_TRUE(config != NULL);
 	initConfigToDefault(config);
 	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
 	ASSERT_TRUE(parameterSetCheck(config, &msg, "a", 1, NULL) == NULL);
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_PREFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, spConfigGetConfigStructSize());
+	config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
+	ASSERT_TRUE(config != NULL);
 	initConfigToDefault(config);
 	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
 	spConfigSetImagesPrefix(config, duplicateString("whatever"));
@@ -240,7 +245,8 @@ bool testDefault() {
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_SUFFIX);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, spConfigGetConfigStructSize());
+	config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
+	ASSERT_TRUE(config != NULL);
 	initConfigToDefault(config);
 	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
 	spConfigSetImagesPrefix(config, duplicateString("whatever"));
@@ -249,7 +255,8 @@ bool testDefault() {
 	ASSERT_TRUE(msg == SP_CONFIG_MISSING_NUM_IMAGES);
 	msg = SP_CONFIG_SUCCESS;
 
-	config = calloc(1, spConfigGetConfigStructSize());
+	config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
+	ASSERT_TRUE(config != NULL);
 	initConfigToDefault(config);
 	spConfigSetImagesDirectory(config, duplicateString("./bla/bla/"));
 	spConfigSetImagesPrefix(config, duplicateString("whatever"));
@@ -288,8 +295,10 @@ bool testDefault() {
 }
 
 bool testHandler() {
-	SPConfig config = calloc(1, spConfigGetConfigStructSize());
+	SPConfig config = (SPConfig)calloc(1, spConfigGetConfigStructSize());
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+
+	ASSERT_TRUE(config != NULL);
 
 	ASSERT_FALSE(handleVariable(config, "a", 1, "spImagesDirectori", "C:\\MyDocuments\\",
 			&msg));

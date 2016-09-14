@@ -247,7 +247,8 @@ bool handleLoggerLevel(SPConfig config, const char* filename, int lineNum, char*
  * field's value to the given value, in case the value upholds all the constraints
  * regarding the field
  *
- * pre assumptions - config, filename, varName, value and msg are all valid
+ * pre assumptions - config, filename, varName, value and msg are all valid;
+ * 					 value is not an empty string
  *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
@@ -310,6 +311,10 @@ SPConfig parameterSetCheck(SPConfig config, SP_CONFIG_MSG* msg, const char* file
  * - SP_CONFIG_MISSING_SUFFIX - if spImagesSuffix is missing 
  * - SP_CONFIG_MISSING_NUM_IMAGES - if spNumOfImages is missing
  * - SP_CONFIG_SUCCESS - in case of success
+ * - SP_CONFIG_INVALID_LINE - in case of invalid line
+ * - SP_CONFIG_INVALID_BOOLEAN - if a line in the config file contains invalid boolean
+ * - SP_CONFIG_INVALID_KDTREE_SPLIT_METHOD - if a line in the config file contains invalid
+ * 											 KDTree split method
  *
  *
  */
