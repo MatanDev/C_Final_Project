@@ -1,0 +1,1 @@
+all 3 tests should return the same results (tests for the kd tree split methods)

@@ -1,0 +1,1 @@
+test 1 should work fine and test 2 ,3 and 4 should fail for wrong features files
