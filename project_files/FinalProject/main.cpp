@@ -208,7 +208,6 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 
 			spLoggerSafePrintWarning(WRONG_USER_QUERY, __FILE__, __FUNCTION__, __LINE__);
 			printf(REQUEST_QUERY_AGAIN);
-			fflush(NULL);
 			getQuery(workingImagePath);
 		}
 		if (!strcmp(workingImagePath, QUERY_EXIT_INPUT)){ // query == '<>'

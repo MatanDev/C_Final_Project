@@ -326,8 +326,8 @@ bool handleLoggerLevel(SPConfig config, const char* filename, int lineNum, char*
 	return true;
 }
 
-bool handleVariable(SPConfig config, const char* filename, int lineNum, char *varName,
-		char *value, SP_CONFIG_MSG* msg) {
+bool handleVariable(SPConfig config, const char* filename, int lineNum, char* varName,
+		char* value, SP_CONFIG_MSG* msg) {
 	assert(value[0] != NULL_CHARACTER); // value is not an empty string
 
 	if (!strcmp(varName, SP_IMAGES_DIRECTORY))

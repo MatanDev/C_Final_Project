@@ -51,6 +51,8 @@ typedef struct sp_config_t* SPConfig;
  * returns null in case of memory allocation failure
  * (not logging the failure)
  *
+ * pre assumptions - str is valid
+ *
  * @param str - the given string to duplicate
  *
  * @returns -
@@ -61,6 +63,8 @@ char* duplicateString(const char* str);
 
 /*
  * Returns true if copying def to *field was successful, false otherwise.
+ *
+ * pre assumptions - field, def and msg are valid
  *
  * @param field - pointer to the string field to copy the default value into
  * @param def - the default string to initialize *field with
@@ -74,12 +78,17 @@ bool checkAndSetDefIfNeeded(char** field, const char* def, SP_CONFIG_MSG* msg);
 /*
  * Initializes given configuration structure instance's fields to default values
  *
+ * pre assumptions - config is valid
+ *
  * @param config - pointer to the configuration structure instance
  */
 void initConfigToDefault(SPConfig config);
 
 /*
  * Prints a formatted error message with respect to given parameter errorMsgType
+ *
+ * pre assumptions - filename is valid, and parameterName is valid in case errorMsgType is
+ * 					 PARAMETER_NOT_SET
  *
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
@@ -94,6 +103,8 @@ void printErrorMessage(const char* filename, int lineNum, ERROR_MSG_TYPE errorMs
 /*
  * Checks if the given configuration line is valid
  * and extracts the variable name and its value if so
+ *
+ * pre assumptions - all pointer arguments are valid
  *
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
@@ -114,6 +125,8 @@ bool parseLine(const char* filename, int lineNum, char* line, char** varName, ch
  * Checks if the given value upholds all the constraints of the given string field
  * and if so sets the given string field value to the given value
  *
+ * pre assumptions - all pointer arguments are valid
+ *
  * @param strField - pointer to string field to set the value to
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
@@ -132,6 +145,8 @@ bool handleStringField(char** strField, const char* filename, int lineNum,
  * Checks if 'strVal' is a valid integer according to the rules in the forum and if so
  * stores it in *'intVal'
  *
+ * pre assumptions - both strVal and intVal are valid
+ *
  * @param strVal - the string to be checked
  * @param intVal - pointer to the address to store the parsed integer in
  *
@@ -142,6 +157,8 @@ bool isValidInt(char* strVal, int* intVal);
 /*
  * Checks if the given value is a positive integer and if so sets the given integer field
  * value to the given value
+ *
+ * pre assumptions - all pointer arguments are valid
  *
  * @param posIntField - pointer to integer field to set the value to
  * @param filename - the configuration filename
@@ -157,6 +174,8 @@ bool handlePositiveIntField(int* posIntField, const char* filename, int lineNum,
 /*
  * Checks if the given value is a positive integer between 10 and 28
  * and if so sets config->spPCADimension to the given value (as an integer)
+ *
+ * pre assumptions - config, filename, value and msg are all valid
  *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
@@ -174,6 +193,8 @@ bool handlePCADimension(SPConfig config, const char* filename, int lineNum, char
  * Checks if the given value is "true" or "false"
  * and if so sets the given boolean field value to true or false respectively
  *
+ * pre assumptions - all pointer arguments are valid
+ *
  * @param boolField - pointer to boolean field to set the value to
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
@@ -190,6 +211,8 @@ bool handleBoolField(bool* boolField, const char* filename, int lineNum, char* v
  * Checks if the given value is a KDTree split method
  * and if so sets config->spKDTreeSplitMethod value to the given KDTree split method
  *
+ * pre assumptions - config, filename, value and msg are all valid
+ *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
@@ -204,6 +227,8 @@ bool handleKDTreeSplitMethod(SPConfig config, const char* filename, int lineNum,
 /*
  * Checks if the given value is a positive integer between 1 and 4
  * and if so sets config->spLoggerLevel accordingly
+ *
+ * pre assumptions - config, filename, value and msg are all valid
  *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
@@ -222,17 +247,20 @@ bool handleLoggerLevel(SPConfig config, const char* filename, int lineNum, char*
  * field's value to the given value, in case the value upholds all the constraints
  * regarding the field
  *
+ * pre assumptions - config, filename, varName, value and msg are all valid
+ *
  * @param config - pointer to the configuration structure instance
  * @param filename - the configuration filename
  * @param lineNum - the number of the invalid line or the number of lines in the
  * configuration file in case of parameter not set error
  * @param varName - a string which contains the name of the variable to set the value to
+ * @assert value is not an empty string
  * @param value - a string which contains the value to set
  * @param msg - pointer in which the msg returned by the function is stored
  * @return true if the given value was set successfully to the given variable
  */
-bool handleVariable(SPConfig config, const char* filename, int lineNum, char *varName,
-		char *value, SP_CONFIG_MSG* msg);
+bool handleVariable(SPConfig config, const char* filename, int lineNum, char* varName,
+		char* value, SP_CONFIG_MSG* msg);
 
 /*
  * Closes given FILE pointer 'configFile', destroys the given configuration structure
@@ -247,6 +275,8 @@ SPConfig onError(SPConfig config, FILE* configFile);
 /*
  * Check if the parameters that don't have a default value were set in the configuration
  * file
+ *
+ * pre assumptions - config, msg and filename are all valid
  *
  * @param config - pointer to the configuration structure instance
  * @param msg - pointer in which the msg returned by the function is stored
@@ -287,6 +317,8 @@ SPConfig spConfigCreate(const char* filename, SP_CONFIG_MSG* msg);
 
 /*
  * Returns true if config is not null, otherwise false
+ *
+ * pre assumptions - function (the const char* argument) is valid
  *
  * @param config - the configuration structure
  * @assert msg != NULL

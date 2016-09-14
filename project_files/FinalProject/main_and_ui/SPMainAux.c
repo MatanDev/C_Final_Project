@@ -51,7 +51,6 @@
 
 #define MAIN_RETURNED_ERROR										"An error has been encountered, please check the log file for more information.\n"
 
-#define DEBUG_ENDING_CONTROL_FLOW 								"Ending control flow with return value - "
 #define DEBUG_IMAGES_PRESENTED_NON_GUI							"Similar images are being presented, non GUI mode"
 #define DEBUG_IMAGES_PARSER_FINISHED 							"Images parser finished its work successfully"
 #define DEBUG_WORKING_IMAGE_INITIALIZED 						"Working image initialized successfully"
@@ -72,7 +71,7 @@ char* getConfigFilename(int argc, char** argv) {
 		if (!strcmp(argv[1], CONFIG_FILE_PATH_ARG)){
 			return argv[2];
 		}
-		else { // logger is not yet initialized
+		else { // logger is not initialized yet
 			printf(WARNING_CONFIG_ARG);
 		}
 	}
@@ -90,6 +89,7 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 bool verifyPathAndAvailableFile(char* path) {
 	FILE* fp;
 
+	//TODO - Matan - change macro to return false and not NULL
 	spVerifyArgumentsRnNc(path != NULL, WARNING_WRONG_FILE);
 	spValNc((fp = fopen(path, READ_FILE_MODE))!= NULL, WARNING_WRONG_FILE, false);
 	fclose(fp);
@@ -103,16 +103,13 @@ void getQuery(char* destination) {
 
 void getAsString(const char* message, char* destination) {
 	printf("%s", message);
-	fflush(NULL);
 	scanf("%s", destination);
-	fflush(NULL);
 }
 
 void endControlFlow(SPConfig config, SPImageData image,
-		bool isCurrentImageFeaturesArrayAllocated, SPKDTreeNode kdTree, SPBPQueue bpq, int returnValue) {
-	//spLoggerSafePrintDebugWithIndex(DEBUG_ENDING_CONTROL_FLOW, returnValue,
-	//			__FILE__, __FUNCTION__, __LINE__);
-	if (returnValue < 0){
+		bool isCurrentImageFeaturesArrayAllocated, SPKDTreeNode kdTree, SPBPQueue bpq,
+		int returnValue) {
+	if (returnValue < 0) {
 		printf(MAIN_RETURNED_ERROR);
 	}
 	printf("%s", EXITING);
@@ -129,20 +126,19 @@ void presentSimilarImagesNoGUI(char* queryImagePath, SPConfig config,
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	char tmpImagePath[MAX_PATH_LEN];
 
-	spVerifyArgumentsNc(queryImagePath != NULL && config != NULL && imagesIndicesArray != NULL &&
-			imagesCount >= 0, FAILED_PRESEINTING_IMAGES_NO_GUI_MODE, ); //returns;
+	spVerifyArgumentsNc(queryImagePath != NULL && config != NULL &&
+			imagesIndicesArray != NULL && imagesCount >= 0,
+			FAILED_PRESEINTING_IMAGES_NO_GUI_MODE, ); // return;
 
-	spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_NON_GUI,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_IMAGES_PRESENTED_NON_GUI, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	printf(CLOSEST_IMAGES, queryImagePath);
-	fflush(NULL);
 	for (i = 0; i < imagesCount; i++) {
 		spValWarning((msg = spConfigGetImagePath(tmpImagePath, config, imagesIndicesArray[i])) == SP_CONFIG_SUCCESS,
 				WARNING_COULD_NOT_LOAD_IMAGE_PATH,
 				printf(RELEVANT_IMAGE_INDEX_IS, imagesIndicesArray[i]),
 				printf("%s\n", tmpImagePath));
-		fflush(NULL);
 	}
 }
 
@@ -181,18 +177,18 @@ int* searchSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numO
 SP_CONFIG_MSG loadRelevantSettingsData(const SPConfig config, int* numOfImages,
 		int* numOfSimilar, bool* extractFlag, bool* GUIFlag) {
 	SP_CONFIG_MSG rslt = SP_CONFIG_SUCCESS;
-	assert( config != NULL);
-
-	*extractFlag = spConfigIsExtractionMode(config , &rslt);
-	spVal(rslt == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, rslt);
+	assert(config != NULL);
 
 	*numOfImages = spConfigGetNumOfImages(config, &rslt);
 	spVal(rslt == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, rslt);
 
-	*GUIFlag = spConfigMinimalGui(config, &rslt);
+	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
 	spVal(rslt == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, rslt);
 
-	*numOfSimilar = spConfigGetNumOfSimilarImages(config, &rslt);
+	*extractFlag = spConfigIsExtractionMode(config , &rslt);
+	spVal(rslt == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, rslt);
+
+	*GUIFlag = spConfigMinimalGui(config, &rslt);
 	spVal(rslt == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS, rslt);
 
 	return rslt;
@@ -202,14 +198,14 @@ SPImageData* initializeImagesDataList(int numOfImages) {
 	SPImageData* imagesDataList = NULL;
 	int i;
 	spCallocEr(imagesDataList, SPImageData, numOfImages,
-			ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, NULL); //returns;
+			ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS, NULL);
 
-	for (i=0 ; i<numOfImages; i++){
+	for (i = 0; i < numOfImages; i++){
 		//extract each relevant image data
 		spValWcRn(((imagesDataList)[i] = createImageData(i)) != NULL,
 				ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS,
 				//roll-back
-				freeAllImagesData(imagesDataList,i,false)); //false because features list is not yet allocated
+				freeAllImagesData(imagesDataList, i, false)); // false because features list is not yet allocated
 	}
 	return imagesDataList;
 }
@@ -229,37 +225,36 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 	SPPoint* allFeaturesArray;
 	SP_KDTREE_SPLIT_METHOD splitMethod;
 
-	spVal(spImagesParserStartParsingProcess(config, imagesDataList) == SP_DP_SUCCESS, ERROR_PARSING_IMAGES_DATA, false);
+	spVal(spImagesParserStartParsingProcess(config, imagesDataList) == SP_DP_SUCCESS,
+			ERROR_PARSING_IMAGES_DATA, false);
 
-	spLoggerSafePrintDebug(DEBUG_IMAGES_PARSER_FINISHED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_IMAGES_PARSER_FINISHED, __FILE__, __FUNCTION__, __LINE__);
 
-	spVal((*currentImageData = initializeWorkingImage()), ERROR_INITIALIZING_QUERY_IMAGE, false);
+	spVal((*currentImageData = initializeWorkingImage()), ERROR_INITIALIZING_QUERY_IMAGE,
+			false);
 
-	spLoggerSafePrintDebug(DEBUG_WORKING_IMAGE_INITIALIZED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_WORKING_IMAGE_INITIALIZED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	totalNumOfFeatures = calculateTotalNumOfFeatures(imagesDataList, numOfImages);
 
-	spLoggerSafePrintDebug(DEBUG_NUMBER_OF_FEATURES_CALCULATED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_NUMBER_OF_FEATURES_CALCULATED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	spVal((allFeaturesArray = initializeAllFeaturesArray(imagesDataList, numOfImages,
 			totalNumOfFeatures)), ERROR_CREATING_FEATURES_ARRAY, false);
 
-	spLoggerSafePrintDebug(DEBUG_FEATURES_ARRAY_INITIALIZED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_FEATURES_ARRAY_INITIALIZED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	splitMethod = spConfigGetSplitMethod(config, &configMessage);
-	spValWc(configMessage == SP_CONFIG_SUCCESS,
-			ERROR_READING_SETTINGS, free(allFeaturesArray),false);
-
-	spValWc((*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
-			splitMethod)), ERROR_CREATING_KD_TREE,
+	spValWc(configMessage == SP_CONFIG_SUCCESS, ERROR_READING_SETTINGS,
 			free(allFeaturesArray), false);
 
-	spLoggerSafePrintDebug(DEBUG_KD_TREE_INITIALIZED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spValWc((*kdTree = InitKDTreeFromPoints(allFeaturesArray, totalNumOfFeatures,
+			splitMethod)), ERROR_CREATING_KD_TREE, free(allFeaturesArray), false);
+
+	spLoggerSafePrintDebug(DEBUG_KD_TREE_INITIALIZED, __FILE__, __FUNCTION__, __LINE__);
 
 	free(allFeaturesArray);
 
@@ -269,41 +264,40 @@ bool initializeWorkingImageKDTreeAndBPQueue(const SPConfig config,
 
 	spVal((*bpq = spBPQueueCreate(knn)), ERROR_INITIALIZING_BP_QUEUE, false);
 
-	spLoggerSafePrintDebug(DEBUG_PRIORITY_QUEUE_INITIALIZED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_PRIORITY_QUEUE_INITIALIZED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	return true;
 }
 
-bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag){
+bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag) {
 	char tempPath[MAX_PATH_LEN];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	//verify PCA file
 	spVal((msg = spConfigGetPCAPath(tempPath, config)) == SP_CONFIG_SUCCESS,
-		//	&& verifyPathAndAvailableFile(tempPath),
 			ERROR_AT_PCA_FILE_PATH, false);
 
-	spLoggerSafePrintDebug(DEBUG_PCA_FILE_IS_VERIFIED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_PCA_FILE_IS_VERIFIED, __FILE__, __FUNCTION__, __LINE__);
 
 	//verify images files
-	for (i = 0;i < numOfImages ; i++){
-		if (extractFlag){
-		spVal((msg = spConfigGetImagePath(tempPath, config, i)) == SP_CONFIG_SUCCESS
-				&& verifyPathAndAvailableFile(tempPath),
-				ERROR_AT_IMAGES_FILE_PATH, false);
-		spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX,
-				i,
-					__FILE__, __FUNCTION__, __LINE__);
+	for (i = 0;i < numOfImages ; i++) {
+		if (extractFlag) {
+			spVal((msg = spConfigGetImagePath(tempPath, config, i)) == SP_CONFIG_SUCCESS
+					&& verifyPathAndAvailableFile(tempPath), ERROR_AT_IMAGES_FILE_PATH,
+					false);
+
+			spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX,
+					i, __FILE__, __FUNCTION__, __LINE__);
 		}
 		else {
-			spValWarning((msg = spConfigGetImagePathFeats(tempPath, config, i, true)) == SP_CONFIG_SUCCESS
-					&& verifyPathAndAvailableFile(tempPath),
+			spValWarning((msg = spConfigGetImagePathFeats(tempPath, config, i, true))
+					== SP_CONFIG_SUCCESS && verifyPathAndAvailableFile(tempPath),
 					WARNING_AT_IMAGES_FEATURES_FILE_PATH, continue,
-					spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX, i,
-							__FILE__, __FUNCTION__, __LINE__));
+					spLoggerSafePrintDebugWithIndex(
+							DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX,
+							i, __FILE__, __FUNCTION__, __LINE__));
 		}
 	}
 	return true;
@@ -313,14 +307,13 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 
 	spVerifyArguments(config != NULL && numOfImages > 0 && numOfSimilarImages != NULL &&
-			*numOfSimilarImages > 0,
-			ERROR_AT_IMAGES_COUNTS, false);
+			*numOfSimilarImages > 0, ERROR_AT_IMAGES_COUNTS, false);
 
-	if (*numOfSimilarImages > numOfImages){
-		spVal((msg = spConfigCropSimilarImages(config)) == SP_CONFIG_SUCCESS ,
+	if (*numOfSimilarImages > numOfImages) {
+		spVal((msg = spConfigCropSimilarImages(config)) == SP_CONFIG_SUCCESS,
 				ERROR_AT_IMAGES_COUNTS, false);
-		spLoggerSafePrintWarning(WARNING_IMAGES_COUNT_CROPPED,
-						__FILE__, __FUNCTION__, __LINE__);
+		spLoggerSafePrintWarning(WARNING_IMAGES_COUNT_CROPPED, __FILE__, __FUNCTION__,
+				__LINE__);
 		*numOfSimilarImages = numOfImages;
 	}
 
@@ -366,16 +359,16 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
 		printf(ERROR_AT_CREATE_LOGGER, loggerMsgToStr(loggerMsg));
 		return false;
 	}
-	spLoggerSafePrintDebug(DEBUG_LOGGER_HAS_BEEN_CREATED,
-			__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_LOGGER_HAS_BEEN_CREATED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	//load relevant data from settings
 	if (loadRelevantSettingsData(*config, numOfImages, numOfSimilarImages, extractFlag,
 			GUIFlag) != SP_CONFIG_SUCCESS) {
 		return false;
 	}
-	spLoggerSafePrintDebug(DEBUG_RELEVANT_SETTINGS_DATA_LOADED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_RELEVANT_SETTINGS_DATA_LOADED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	return verifyImagesNumbersLimits(*config, *numOfImages, numOfSimilarImages) &&
 			verifyImagesFiles(*config, *numOfImages, *extractFlag);

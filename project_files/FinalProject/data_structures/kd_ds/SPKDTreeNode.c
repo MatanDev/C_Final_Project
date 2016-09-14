@@ -11,8 +11,6 @@
 #define WARNING_KDTREE_NODE_NULL					"KDTreeNode object is null when destroy is called"
 
 #define DEBUG_INITIALIZING_KD_TREE  				"Initializing KD Tree"
-#define DEBUG_CREATED_LEAF_NODE_INDEX  				"Created leaf, node->->index = "
-#define DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH 	"Creating inner node for rec depth - "
 
 
 SPKDTreeNode InitKDTreeFromPoints(SPPoint* pointsArray, int size,
@@ -42,9 +40,6 @@ SPKDTreeNode createLeaf(SPKDTreeNode node, SPKDArray array) {
 	node->kdtLeft = NULL;
 	node->kdtRight = NULL;
 	node->data = array->pointsArray[0];
-	//spLoggerSafePrintDebugWithIndex(DEBUG_CREATED_LEAF_NODE_INDEX,
-	//		spPointGetIndex(node->data),
-	//			__FILE__, __FUNCTION__, __LINE__);
 	return node;
 }
 
@@ -67,8 +62,6 @@ int getSplitDimInMaxSpreadMethod(SPKDArray array) {
 SPKDTreeNode createInnerNode(SPKDTreeNode node, SPKDArray array,
 		SP_KDTREE_SPLIT_METHOD splitMethod, int recDepth, int splitDim) {
 	SPKDArrayPair splitResPair = Split(array, splitDim);
-	//spLoggerSafePrintDebugWithIndex(DEBUG_CREATING_INNER_NODE_FOR_REC_DEPTH, recDepth,
-	//			__FILE__, __FUNCTION__, __LINE__);
 	if (!splitResPair)
 		return onErrorInInitKDTree(node);
 
