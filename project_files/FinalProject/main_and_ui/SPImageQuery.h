@@ -20,6 +20,9 @@ int* initializeCounterArray(int size);
  * Pops the current minimal element from given priority queue 'bpq' (peek + dequeue)
  * and places its index in 'indicesArray'['arrayIndex']
  *
+ * pre assumptions - both bpq and indicesArray are valid,
+ * 					 0 <= arrayIndex < size of indicesArray
+ *
  * @param bpq - the priority queue to pop from
  * @param indicesArray - the array to place the index popped from queue in
  * @param arrayIndex - the index in 'indicesArray' to place the index popped from queue in
@@ -28,6 +31,8 @@ int* initializeCounterArray(int size);
  * SP_BPQUEUE_INVALID_ARGUMENT if 'bpq' is NULL
  * SP_BPQUEUE_EMPTY if the 'bpq' if empty
  * SP_BPQUEUE_SUCCESS if the element has been removed successfully
+ *
+ * @logger - in case of any type of failure the relevant error is logged to the logger
  */
 SP_BPQUEUE_MSG popFromQueueToIndicesArray(SPBPQueue bpq, int* indicesArray,
 		int arrayIndex);
@@ -35,6 +40,8 @@ SP_BPQUEUE_MSG popFromQueueToIndicesArray(SPBPQueue bpq, int* indicesArray,
 /*
  * Creates an integer array containing the indices of the most similar images based
  * on the given priority queue 'bpq'
+ *
+ * pre assumptions - bpq is valid
  *
  * @param bpq - the priority queue to pop from
  * @param originalQueueSize - the size of the queue before we started popping elems from it
@@ -50,6 +57,9 @@ int* createSimImagesToFeatureIndicesArray(SPBPQueue bpq, int originalQueueSize);
  * Finds the indices of the images containing the features that are the most similar
  * to the given feature 'relevantFeature', creates an integer array containing them and
  * eventually returns it.
+ *
+ * pre assumptions - relevantFeature, kdTree and bpq are valid,
+ * 					 finalQueueSize is a valid pointer
  *
  * @param relevantFeature - the feature we compare the elements in 'kdTree' to
  * @param kdTree - a KDTree instance representing the KDTree created from all the features
@@ -71,6 +81,8 @@ int* getSimilarImagesIndicesToFeature(SPPoint relevantFeature, SPKDTreeNode kdTr
  * Updates 'counterArray' according to the indices of the images containing the features
  * that are the most similar to the given feature 'relevantFeature'.
  *
+ * pre assumptions - counterArray, relevantFeature, kdTree and bpq are valid
+ *
  * @param relevantFeature - the feature we compare the elements in 'kdTree' to
  * @param kdTree - a KDTree instance representing the KDTree created from all the features
  * of all the images whose paths were given in the configuration file
@@ -89,13 +101,16 @@ bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
  * Returns an integer array of size 'retArraySize' containing the indices of 'counterArray'
  * with the maximum value
  *
+ * pre assumptions - counterArray is valid
+ *
  * @param counterArray - the counter array to work by
  * @param counterArraySize - the size of 'counterArray'
  * @param retArraySize - the size of the return array
  *
  * @returns NULL in case of memory allocation failure, otherwise returns the desired array
  *
- * @logger - in case of any type of failure the relevant error is logged to the logger
+ * @logger - in case of any type of error or warning a relevant message is written to the
+ * logger
  */
 int* getTopItems(int* counterArray, int counterArraySize, int retArraySize);
 
@@ -118,6 +133,7 @@ int* getTopItems(int* counterArray, int counterArraySize, int retArraySize);
  * array
  *
  * @logger - in case of any type of failure the relevant error is logged to the logger
+ * debug prints are also printed to the logger
  */
 int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfImages,
 		int numOfSimilarImages, SPBPQueue bpq);

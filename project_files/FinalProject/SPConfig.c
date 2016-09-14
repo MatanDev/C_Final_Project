@@ -486,7 +486,7 @@ bool isValid(const SPConfig config, SP_CONFIG_MSG* msg, const char* function, in
 	*msg = SP_CONFIG_SUCCESS;
 	return true;
 }
-//TODO - better to use && instead of ternary operator (here and in the next function)?
+
 bool spConfigIsExtractionMode(const SPConfig config, SP_CONFIG_MSG* msg) {
 	return isValid(config, msg, __FUNCTION__, __LINE__) ? config->spExtractionMode : false;
 }

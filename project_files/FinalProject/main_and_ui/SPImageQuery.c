@@ -58,14 +58,12 @@ int* createSimImagesToFeatureIndicesArray(SPBPQueue bpq, int originalQueueSize) 
 
 int* getSimilarImagesIndicesToFeature(SPPoint relevantFeature, SPKDTreeNode kdTree,
 		SPBPQueue bpq, int* finalQueueSize) {
-
 	spValRn(kNearestNeighbors(kdTree, bpq, relevantFeature), ERROR_K_NEAREST_NEIGHBORS);
+
 	*finalQueueSize = spBPQueueSize(bpq);
 
 	return createSimImagesToFeatureIndicesArray(bpq, *finalQueueSize);
 }
-
-
 
 bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
 		SPKDTreeNode kdTree, SPBPQueue bpq) {
@@ -77,7 +75,7 @@ bool updateCounterArrayPerFeature(int* counterArray, SPPoint relevantFeature,
 	for (j = 0; j < finalQueueSize; j++)
 		counterArray[similarImagesIndices[j]]++;
 
-	// if we get here closestImagesIndices is not null
+	// if we get here similarImagesIndices is valid
 	free(similarImagesIndices);
 
 	return true;
@@ -116,27 +114,24 @@ int* getSimilarImages(SPImageData workingImage, SPKDTreeNode kdTree, int numOfIm
 	spVerifyArguments(workingImage != NULL && kdTree != NULL && bpq != NULL,
 			ERROR_GENERATING_SIMILAR_IMAGES, NULL);
 
-
 	// create an index-counter array for the images
 	spValRn((counterArray = initializeCounterArray(numOfImages)),
 			ERROR_GENERATING_SIMILAR_IMAGES);
 
-	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_SEARCH_STARTED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_SEARCH_STARTED, __FILE__, __FUNCTION__,
+			__LINE__);
 
 	for (i = 0; i < workingImage->numOfFeatures; i++) {
-		spValWcRn((updateCounterArrayPerFeature(counterArray, (workingImage->featuresArray)[i],
-				kdTree, bpq)),
-				ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE,
-				free(counterArray));
+		spValWcRn((updateCounterArrayPerFeature(counterArray,
+				(workingImage->featuresArray)[i], kdTree, bpq)),
+				ERROR_UPDATE_COUNTER_ARRAY_PER_FEATURE, free(counterArray));
 	}
 
-	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_ENDED,
-				__FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_SIMILAR_IMAGES_ENDED, __FILE__, __FUNCTION__, __LINE__);
 
 	topItems = getTopItems(counterArray, numOfImages, numOfSimilarImages);
 
-	// if we get here counterArray is not null
+	// if we get here counterArray is valid
 	free(counterArray);
 
 	return topItems;
