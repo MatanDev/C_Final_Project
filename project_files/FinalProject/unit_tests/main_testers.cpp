@@ -40,23 +40,44 @@ extern "C" {
 #include "SPKDTreeNodeKNNUnitTest.h"
 }
 
+#define TESTS_START_DECORATION		"-------------%s Tests Start-------------\n"
+#define TESTS_END_DECORATION		"-------------%s Tests End---------------\n\n\n"
+#define	TESTS_CONFIG_FILE_PATH		"./unit_tests/spcbir.config"
+#define MAIN_FAILURE_RET_VAL		-1
+#define STDOUT						"stdout"
+#define	IMAGES_PARSER_SEC_NAME		"Images Parser"
+#define	CONFIG_SEC_NAME				"Configuration"
+#define	KDARRAY_SEC_NAME			"KDArray"
+#define	KDTREE_NODE_SEC_NAME		"KDTree Node"
+#define	KDTREE_NODE_KNN_SEC_NAME	"KDTree Node KNN"
+#define	LIST_SEC_NAME				"List"
+#define	POINT_SEC_NAME				"Point"
+#define	BPQ_SEC_NAME				"B Priority Queue"
+
+#define testDecorator(testFunction, sectionName) do {				\
+	printf(TESTS_START_DECORATION, sectionName);	\
+	testFunction;													\
+	printf(TESTS_END_DECORATION, sectionName);	\
+	} while(0)
+
+
 int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
-	SPConfig config = spConfigCreate("./unit_tests/spcbir.config", &msg);
+	SPConfig config = spConfigCreate(TESTS_CONFIG_FILE_PATH, &msg);
 	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
 	if (loggerFilename == NULL || msg != SP_CONFIG_SUCCESS)
-		return -1;
+		return MAIN_FAILURE_RET_VAL;
 
-	spLoggerCreate(!strcmp(loggerFilename, "stdout") ? NULL : loggerFilename,
+	spLoggerCreate(!strcmp(loggerFilename, STDOUT) ? NULL : loggerFilename,
 			spConfigGetLoggerLevel(config, &msg));
-	//RunImagesParserTests(config);
-	runConfigTests();
-	//runKDArrayTests();
-	//runKDTreeNodeTests();
-	//runKDTreeNodeKNNTests();
-	//runListTests();
-	//runPointTests();
-	//runBPQueueTests();
+	testDecorator(runImagesParserTests(config), IMAGES_PARSER_SEC_NAME);
+	testDecorator(runConfigTests(), CONFIG_SEC_NAME);
+	testDecorator(runKDArrayTests(), KDARRAY_SEC_NAME);
+	testDecorator(runKDTreeNodeTests(), KDTREE_NODE_SEC_NAME);
+	testDecorator(runKDTreeNodeKNNTests(), KDTREE_NODE_KNN_SEC_NAME);
+	testDecorator(runListTests(), LIST_SEC_NAME);
+	testDecorator(runPointTests(), POINT_SEC_NAME);
+	testDecorator(runBPQueueTests(), BPQ_SEC_NAME);
 	spConfigDestroy(config);
 	spLoggerDestroy();
 	return 0;

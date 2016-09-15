@@ -8,6 +8,6 @@
 #ifndef SPIMAGESPARSERUNITTEST_H_
 #define SPIMAGESPARSERUNITTEST_H_
 
-void RunImagesParserTests(SPConfig config);
+void runImagesParserTests(SPConfig config);
 
 #endif /* SPIMAGESPARSERPARSERUNITTEST_H_ */

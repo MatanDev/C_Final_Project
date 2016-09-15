@@ -408,9 +408,9 @@ bool testHandler() {
 }
 
 void runConfigTests() {
-	// Because of the fact that edge cases are also tested in these unit tests
-	// there might be printed messages that can be ignored in case all we care about is
-	// whether the tests have passed or not
+	printf("Because of the fact that edge cases are also tested in these unit tests\n");
+	printf("there might be printed messages that can be ignored in case all we care\n");
+	printf("about is whether the tests have passed or not\n\n");
 	RUN_TEST(testGivenConfFile);
 	RUN_TEST(testParseLine);
 	RUN_TEST(testDefault);

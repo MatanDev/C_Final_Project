@@ -264,7 +264,7 @@ bool testGetLine(char* configSign){
 	return true;
 }
 
-void RunImagesParserTests(SPConfig config){
+void runImagesParserTests(SPConfig config){
 	char* configSign = NULL;
 	configSign = getSignature(config);
 	configData configData;
