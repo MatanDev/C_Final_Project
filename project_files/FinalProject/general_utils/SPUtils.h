@@ -106,8 +106,8 @@
  */
 #define spValWc(action, errorMessage, callBack, returnValue) do { \
                 if(!((action))) { \
+                	callBack; \
 					spLoggerSafePrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
-					callBack; \
 					return returnValue; \
                 } \
         } while (0)
@@ -124,8 +124,8 @@
  */
 #define spValWcNc(action, warningMessage, callBack, returnValue) do { \
                 if(!((action))) { \
+                	callBack; \
 					spLoggerSafePrintWarning(warningMessage, __FILE__, __FUNCTION__, __LINE__); \
-					callBack; \
 					return returnValue; \
                 } \
         } while (0)
@@ -141,8 +141,8 @@
  */
 #define spValWcRn(action, errorMessage, callBack) do { \
                 if(!((action))) { \
-					spLoggerSafePrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
 					callBack; \
+					spLoggerSafePrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
 					return NULL; \
                 } \
         } while (0)
@@ -158,8 +158,8 @@
  */
 #define spValWcRnNc(action, warningMessage, callBack) do { \
                 if(!((action))) { \
+                	callBack; \
 					spLoggerSafePrintWarning(warningMessage, __FILE__, __FUNCTION__, __LINE__); \
-					callBack; \
 					return NULL; \
                 } \
         } while (0)
@@ -314,9 +314,9 @@
  */
 #define spVerifyArgumentsWcRn(toVerify, extendedErrorMessage, callBack) do { \
                 if(!((toVerify))) { \
+                	callBack; \
                 	spLoggerSafePrintError(ERROR_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
 					spLoggerSafePrintError(extendedErrorMessage, __FILE__, __FUNCTION__, __LINE__); \
-					callBack; \
 					return NULL; \
                 } \
         } while (0)
@@ -332,9 +332,9 @@
  */
 #define spVerifyArgumentsWcRnNc(toVerify, warningMessage, callBack) do { \
                 if(!((toVerify))) { \
+                	callBack; \
                 	spLoggerSafePrintWarning(WARNING_INVALID_ARGUMENT, __FILE__, __FUNCTION__, __LINE__); \
 					spLoggerSafePrintWarning(warningMessage, __FILE__, __FUNCTION__, __LINE__); \
-					callBack; \
 					return NULL; \
                 } \
         } while (0)
@@ -396,8 +396,8 @@
 #define spCallocWc(pointer, type, countOfItems, onError)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
                 if(!(pointer)) { \
+                	onError; \
 					spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
 					return NULL;\
                 } \
         } while (0)
@@ -416,9 +416,9 @@
 #define spCallocErWc(pointer, type, countOfItems, errorMessage, onError)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
                 if(!(pointer)) { \
+                	onError; \
 					spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
 					spLoggerSafePrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
 					return NULL;\
                 } \
         } while (0)
@@ -437,9 +437,9 @@
 #define spCallocErWcRCb(pointer, type, countOfItems, errorMessage, onError, callBack)  do { \
 				pointer = (type*)calloc(countOfItems, sizeof(type)); \
                 if(!(pointer)) { \
+                	onError; \
 					spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
 					spLoggerSafePrintError(errorMessage, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
 					return callBack;\
                 } \
         } while (0)
@@ -491,8 +491,8 @@
 #define spReallocWc(pointer, type, countOfItems, onError)  do { \
 				pointer = (type*)realloc((pointer), countOfItems * sizeof(type)); \
                 if(!(pointer)) { \
+                	onError; \
 					spLoggerSafePrintError(ERROR_ALLOCATING_MEMORY, __FILE__, __FUNCTION__, __LINE__); \
-					onError; \
 					return NULL;\
                 } \
         } while (0)
