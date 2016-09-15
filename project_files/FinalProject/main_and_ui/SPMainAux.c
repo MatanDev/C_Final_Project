@@ -88,9 +88,7 @@ SPConfig getConfigFromFile(const char* configFilename, SP_CONFIG_MSG* msg) {
 
 bool verifyPathAndAvailableFile(char* path) {
 	FILE* fp;
-
-	//TODO - Matan - change macro to return false and not NULL
-	spVerifyArgumentsRnNc(path != NULL, WARNING_WRONG_FILE);
+	spVerifyArgumentsNc(path != NULL, WARNING_WRONG_FILE, false);
 	spValNc((fp = fopen(path, READ_FILE_MODE))!= NULL, WARNING_WRONG_FILE, false);
 	fclose(fp);
 

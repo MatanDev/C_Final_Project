@@ -19,7 +19,6 @@ bool pushLeafToQueue(SPPoint currPoint, SPBPQueue bpq, SPPoint queryPoint){
 	SPListElement elem = NULL;
 	SP_BPQUEUE_MSG queueMessage;
 	double distance = spPointL2SquaredDistance(currPoint, queryPoint);
-	//TODO - talk about this...
 	if (distance <= epsilon) // this is the most precise we can get => any lesser number should be treated as same point
 		distance = 0;
 	spVal((elem = spListElementCreate(spPointGetIndex(currPoint), distance)),
