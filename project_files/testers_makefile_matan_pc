@@ -1,7 +1,7 @@
 CC = gcc
 CPP = g++
 #put your object files here
-OBJS = main_testers.o SPImageProc.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPKDArray.o \
+OBJS = main_testers.o SPPoint.o SPListElement.o SPList.o SPBPriorityQueue.o SPKDArray.o \
 SPKDTreeNode.o SPKDTreeNodeKNN.o SPConfig.o SPLogger.o SPImagesParser.o SPMainAux.o SPImageQuery.o \
 SPConfigUnitTest.o SPImagesParserUnitTest.o SPKDArrayUnitTest.o SPKDTreeNodeKNNUnitTest.o SPKDTreeNodeUnitTest.o \
 SPImageData.o SPPointUnitTest.o SPListUnitTest.o SPBPQueueUnitTest.o
@@ -14,29 +14,19 @@ KD_DS_DIR = ./data_structures/kd_ds
 IMAGE_PARSING_DIR = ./image_parsing
 MAIN_AND_UI_DIR = ./main_and_ui
 GENERAL_UTILS_DIR = ./general_utils
-INCLUDEPATH=/home/matan-pc/Desktop/opencv/include/
-LIBPATH=/usr/local/lib/
-LIBS=-lopencv_xfeatures2d -lopencv_features2d \
--lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
 
-
-CPP_COMP_FLAG = -std=c++11 -Wall -Wextra \
--Werror -pedantic-errors -DNDEBUG
 
 C_COMP_FLAG = -std=c99 -Wall -Wextra \
--Werror -pedantic-errors -DNDEBUG
+-Werror -DNDEBUG
 
 $(EXEC): $(OBJS)
 	$(CPP) $(OBJS) -L$(LIBPATH) $(LIBS) -o $@
-main_testers.o: $(TESTS_DIR)/main_testers.cpp SPConfig.h SPLogger.h SPImageProc.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h \
+main_testers.o: $(TESTS_DIR)/main_testers.c SPConfig.h SPLogger.h SPImageProc.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h \
 $(IMAGE_PARSING_DIR)/SPImagesParser.h SPPoint.h $(KD_DS_DIR)/SPKDTreeNode.h $(MAIN_AND_UI_DIR)/SPImageQuery.h $(TESTS_DIR)/SPListUnitTest.h \
 $(MAIN_AND_UI_DIR)/SPMainAux.h $(TESTS_DIR)/SPConfigUnitTest.h $(TESTS_DIR)/SPImagesParserUnitTest.h $(TESTS_DIR)/SPKDArrayUnitTest.h \
 $(TESTS_DIR)/SPKDTreeNodeKNNUnitTest.h $(TESTS_DIR)/SPKDTreeNodeUnitTest.h $(TESTS_DIR)/SPPointUnitTest.h $(TESTS_DIR)/SPBPQueueUnitTest.h
-	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $(TESTS_DIR)/$*.cpp
-SPImageProc.o: SPImageProc.cpp SPImageProc.h SPConfig.h SPPoint.h SPLogger.h
-	$(CPP) $(CPP_COMP_FLAG) -I$(INCLUDEPATH) -c $*.cpp
-#a rule for building a simple c souorce file
-#use gcc -MM SPPoint.c to see the dependencies
+	$(CC) $(C_COMP_FLAG) -I$(INCLUDEPATH) -c $(TESTS_DIR)/$*.c
+
 
 #------------------------------------------------priority queue--------------------------------------------------------------------------------
 

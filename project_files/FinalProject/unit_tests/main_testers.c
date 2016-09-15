@@ -12,15 +12,10 @@ Please read the following regarding the unit tests:
   convenient way.
  -----------------------------------------------------------------------------------------------------------------------------------*/
 
+#include "ctype.h"
+#include "stdlib.h"
+#include "string.h"
 
-#include <cstring>
-#include <cassert>
-#include <cstdio>
-#include <cctype>
-#include <cstdlib>
-#include "../SPImageProc.h"
-
-extern "C" {
 #include "../SPConfig.h"
 #include "../SPLogger.h"
 #include "../SPPoint.h"
@@ -38,7 +33,7 @@ extern "C" {
 #include "SPListUnitTest.h"
 #include "SPBPQueueUnitTest.h"
 #include "SPKDTreeNodeKNNUnitTest.h"
-}
+
 
 #define TESTS_START_DECORATION		"-------------%s Tests Start-------------\n"
 #define TESTS_END_DECORATION		"-------------%s Tests End---------------\n\n\n"
