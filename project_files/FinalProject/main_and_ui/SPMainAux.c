@@ -12,7 +12,7 @@
 
 
 #define DEFAULT_CONFIG_FILE										"spcbir.config"
-#define CANNOT_OPEN_MSG 										"The configuration file %s couldn’t be open\n"
+#define CANNOT_OPEN_MSG 										"The configuration file %s couldn't be open\n"
 #define ENTER_A_QUERY_IMAGE_OR_TO_TERMINATE 					"Please enter image path:\n"
 #define INVALID_CMD_LINE										"Invalid command line : use -c <config_filename>\n"
 #define STDOUT													"stdout"
@@ -23,7 +23,7 @@
 #define CONFIG_FILE_PATH_ARG									"-c"
 #define READ_FILE_MODE											"r"
 
-#define WARNING_CONFIG_ARG										"Warning, program is running with unknown arguments, did you mean -c ?"
+#define WARNING_CONFIG_ARG										"Warning, program is running with unknown arguments, did you mean -c ?\n"
 #define WARNING_ZERO_FEATURES_FROM_IMAGE						"Warning, some images have zero features"
 #define WARNING_IMAGES_COUNT_CROPPED							\
 	"Warning - the number of similar > number of images, only 'number of images' similar images will be presented when querying"
@@ -37,10 +37,10 @@
 #define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
 #define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
 #define ERROR_AT_PCA_FILE_PATH									"Error at generating PCA file path"
-#define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s"
-#define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s"
-#define ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG					"Failed to get logger level from configuration with message %s"
-#define ERROR_AT_CREATE_LOGGER									"Failed to create logger with message %s"
+#define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s\n"
+#define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s\n"
+#define ERROR_AT_GET_LOGGER_LEVEL_FROM_CONFIG					"Failed to get logger level from configuration with message %s\n"
+#define ERROR_AT_CREATE_LOGGER									"Failed to create logger with message %s\n"
 #define ERROR_AT_GET_IMAGE_PATH_FROM_CONFIG						"Failed to get image path from configuration"
 #define ERROR_PARSING_IMAGES_DATA 								"Failed at images parsing process"
 #define ERROR_INITIALIZING_QUERY_IMAGE 							"Failed to initialize query image item"
