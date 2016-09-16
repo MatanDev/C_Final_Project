@@ -60,7 +60,7 @@
 #define DEBUG_PRIORITY_QUEUE_INITIALIZED						"Priority Queue initialized"
 #define DEBUG_PCA_PATH_IS_VERIFIED 								"PCA path is verified"
 #define DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX 					"Image file is verified at index - "
-#define DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX				"Image .feat file is verified at index - "
+#define DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX				"Image .feats file is verified at index - "
 #define DEBUG_LOGGER_HAS_BEEN_CREATED  							"Logger has been created"
 #define DEBUG_RELEVANT_SETTINGS_DATA_LOADED						"Relevant settings data loaded"
 
