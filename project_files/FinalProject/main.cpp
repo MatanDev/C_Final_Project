@@ -240,9 +240,10 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * @param argv - the main arguments
  *
  * @returns :
- * '-1' - configuration and setting initialization failed
- * '-2' - extracting images data, and loading images logic failed
- * '-3' - in case of error at the logger
+ * '-1' - configuration or logger initialization failed
+ * '-2' - settings initialization failed
+ * '-3' - extracting images data, and loading images logic failed
+ * '-4' - in case of error at the logger
  * '0'  - success
  */
 
