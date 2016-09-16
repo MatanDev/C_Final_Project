@@ -56,7 +56,7 @@ Please read the following regarding the unit tests:
 	} while(0)
 
 
-int main() {
+/*int main() {
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
 	SPConfig config = spConfigCreate(TESTS_CONFIG_FILE_PATH, &msg);
 	char* loggerFilename = spConfigGetLoggerFilename(config, &msg);
@@ -77,5 +77,5 @@ int main() {
 	spLoggerDestroy();
 	return 0;
 }
-
+*/
 

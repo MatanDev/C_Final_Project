@@ -12,7 +12,7 @@
 #define INFO_MSG  									"---INFO---\n"
 #define DEBUG_MSG  									"---DEBUG---\n"
 #define TIMESTAMP_MAX_LEN							100
-#define LOGGER_ERROR_EXIT_CODE						-3
+#define LOGGER_ERROR_EXIT_CODE						-4
 
 #define GENERAL_MESSAGE_SKELETON					"%s- file: %s\n- function: %s\n- line: %d\n- message: %s"
 #define SHORT_MESSAGE_SKELETON						"%s- message: %s"

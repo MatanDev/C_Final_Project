@@ -35,7 +35,7 @@
 #define ERROR_READING_SETTINGS 									"Could not load data from the configurations"
 #define ERROR_AT_CREATEING_QUERY_IMAGE_ITEM 					"Error creating query image item"
 #define ERROR_AT_CREATEING_IMAGES_DATABASE_ITEMS 				"Error creating image database items"
-#define ERROR_AT_IMAGES_FILE_PATH 								"Error at images file path, image does not exists or not available"
+#define PROBLEM_WITH_IMAGES_FILE_PATH 							"Problem with images file path, image does not exists or not available"
 #define ERROR_AT_PCA_FILE_PATH									"Error at generating PCA file path"
 #define ERROR_AT_GET_CONFIG_FROM_FILE							"Get configuration from file failed with message: %s\n"
 #define ERROR_AT_GET_LOGGER_FILENAME_FROM_CONFIG				"Failed to get logger filename from configuration with message %s\n"
@@ -58,7 +58,7 @@
 #define DEBUG_FEATURES_ARRAY_INITIALIZED						"Features array initialized"
 #define DEBUG_KD_TREE_INITIALIZED  								"KD Tree initialized"
 #define DEBUG_PRIORITY_QUEUE_INITIALIZED						"Priority Queue initialized"
-#define DEBUG_PCA_FILE_IS_VERIFIED 								"PCA File is verified"
+#define DEBUG_PCA_PATH_IS_VERIFIED 								"PCA path is verified"
 #define DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX 					"Image file is verified at index - "
 #define DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX				"Image .feat file is verified at index - "
 #define DEBUG_LOGGER_HAS_BEEN_CREATED  							"Logger has been created"
@@ -101,7 +101,9 @@ void getQuery(char* destination) {
 
 void getAsString(const char* message, char* destination) {
 	printf("%s", message);
+	fflush(NULL);
 	scanf("%s", destination);
+	fflush(NULL);
 }
 
 void endControlFlow(SPConfig config, SPImageData image,
@@ -272,19 +274,20 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag) {
 	char tempPath[MAX_PATH_LEN];
 	int i;
 	SP_CONFIG_MSG msg = SP_CONFIG_SUCCESS;
+	bool isImagePathValid;
 
 	//verify PCA file
 	spVal((msg = spConfigGetPCAPath(tempPath, config)) == SP_CONFIG_SUCCESS,
 			ERROR_AT_PCA_FILE_PATH, false);
 
-	spLoggerSafePrintDebug(DEBUG_PCA_FILE_IS_VERIFIED, __FILE__, __FUNCTION__, __LINE__);
+	spLoggerSafePrintDebug(DEBUG_PCA_PATH_IS_VERIFIED, __FILE__, __FUNCTION__, __LINE__);
 
 	//verify images files
-	for (i = 0;i < numOfImages ; i++) {
+	for (i = 0; i < numOfImages; i++) {
+		isImagePathValid = (msg = spConfigGetImagePath(tempPath, config, i))
+				== SP_CONFIG_SUCCESS && verifyPathAndAvailableFile(tempPath);
 		if (extractFlag) {
-			spVal((msg = spConfigGetImagePath(tempPath, config, i)) == SP_CONFIG_SUCCESS
-					&& verifyPathAndAvailableFile(tempPath), ERROR_AT_IMAGES_FILE_PATH,
-					false);
+			spVal(isImagePathValid, PROBLEM_WITH_IMAGES_FILE_PATH, false);
 
 			spLoggerSafePrintDebugWithIndex(DEBUG_IMAGE_FILE_IS_VERIFIED_AT_INDEX,
 					i, __FILE__, __FUNCTION__, __LINE__);
@@ -296,6 +299,10 @@ bool verifyImagesFiles(SPConfig config, int numOfImages, bool extractFlag) {
 					spLoggerSafePrintDebugWithIndex(
 							DEBUG_IMAGE_FEAT_FILE_IS_VERIFIED_AT_INDEX,
 							i, __FILE__, __FUNCTION__, __LINE__));
+			if (!isImagePathValid) {
+				spLoggerSafePrintWarning(PROBLEM_WITH_IMAGES_FILE_PATH, __FILE__,
+						__FUNCTION__, __LINE__);
+			}
 		}
 	}
 	return true;
@@ -319,8 +326,7 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
 }
 
 
-bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
-		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag) {
+bool initConfigAndLogger(int argc, char** argv, SPConfig* config) {
 	char *configFilename, *loggerFilename;
 	SP_CONFIG_MSG configMsg = SP_CONFIG_SUCCESS;
 	SP_LOGGER_LEVEL loggerLevel;
@@ -360,15 +366,20 @@ bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfIm
 	spLoggerSafePrintDebug(DEBUG_LOGGER_HAS_BEEN_CREATED, __FILE__, __FUNCTION__,
 			__LINE__);
 
+	return true;
+}
+
+bool initSettings(SPConfig config, int* numOfImages, int* numOfSimilarImages,
+		bool* extractFlag, bool* GUIFlag) {
 	//load relevant data from settings
-	if (loadRelevantSettingsData(*config, numOfImages, numOfSimilarImages, extractFlag,
+	if (loadRelevantSettingsData(config, numOfImages, numOfSimilarImages, extractFlag,
 			GUIFlag) != SP_CONFIG_SUCCESS) {
 		return false;
 	}
 	spLoggerSafePrintDebug(DEBUG_RELEVANT_SETTINGS_DATA_LOADED, __FILE__, __FUNCTION__,
 			__LINE__);
 
-	return verifyImagesNumbersLimits(*config, *numOfImages, numOfSimilarImages) &&
-			verifyImagesFiles(*config, *numOfImages, *extractFlag);
+	return verifyImagesNumbersLimits(config, *numOfImages, numOfSimilarImages) &&
+			verifyImagesFiles(config, *numOfImages, *extractFlag);
 }
 

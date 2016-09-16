@@ -29,8 +29,9 @@ extern "C" {
 
 #define RUN_ACTION									false
 
-#define CONFIG_AND_INIT_ERROR_RETURN_VALUE 			-1
-#define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-2
+#define INIT_CONFIG_OR_LOGGER_ERROR_RETURN_VALUE	-1
+#define INIT_SETTINGS_ERROR_RETURN_VALUE 			-2
+#define IMAGE_DATA_LOGIC_ERROR_RETURN_VALUE 		-3
 #define SUCCESS_RETURN_VALUE 						0
 
 /*------------------------------------------------------------ logger info -------------------------------------------------------------------------*/
@@ -76,8 +77,9 @@ extern "C" {
  * @param imageProbObject - a pointer to the image proc object pointer
  *
  * @returns :
- * '-1' - configuration and setting initialization failed
- * '-2' - extracting images data, and loading images logic failed
+ * '-1' - configuration or logger initialization failed
+ * '-2' - settings initialization failed
+ * '-3' - extracting images data, and loading images logic failed
  * '0'  - success
  */
 int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
@@ -87,8 +89,12 @@ int spMainInitialize(int argc, char** argv, SPConfig* config, int* numOfImages,
 	char tempPath[MAX_PATH_LEN];
 	SPImageData* imagesDataList = NULL;
 
-	spVal((initConfigAndSettings(argc, argv, config, numOfImages,
-			numOfSimilarImages, extractFlag, GUIFlag)), ERROR_INIT_CONFIG, CONFIG_AND_INIT_ERROR_RETURN_VALUE );
+	if(!initConfigAndLogger(argc, argv, config)) {
+		return INIT_CONFIG_OR_LOGGER_ERROR_RETURN_VALUE;
+	}
+
+	spVal((initSettings(*config, numOfImages, numOfSimilarImages, extractFlag, GUIFlag)),
+			ERROR_INIT_CONFIG, INIT_SETTINGS_ERROR_RETURN_VALUE);
 	spLoggerSafePrintInfo(CONFIGURATIONS_AND_LOGGER_INITIALIZED);
 
 	spVal(imagesDataList = initializeImagesDataList(*numOfImages),
@@ -240,7 +246,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '0'  - success
  */
 
-/*int main(int argc, char** argv) {
+int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
 	int numOfSimilarImages, numOfImages = 0;
@@ -250,9 +256,15 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 	SPBPQueue bpq = NULL;
 	sp::ImageProc* imageProcObject = NULL;
 
-	spMainAction(((flowFlag = spMainInitialize(argc, argv, &config, &numOfImages,
+	if ((flowFlag = spMainInitialize(argc, argv, &config, &numOfImages,
 			&numOfSimilarImages, &extractFlag, &GUIFlag, &bpq,
-			&currentImageData, &kdTree, &imageProcObject)) >= 0), flowFlag);
+			&currentImageData, &kdTree, &imageProcObject))
+			== INIT_CONFIG_OR_LOGGER_ERROR_RETURN_VALUE) {
+		spConfigDestroy(config);
+		return flowFlag;
+	}
+
+	spMainAction(flowFlag >= 0, flowFlag);
 
 	spLoggerSafePrintInfo(INITIALIZATION_FINISHED_SUCCESSFUL);
 
@@ -262,4 +274,4 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
 	spLoggerSafePrintInfo(USER_INTERACTION_FINISHED_SUCCESSFULLY);
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
-}*/
+}

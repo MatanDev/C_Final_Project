@@ -276,12 +276,9 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
 
 /*
  * Initializes the configuration structure instance pointed by 'config' according to 'argc'
- * and 'argv', and the values of the settings pointed by: 'numOfImages',
- * 'numOfSimilarImages', 'extractFlag' and 'GUIFlag'
+ * and 'argv', and the logger accordingly
  *
- * pre assumptions - argv is valid and argc is its length;
- * 					 config, numOfImages, numOfSimilarImages, extractFlag, GUIFlag are
- * 					 all valid
+ * pre assumptions - argv is valid and argc is its length, config is also valid
  *
  * @param argc - the number of arguments the program received in the command line,
  * including the name of the program
@@ -289,6 +286,21 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
  * line
  * @param config - pointer to a configuration structure instance to be initialized in the
  * function
+ *
+ * @returns false if failed in any stage of the operation, otherwise returns true
+ *
+ * a debug print is printed to the logger (after it is initiated)
+ */
+bool initConfigAndLogger(int argc, char** argv, SPConfig* config);
+
+/*
+ * Initializes the values of the settings pointed by: 'numOfImages', 'numOfSimilarImages',
+ * 'extractFlag' and 'GUIFlag'
+ *
+ * pre assumptions - config, numOfImages, numOfSimilarImages, extractFlag, GUIFlag are
+ * 					 all valid
+ *
+ * @param config - the configuration structure instance
  * @param numOfImages - pointer to an integer to contain the number of images that was set
  * in the configuration file
  * @param numOfSimilarImages - pointer to an integer to contain the number of similar
@@ -301,12 +313,11 @@ bool verifyImagesNumbersLimits(SPConfig config, int numOfImages, int* numOfSimil
  * @returns false if failed in any stage of the operation, otherwise returns true
  *
  * @logger -
- * in case of any type of error or warning (after the logger is initiated) a relevant
- * message is written to the logger
- * debug prints are also printed to the logger (after it is initiated)
+ * in case of any type of error or warning a relevant message is written to the logger
+ * debug prints are also printed to the logger
  */
-bool initConfigAndSettings(int argc, char** argv, SPConfig* config, int* numOfImages,
-		int* numOfSimilarImages, bool* extractFlag, bool* GUIFlag);
+bool initSettings(SPConfig config, int* numOfImages, int* numOfSimilarImages,
+		bool* extractFlag, bool* GUIFlag);
 
 #endif /* SPMAINAUX_H_ */
 
