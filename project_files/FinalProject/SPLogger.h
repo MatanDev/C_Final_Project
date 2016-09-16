@@ -233,7 +233,7 @@ const char* loggerMsgToStr(SP_LOGGER_MSG msg);
 /*
  * The method acts as 'spLoggerPrintError' besides it does not
  * returns any value, in case of any type of failure the program will report error and
- * exit with exit code -3
+ * exit with exit code -4
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintError'
  *
@@ -249,7 +249,7 @@ void spLoggerSafePrintError(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintWarning' besides it does not
  * returns any value, in case of any type of failure the program
- * will report error and exit with exit code -3
+ * will report error and exit with exit code -4
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintWarning'.
  *
@@ -264,7 +264,7 @@ void spLoggerSafePrintWarning(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintInfo' besides it does not
  * returns any value, in case of any type of failure the program
- * will report error and exit with exit code -3
+ * will report error and exit with exit code -4
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintInfo'
  *
@@ -278,7 +278,7 @@ void spLoggerSafePrintInfo(const char* msg);
 /*
  * The method acts as 'spLoggerPrintDebug' besides it does not
  * returns any value, in case of any type of failure the program
- * will report error and exit with exit code -3
+ * will report error and exit with exit code -4
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintDebug'
  *
@@ -293,7 +293,7 @@ void spLoggerSafePrintDebug(const char* msg, const char* file,
 /*
  * The method acts as 'spLoggerPrintMsg' besides it does not
  * returns any value, in case of any type of failure the program
- * will report error and exit with exit code -3
+ * will report error and exit with exit code -4
  *
  * for parameters spec's and method behavior please refer to 'spLoggerPrintMsg'
  *
