@@ -576,9 +576,8 @@ SP_DP_MESSAGES spImagesParserStartParsingProcess(const SPConfig config, SPImageD
 		spLoggerSafePrintDebug(DEBUG_DONE_SAVING_IMAGES_DATA,
 					__FILE__, __FUNCTION__, __LINE__);
 	}
-	spVal(msg == SP_DP_SUCCESS, FAILED_AT_IMAGE_PARSING_PROCESS, msg);
-
 	free(configSignature);
+	spVal(msg == SP_DP_SUCCESS, FAILED_AT_IMAGE_PARSING_PROCESS, msg);
 
 	return SP_DP_SUCCESS;
 }
