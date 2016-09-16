@@ -19,7 +19,7 @@ extern "C" {
 #define QUERY_EXIT_INPUT 							"<>"
 
 #define ERROR_LOADING_IMAGE_PATH 					"Error creating image path"
-#define ERROR_INIT_CONFIG 							"Error initializing configurations and settings"
+#define ERROR_INIT_CONFIG 							"Error initializing settings"
 #define ERROR_INIT_IMAGES 							"Error at initialize images data items process"
 #define ERROR_INIT_KDTREE_OR_DATA 					"Error building the data structures"
 #define REQUEST_QUERY_AGAIN							"Please enter a valid file path, or <> to exit.\n"
