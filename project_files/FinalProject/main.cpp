@@ -246,7 +246,7 @@ void spMainStartUserInteraction(SPConfig config,SPImageData currentImageData, SP
  * '-4' - in case of error at the logger
  * '0'  - success
  */
-
+/*
 int main(int argc, char** argv) {
 	int flowFlag;
 	SPConfig config = NULL;
@@ -276,3 +276,4 @@ int main(int argc, char** argv) {
 	// end control flow
 	spMainAction(RUN_ACTION, SUCCESS_RETURN_VALUE); //returns success
 }
+*/
