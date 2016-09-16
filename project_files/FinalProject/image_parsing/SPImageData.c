@@ -77,6 +77,7 @@ void resetImageData(SPImageData image){
 		if (image->featuresArray != NULL){
 			freeFeatures(image->featuresArray, image->numOfFeatures);
 			free(image->featuresArray);
+			image->featuresArray = NULL;
 		}
 		image->numOfFeatures = 0;
 	}
