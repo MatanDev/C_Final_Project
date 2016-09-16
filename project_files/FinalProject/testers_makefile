@@ -19,12 +19,12 @@ C_COMP_FLAG = -std=c99 -Wall -Wextra \
 -Werror -pedantic-errors -DNDEBUG
 
 $(EXEC): $(OBJS)
-	$(CC) $(OBJS) -L$(LIBPATH) $(LIBS) -o $@
+	$(CC) $(OBJS) $(LIBS) -o $@
 main_testers.o: $(TESTS_DIR)/main_testers.c SPConfig.h SPLogger.h SPImageProc.h $(PRIORITY_QUEUE_DIR)/SPBPriorityQueue.h \
 $(IMAGE_PARSING_DIR)/SPImagesParser.h SPPoint.h $(KD_DS_DIR)/SPKDTreeNode.h $(MAIN_AND_UI_DIR)/SPImageQuery.h $(TESTS_DIR)/SPListUnitTest.h \
 $(MAIN_AND_UI_DIR)/SPMainAux.h $(TESTS_DIR)/SPConfigUnitTest.h $(TESTS_DIR)/SPImagesParserUnitTest.h $(TESTS_DIR)/SPKDArrayUnitTest.h \
 $(TESTS_DIR)/SPKDTreeNodeKNNUnitTest.h $(TESTS_DIR)/SPKDTreeNodeUnitTest.h $(TESTS_DIR)/SPPointUnitTest.h $(TESTS_DIR)/SPBPQueueUnitTest.h
-	$(CC) $(C_COMP_FLAG) -I$(INCLUDEPATH) -c $(TESTS_DIR)/$*.c
+	$(CC) -c $(TESTS_DIR)/$*.c
 
 
 #------------------------------------------------priority queue--------------------------------------------------------------------------------
